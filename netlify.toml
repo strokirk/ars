@@ -1,0 +1,4 @@
+# The site is pre-built and committed under site/ (regenerate with `node site/build.ts`).
+# No build step runs on Netlify — we just publish the static directory.
+[build]
+  publish = "site"

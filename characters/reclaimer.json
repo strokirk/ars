@@ -1,0 +1,332 @@
+{
+  "schema": 2,
+  "name": "Aldric of Flambeau",
+  "house": "Flambeau",
+  "concept": "Water-and-growth reclaimer-lord who drains marshes, controls rivers, and makes valleys conspicuously blessed — taking over Mythic Europe through owned water and owned harvest, not sword or stone",
+  "age": 25,
+  "characteristics": {
+    "Int": 3,
+    "Per": 1
+  },
+  "virtues": [
+    {
+      "name": "The Gift",
+      "display": "The Gift",
+      "size": "Free",
+      "category": "Special",
+      "points": 0,
+      "free": true
+    },
+    {
+      "name": "Hermetic Magus",
+      "display": "Hermetic Magus",
+      "size": "Free",
+      "category": "Social Status",
+      "points": 0,
+      "free": true
+    },
+    {
+      "name": "Puissant Art",
+      "display": "Puissant Ignem",
+      "param": "Ignem",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 0,
+      "free": true
+    },
+    {
+      "name": "Major Magical Focus",
+      "display": "Major Magical Focus (water)",
+      "param": "water",
+      "size": "Major",
+      "category": "Hermetic",
+      "points": 3
+    },
+    {
+      "name": "Affinity with Art",
+      "display": "Affinity with Aquam",
+      "param": "Aquam",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Puissant Art",
+      "display": "Puissant Aquam",
+      "param": "Aquam",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Inventive Genius",
+      "display": "Inventive Genius",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Skilled Parens",
+      "display": "Skilled Parens",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Affinity with Art",
+      "display": "Affinity with Herbam",
+      "param": "Herbam",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Personal Vis Source",
+      "display": "Personal Vis Source",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Deft Form",
+      "display": "Deft Aquam",
+      "param": "Aquam",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    }
+  ],
+  "flaws": [
+    {
+      "name": "Tormenting Master",
+      "display": "Tormenting Master",
+      "size": "Major",
+      "category": "Story",
+      "points": 3
+    },
+    {
+      "name": "Blatant Gift",
+      "display": "Blatant Gift",
+      "size": "Major",
+      "category": "Hermetic",
+      "points": 3
+    },
+    {
+      "name": "Ambitious",
+      "display": "Ambitious",
+      "size": "Minor",
+      "category": "Personality",
+      "points": 1
+    },
+    {
+      "name": "Wrathful",
+      "display": "Wrathful",
+      "size": "Minor",
+      "category": "Personality",
+      "points": 1
+    },
+    {
+      "name": "Infamous Master",
+      "display": "Infamous Master",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Judged Unfairly",
+      "display": "Judged Unfairly",
+      "size": "Minor",
+      "category": "General",
+      "points": 1
+    }
+  ],
+  "abilities": [
+    {
+      "name": "Folk Ken",
+      "score": 2,
+      "stage": "childhood",
+      "type": "General"
+    },
+    {
+      "name": "Athletics",
+      "score": 2,
+      "stage": "childhood",
+      "type": "General"
+    },
+    {
+      "name": "Awareness",
+      "score": 2,
+      "stage": "childhood",
+      "type": "General"
+    },
+    {
+      "name": "Bargain",
+      "score": 2,
+      "stage": "later-life",
+      "type": "General"
+    },
+    {
+      "name": "Guile",
+      "score": 2,
+      "stage": "later-life",
+      "type": "General"
+    },
+    {
+      "name": "Intrigue",
+      "score": 2,
+      "stage": "later-life",
+      "type": "General"
+    },
+    {
+      "name": "Leadership",
+      "score": 2,
+      "stage": "later-life",
+      "type": "General"
+    },
+    {
+      "name": "Ride",
+      "score": 2,
+      "stage": "later-life",
+      "type": "General"
+    },
+    {
+      "name": "Latin",
+      "score": 4,
+      "stage": "apprenticeship",
+      "type": "Academic",
+      "restricted": true
+    },
+    {
+      "name": "Magic Theory",
+      "score": 4,
+      "stage": "apprenticeship",
+      "type": "Arcane",
+      "restricted": true
+    },
+    {
+      "name": "Artes Liberales",
+      "score": 1,
+      "stage": "apprenticeship",
+      "type": "Academic",
+      "restricted": true
+    },
+    {
+      "name": "Order of Hermes Lore",
+      "score": 2,
+      "stage": "apprenticeship",
+      "type": "General",
+      "restricted": true
+    },
+    {
+      "name": "Finesse",
+      "score": 2,
+      "stage": "apprenticeship",
+      "type": "Arcane"
+    },
+    {
+      "name": "Concentration",
+      "score": 2,
+      "stage": "apprenticeship",
+      "type": "General"
+    },
+    {
+      "name": "Parma Magica",
+      "score": 1,
+      "stage": "apprenticeship",
+      "type": "Arcane",
+      "restricted": true
+    }
+  ],
+  "arts": {
+    "Aquam": 13,
+    "Herbam": 9,
+    "Rego": 8,
+    "Creo": 5,
+    "Intellego": 2
+  },
+  "spells": [
+    {
+      "name": "Parting the Waves",
+      "technique": "Rego",
+      "form": "Aquam",
+      "level": 30,
+      "requisites": [],
+      "labTotal": 34
+    },
+    {
+      "name": "Closing the Earth's Gate",
+      "technique": "Perdo",
+      "form": "Aquam",
+      "level": 25,
+      "requisites": [],
+      "labTotal": 26
+    },
+    {
+      "name": "Twist the Living Tree",
+      "technique": "Rego",
+      "form": "Herbam",
+      "level": 25,
+      "requisites": [],
+      "labTotal": 27
+    },
+    {
+      "name": "Bridge of Wood",
+      "technique": "Creo",
+      "form": "Herbam",
+      "level": 15,
+      "requisites": [],
+      "labTotal": 24
+    },
+    {
+      "name": "Trap of the Entwining Vines",
+      "technique": "Creo",
+      "form": "Herbam",
+      "level": 15,
+      "requisites": [],
+      "labTotal": 24
+    },
+    {
+      "name": "Mighty Torrent of Water",
+      "technique": "Creo",
+      "form": "Aquam",
+      "level": 20,
+      "requisites": [],
+      "labTotal": 31
+    },
+    {
+      "name": "Push of the Gentle Wave",
+      "technique": "Rego",
+      "form": "Aquam",
+      "level": 15,
+      "requisites": [],
+      "labTotal": 34
+    },
+    {
+      "name": "Conjure the Sturdy Vine",
+      "technique": "Creo",
+      "form": "Herbam",
+      "level": 5,
+      "requisites": [],
+      "labTotal": 24
+    }
+  ],
+  "personality": [
+    {
+      "trait": "Ambitious",
+      "value": 3
+    },
+    {
+      "trait": "Prideful",
+      "value": 3
+    },
+    {
+      "trait": "Wrathful",
+      "value": 2
+    }
+  ],
+  "confidence": 1,
+  "reputation": null,
+  "laterLifeYears": 5,
+  "nativeLanguage": "Rhine German",
+  "notes": ""
+}

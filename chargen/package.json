@@ -1,0 +1,21 @@
+{
+  "name": "chargen",
+  "version": "0.1.0",
+  "description": "Iterative CLI for building rules-legal Ars Magica (Definitive Edition) Hermetic magi.",
+  "type": "module",
+  "bin": {
+    "chargen": "bin/chargen"
+  },
+  "scripts": {
+    "chargen": "node src/cli/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}

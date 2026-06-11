@@ -1,0 +1,13 @@
+_Ars Magica — Chapter 9: Spells_
+
+## Imaginem Spells
+
+Imaginem is the Form of sensations and illusion. By using Imaginem, you can alter what others perceive. Imaginem, however, means "image," not "illusion." Thus, one creates, transforms, perceives, destroys, and controls images, not necessarily illusions. A clairvoyance spell, therefore, is Intellego Imaginem because it detects real images. By manipulating sensations, however, you can create effective illusions. The Art of Imaginem rewards the creative magus by fooling people into actions they would otherwise shun: for instance, they might walk off a cliff, while their eyes tell them there is a bridge over the chasm. Imaginem cannot affect light, as that is part of Ignem, but it can affect the things that light allows you to see.
+
+Stenches and perfumes, tints and stains, color and shadow, melody and cacophony, sweet and sour; all these are perceptions, and so can be manipulated by the Art of Imaginem. An image works on the senses, not on the mind, so an unthinking beast is as likely to believe an image as an imaginative human. Similarly, everyone can sense an illusion created by Imaginem magic. Nevertheless, Imaginem spells are still most effective at fouling the communication on which human society depends. Beasts are likely to be fooled by illusions, as are the simpler undead. Demons are very hard to deceive, while faeries often see through illusions and manipulate them to fool you in turn.
+
+Certain members of the Church have proven remarkably adept at discerning truth from illusion, though the talent is not dependable.
+
+It is more difficult to mimic a specific object or person using an Imaginem spell than it is to mimic a general image. and requires a Perception + Finesse stress roll. For example, it is easier to imitate a generic gold ring than it is to reproduce the gold ring with inscriptions that the baron presented to his wife on the occasion of their tenth wedding anniversary. The higher the roll, the better you can fool people. You get a bonus to your roll for familiarity with what you are mimicking (-3 for an unfamiliar object, +3 for highly familiar objects or for having the subject available for modeling). For mimicking people, a roll against an Ease Factor of 6 lets you fool acquaintances of the person, an Ease Factor of 9 lets you fool friends, and an Ease Factor of 12 lets you fool close friends and relatives. Use a similar scale for mimicking objects. If you botch the Finesse roll, you may think the image is satisfactory, but it's immediately seen through once in use.
+
+A base Individual for Imaginem is the equivalent of an adult human being, whether a visual image of about that size, an auditory illusion making that much noise, or whatever.

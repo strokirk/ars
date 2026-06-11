@@ -1,0 +1,4 @@
+#!/bin/sh
+# chargen launcher — runs the TypeScript entry point directly on Node's
+# native TypeScript support (type stripping, Node >= 22.18). No build step.
+exec node "$(dirname "$0")/../src/cli/index.ts" "$@"

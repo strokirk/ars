@@ -1,0 +1,366 @@
+{
+  "schema": 2,
+  "name": "Konstantinos of Bonisagus",
+  "house": "Bonisagus",
+  "concept": "A Bonisagus theoretician consumed by the conviction that the Limit of Vis is a failure of Bonisagus's imagination, not natural law. His path to dominion over Mythic Europe runs through EPISTEMIC and INFRASTRUCTURAL power: controlling the vis economy, building magical scrying networks, and above all prosecuting the Original Research that will break the Limit. Ambition dressed as scholarship.",
+  "age": 25,
+  "favoredTechnique": "Intellego",
+  "favoredForm": "Vim",
+  "focus": "vis and magical energies",
+  "characteristics": {
+    "Int": 3,
+    "Per": 1
+  },
+  "virtues": [
+    {
+      "name": "The Gift",
+      "display": "The Gift",
+      "size": "Free",
+      "category": "Special",
+      "points": 0,
+      "free": true
+    },
+    {
+      "name": "Hermetic Magus",
+      "display": "Hermetic Magus",
+      "size": "Free",
+      "category": "Social Status",
+      "points": 0,
+      "free": true
+    },
+    {
+      "name": "Puissant Ability",
+      "display": "Puissant Magic Theory",
+      "param": "Magic Theory",
+      "size": "Minor",
+      "category": "General",
+      "points": 0,
+      "free": true
+    },
+    {
+      "name": "Inventive Genius",
+      "display": "Inventive Genius",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Book Learner",
+      "display": "Book Learner",
+      "size": "Minor",
+      "category": "General",
+      "points": 1
+    },
+    {
+      "name": "Affinity with Art",
+      "display": "Affinity with Vim",
+      "param": "Vim",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Puissant Art",
+      "display": "Puissant Vim",
+      "param": "Vim",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Minor Magical Focus",
+      "display": "Minor Magical Focus (vis)",
+      "param": "vis",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Method Caster",
+      "display": "Method Caster",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Skilled Parens",
+      "display": "Skilled Parens",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Secondary Insight",
+      "display": "Secondary Insight",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Personal Vis Source",
+      "display": "Personal Vis Source",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Good Teacher",
+      "display": "Good Teacher",
+      "size": "Minor",
+      "category": "General",
+      "points": 1
+    }
+  ],
+  "flaws": [
+    {
+      "name": "Driven",
+      "display": "Driven",
+      "size": "Major",
+      "category": "Personality",
+      "points": 3
+    },
+    {
+      "name": "Study Requirement",
+      "display": "Study Requirement",
+      "size": "Major",
+      "category": "Hermetic",
+      "points": 3
+    },
+    {
+      "name": "Infamous Master",
+      "display": "Infamous Master",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Proud",
+      "display": "Proud",
+      "size": "Minor",
+      "category": "Personality",
+      "points": 1
+    },
+    {
+      "name": "Unimaginative Learner",
+      "display": "Unimaginative Learner",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Social Handicap",
+      "display": "Social Handicap",
+      "size": "Minor",
+      "category": "General",
+      "points": 1
+    }
+  ],
+  "abilities": [
+    {
+      "name": "Awareness",
+      "score": 2,
+      "stage": "childhood",
+      "type": "General"
+    },
+    {
+      "name": "Concentration",
+      "score": 2,
+      "stage": "childhood",
+      "type": "General"
+    },
+    {
+      "name": "Folk Ken",
+      "score": 2,
+      "stage": "childhood",
+      "type": "General"
+    },
+    {
+      "name": "Area Lore",
+      "score": 2,
+      "stage": "later-life",
+      "type": "General",
+      "restricted": true
+    },
+    {
+      "name": "Bargain",
+      "score": 2,
+      "stage": "later-life",
+      "type": "General"
+    },
+    {
+      "name": "Etiquette",
+      "score": 2,
+      "stage": "later-life",
+      "type": "General"
+    },
+    {
+      "name": "Leadership",
+      "score": 2,
+      "stage": "later-life",
+      "type": "General"
+    },
+    {
+      "name": "Intrigue",
+      "score": 2,
+      "stage": "later-life",
+      "type": "General"
+    },
+    {
+      "name": "Magic Theory",
+      "score": 3,
+      "stage": "apprenticeship",
+      "type": "Arcane",
+      "restricted": true
+    },
+    {
+      "name": "Latin",
+      "score": 3,
+      "stage": "apprenticeship",
+      "type": "Academic",
+      "restricted": true
+    },
+    {
+      "name": "Parma Magica",
+      "score": 2,
+      "stage": "apprenticeship",
+      "type": "Arcane",
+      "restricted": true
+    },
+    {
+      "name": "Artes Liberales",
+      "score": 2,
+      "stage": "apprenticeship",
+      "type": "Academic",
+      "restricted": true
+    },
+    {
+      "name": "Philosophiae",
+      "score": 1,
+      "stage": "apprenticeship",
+      "type": "Academic",
+      "restricted": true
+    },
+    {
+      "name": "Finesse",
+      "score": 1,
+      "stage": "apprenticeship",
+      "type": "Arcane"
+    },
+    {
+      "name": "Penetration",
+      "score": 1,
+      "stage": "apprenticeship",
+      "type": "Arcane"
+    },
+    {
+      "name": "Code of Hermes",
+      "score": 1,
+      "stage": "apprenticeship",
+      "type": "Arcane",
+      "restricted": true
+    },
+    {
+      "name": "Order of Hermes Lore",
+      "score": 1,
+      "stage": "apprenticeship",
+      "type": "General",
+      "restricted": true
+    }
+  ],
+  "arts": {
+    "Vim": 15,
+    "Intellego": 11,
+    "Rego": 5,
+    "Mentem": 5,
+    "Perdo": 3,
+    "Creo": 1,
+    "Muto": 1,
+    "Terram": 1
+  },
+  "spells": [
+    {
+      "name": "Scales of the Magical Weight",
+      "technique": "Intellego",
+      "form": "Vim",
+      "level": 5,
+      "requisites": [],
+      "labTotal": 38
+    },
+    {
+      "name": "Sense the Nature of Vis",
+      "technique": "Intellego",
+      "form": "Vim",
+      "level": 5,
+      "requisites": [],
+      "labTotal": 38
+    },
+    {
+      "name": "Piercing the Faerie Veil",
+      "technique": "Intellego",
+      "form": "Vim",
+      "level": 20,
+      "requisites": [],
+      "labTotal": 38
+    },
+    {
+      "name": "Sense of the Lingering Magic",
+      "technique": "Intellego",
+      "form": "Vim",
+      "level": 30,
+      "requisites": [],
+      "labTotal": 38
+    },
+    {
+      "name": "Sight of the Active Magics",
+      "technique": "Intellego",
+      "form": "Vim",
+      "level": 40,
+      "requisites": [],
+      "labTotal": 49,
+      "inFocus": true
+    },
+    {
+      "name": "Posing the Silent Question",
+      "technique": "Intellego",
+      "form": "Mentem",
+      "level": 20,
+      "requisites": [],
+      "labTotal": 25
+    },
+    {
+      "name": "Sight of the Transparent Motive",
+      "technique": "Intellego",
+      "form": "Mentem",
+      "level": 10,
+      "requisites": [],
+      "labTotal": 25
+    },
+    {
+      "name": "The Ear for Distant Voices",
+      "technique": "Intellego",
+      "form": "Imaginem",
+      "level": 20,
+      "requisites": [],
+      "labTotal": 20
+    }
+  ],
+  "personality": [
+    {
+      "trait": "Ambitious",
+      "value": 3
+    },
+    {
+      "trait": "Proud",
+      "value": 2
+    },
+    {
+      "trait": "Obsessive",
+      "value": 2
+    }
+  ],
+  "confidence": 1,
+  "reputation": null,
+  "laterLifeYears": 5,
+  "nativeLanguage": "Romaic Greek",
+  "notes": ""
+}

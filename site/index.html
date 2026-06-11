@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Covenant Roster — Ars Magica</title>
+<style>
+:root { --ink:#1c1a17; --muted:#6b6257; --line:#d8cfc0; --accent:#7a2e1d; --bg:#fbf8f3; --card:#fff; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.55 "Iowan Old Style",Palatino,Georgia,serif; }
+main { max-width:980px; margin:0 auto; padding:3rem 1.25rem 5rem; }
+header.hero { text-align:center; margin-bottom:2.5rem; }
+header.hero h1 { font-size:2.6rem; color:var(--accent); margin:0 0 .3rem; letter-spacing:.01em; }
+header.hero p { color:var(--muted); margin:0; font-size:1.05rem; }
+h2.section { font-size:1.15rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);
+  border-bottom:2px solid var(--line); padding-bottom:.35rem; margin:3rem 0 1.4rem; }
+.gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1.1rem; }
+a.card { display:flex; flex-direction:column; gap:.55rem; text-decoration:none; color:inherit;
+  background:var(--card); border:1px solid var(--line); border-radius:10px; padding:1.1rem 1.2rem;
+  transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease; }
+a.card:hover { transform:translateY(-3px); box-shadow:0 8px 22px rgba(60,40,20,.13); border-color:var(--accent); }
+.card .name { font-size:1.25rem; font-weight:600; color:var(--accent); line-height:1.2; }
+.badge { align-self:flex-start; font-size:.72rem; text-transform:uppercase; letter-spacing:.05em;
+  background:#f0e7d8; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:.12rem .6rem; }
+.card .concept { color:var(--ink); font-size:.95rem; flex:1; }
+.card .spec { color:var(--muted); font-size:.82rem; font-variant:small-caps; letter-spacing:.03em; }
+.card .go { color:var(--accent); font-size:.85rem; font-weight:600; }
+.create { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1.1rem; }
+.create .tile { background:var(--card); border:1px dashed var(--line); border-radius:10px; padding:1.3rem 1.2rem; text-align:center; }
+.create .tile h3 { margin:.2rem 0 .4rem; color:var(--accent); font-size:1.2rem; }
+.create .tile p { color:var(--muted); font-size:.88rem; margin:0 0 1rem; min-height:2.4em; }
+.create button { font:inherit; font-size:.9rem; color:var(--muted); background:#f3ece0;
+  border:1px solid var(--line); border-radius:999px; padding:.4rem 1.1rem; cursor:not-allowed; }
+.create .soon { display:inline-block; margin-top:.6rem; font-size:.7rem; text-transform:uppercase;
+  letter-spacing:.06em; color:#9a8f7d; }
+footer { text-align:center; color:var(--muted); font-size:.82rem; margin-top:4rem; }
+</style></head>
+<body><main>
+  <header class="hero">
+    <h1>The Covenant Roster</h1>
+    <p>Characters of Mythic Europe · Ars Magica, Definitive Edition</p>
+  </header>
+
+  <h2 class="section">Members (3)</h2>
+  <div class="gallery">
+<a class="card" href="characters/reclaimer.html">
+    <span class="badge">House Flambeau</span>
+    <span class="name">Aldric of Flambeau</span>
+    <span class="concept">Water-and-growth reclaimer-lord who drains marshes, controls rivers, and makes valleys conspicuously blessed — taking over Mythic Europe through owned water and owned harvest, n…</span>
+    
+    <span class="go">View sheet →</span>
+  </a>
+<a class="card" href="characters/corvus-build1.html">
+    <span class="badge">House Tytalus</span>
+    <span class="name">Corvus of Tytalus</span>
+    <span class="concept"></span>
+    
+    <span class="go">View sheet →</span>
+  </a>
+<a class="card" href="characters/heresiarch.html">
+    <span class="badge">House Bonisagus</span>
+    <span class="name">Konstantinos of Bonisagus</span>
+    <span class="concept">A Bonisagus theoretician consumed by the conviction that the Limit of Vis is a failure of Bonisagus's imagination, not natural law.</span>
+    <span class="spec">InVi · focus: vis and magical energies</span>
+    <span class="go">View sheet →</span>
+  </a>
+  </div>
+
+  <h2 class="section">Add to the Roster</h2>
+  <div class="create">
+<div class="tile">
+      <h3>Magus</h3>
+      <p>A Gifted member of the Order of Hermes, built across the five creation budgets.</p>
+      <button type="button" disabled title="Not yet implemented">Create a Magus</button>
+      <span class="soon">Coming soon</span>
+    </div>
+<div class="tile">
+      <h3>Companion</h3>
+      <p>A remarkable mundane ally — knight, scholar, faerie-touched, or worse.</p>
+      <button type="button" disabled title="Not yet implemented">Create a Companion</button>
+      <span class="soon">Coming soon</span>
+    </div>
+<div class="tile">
+      <h3>Grog</h3>
+      <p>A covenant soldier or servant, quick to make and quick to lose.</p>
+      <button type="button" disabled title="Not yet implemented">Create a Grog</button>
+      <span class="soon">Coming soon</span>
+    </div>
+  </div>
+
+  <footer>Built with the <code>chargen</code> rules engine. Sheets are rules-legal and validated.</footer>
+</main></body></html>

@@ -1,0 +1,13 @@
+_Ars Magica — Chapter 8: Laboratory_
+
+## Help in the Laboratory
+
+Though the Code of Hermes provides protection for magi who meet on neutral grounds, the sanctum of a magus (laboratory and living quarters) is a special place in which magi hold their greatest treasures and deepest secrets. Thus, the Code of Hermes allows for magi to exact any toll on magi who trespass within their sancta. Because one magus foregoes protection of the Code when in the laboratory sanctum of another, very few magi ever cooperate in laboratory work.
+
+Nevertheless, there are times when magi receive help in their laboratory work, either from trusting magi or from apprentices. Anyone who has The Gift and a score of at least one in Magic Theory may help you to perform any activity that uses your Magic Theory. If you are being helped to perform some activity that uses your Magic Theory, you add the helper's Intelligence + Magic Theory to your Lab Total for the season. Any helper's Virtues and Flaws affect the Lab Total, in the same way as those of the primary magus. If this total is negative, the 'assistant' imposes a penalty on your Lab Total. If the assistant has some appropriate Virtue or Flaw, like Inventive Genius, that Virtue or Flaw applies to the primary researcher's efforts.
+
+Thus, when two magi cooperate, one must always be the primary researcher and one must be the assistant. This research may take place outside the sanctum of either magus (see The Sanctum, page 297), in which case both parties are protected by the Code. However, the assistant is announcing to the Order that he considers the primary researcher to be his superior. This substantially limits the range of magi that most members of the Order are willing to assist. A magus is conventionally supposed to regard his parens as superior throughout his life, so helping your parens attracts no stigma, even for those magi who actually regard their parentes with contempt.
+
+You may not normally have more than one helper in the lab, as it is difficult to coordinate several helpers with you and with each other. However, if people are exceptionally well-organized and cooperative, more can work together, each helper adding his Magic Theory and Intelligence scores to the primary researcher's scores. The total number of assistants that the primary researcher can make use of in one season is limited to his Leadership score (though he can always have at least one). The exception is that a magus with a familiar may always have at least one assistant in addition to his familiar; this does not increase the maximum if he has a Leadership score of 2 or more.
+
+Lab assistants gain exposure experience, typically in Magic Theory, but do not gain anything else from the experience.

@@ -1,0 +1,280 @@
+{
+  "schema": 2,
+  "name": "Corvus of Tytalus",
+  "house": "Tytalus",
+  "concept": "",
+  "age": 25,
+  "characteristics": {
+    "Int": 3,
+    "Per": 1,
+    "Str": -1,
+    "Sta": 1
+  },
+  "virtues": [
+    {
+      "name": "The Gift",
+      "display": "The Gift",
+      "size": "Free",
+      "category": "Special",
+      "points": 0,
+      "free": true
+    },
+    {
+      "name": "Hermetic Magus",
+      "display": "Hermetic Magus",
+      "size": "Free",
+      "category": "Social Status",
+      "points": 0,
+      "free": true
+    },
+    {
+      "name": "Self-Confident",
+      "display": "Self-Confident",
+      "size": "Minor",
+      "category": "General",
+      "points": 0,
+      "free": true
+    },
+    {
+      "name": "Flexible Formulaic Magic",
+      "display": "Flexible Formulaic Magic",
+      "size": "Major",
+      "category": "Hermetic",
+      "points": 3
+    },
+    {
+      "name": "Affinity with Art",
+      "display": "Affinity with Rego",
+      "param": "Rego",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Puissant Art",
+      "display": "Puissant Rego",
+      "param": "Rego",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Inventive Genius",
+      "display": "Inventive Genius",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    },
+    {
+      "name": "Book Learner",
+      "display": "Book Learner",
+      "size": "Minor",
+      "category": "General",
+      "points": 1
+    },
+    {
+      "name": "Social Contacts",
+      "display": "Social Contacts",
+      "size": "Minor",
+      "category": "General",
+      "points": 1
+    },
+    {
+      "name": "Temporal Influence",
+      "display": "Temporal Influence",
+      "size": "Minor",
+      "category": "General",
+      "points": 1
+    },
+    {
+      "name": "Clear Thinker",
+      "display": "Clear Thinker",
+      "size": "Minor",
+      "category": "General",
+      "points": 1
+    }
+  ],
+  "flaws": [
+    {
+      "name": "Deficient Technique",
+      "display": "Deficient Perdo",
+      "param": "Perdo",
+      "size": "Major",
+      "category": "Hermetic",
+      "points": 3
+    },
+    {
+      "name": "Enemies",
+      "display": "Enemies",
+      "size": "Major",
+      "category": "Story",
+      "points": 3
+    },
+    {
+      "name": "Ambitious",
+      "display": "Ambitious",
+      "size": "Major",
+      "category": "Personality",
+      "points": 3
+    },
+    {
+      "name": "Infamous Master",
+      "display": "Infamous Master",
+      "size": "Minor",
+      "category": "Hermetic",
+      "points": 1
+    }
+  ],
+  "abilities": [
+    {
+      "name": "Area Lore",
+      "score": 2,
+      "stage": "childhood",
+      "type": "General",
+      "restricted": true
+    },
+    {
+      "name": "Folk Ken",
+      "score": 2,
+      "stage": "childhood",
+      "type": "General"
+    },
+    {
+      "name": "Guile",
+      "score": 2,
+      "stage": "childhood",
+      "type": "General"
+    },
+    {
+      "name": "Intrigue",
+      "score": 3,
+      "stage": "later-life",
+      "type": "General"
+    },
+    {
+      "name": "Leadership",
+      "score": 2,
+      "stage": "later-life",
+      "type": "General"
+    },
+    {
+      "name": "Magic Theory",
+      "score": 3,
+      "stage": "apprenticeship",
+      "type": "Arcane",
+      "restricted": true
+    },
+    {
+      "name": "Parma Magica",
+      "score": 2,
+      "stage": "apprenticeship",
+      "type": "Arcane",
+      "restricted": true
+    },
+    {
+      "name": "Latin",
+      "score": 3,
+      "stage": "apprenticeship",
+      "type": "Academic",
+      "restricted": true
+    },
+    {
+      "name": "Bargain",
+      "score": 3,
+      "stage": "later-life",
+      "type": "General"
+    }
+  ],
+  "arts": {
+    "Rego": 13,
+    "Terram": 9,
+    "Mentem": 7,
+    "Intellego": 5,
+    "Muto": 5
+  },
+  "spells": [
+    {
+      "name": "The Miner's Keen Eye",
+      "technique": "Intellego",
+      "form": "Terram",
+      "level": 20,
+      "requisites": [],
+      "labTotal": 23
+    },
+    {
+      "name": "Aura of Rightful Authority",
+      "technique": "Rego",
+      "form": "Mentem",
+      "level": 20,
+      "requisites": [],
+      "labTotal": 32
+    },
+    {
+      "name": "Crest of the Earth Wave",
+      "technique": "Rego",
+      "form": "Terram",
+      "level": 20,
+      "requisites": [],
+      "labTotal": 34
+    },
+    {
+      "name": "Earth That Breaks No More",
+      "technique": "Muto",
+      "form": "Terram",
+      "level": 20,
+      "requisites": [],
+      "labTotal": 23
+    },
+    {
+      "name": "The Call to Slumber",
+      "technique": "Rego",
+      "form": "Mentem",
+      "level": 10,
+      "requisites": [],
+      "labTotal": 32
+    },
+    {
+      "name": "The Unseen Porter",
+      "technique": "Rego",
+      "form": "Terram",
+      "level": 10,
+      "requisites": [],
+      "labTotal": 34
+    },
+    {
+      "name": "Rock of Viscid Clay",
+      "technique": "Muto",
+      "form": "Terram",
+      "level": 15,
+      "requisites": [],
+      "labTotal": 23
+    },
+    {
+      "name": "Probe for Pure Silver",
+      "technique": "Intellego",
+      "form": "Terram",
+      "level": 4,
+      "requisites": [],
+      "labTotal": 23
+    }
+  ],
+  "personality": [
+    {
+      "trait": "Scheming",
+      "value": 3
+    },
+    {
+      "trait": "Ambitious",
+      "value": 3
+    },
+    {
+      "trait": "Pragmatic",
+      "value": 2
+    }
+  ],
+  "confidence": 1,
+  "reputation": null,
+  "laterLifeYears": 5,
+  "nativeLanguage": "German",
+  "notes": ""
+}
