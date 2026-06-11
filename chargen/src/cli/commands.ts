@@ -11,7 +11,7 @@ import type { RulesData } from "../data/rules.ts";
 import { loadCharacter, saveCharacter, characterExists } from "./persist.ts";
 import { renderIssues, renderStatus, renderBatch } from "./render.ts";
 import { renderSheet, kebab } from "./sheet.ts";
-import { renderSheetHtml } from "./sheet-html.ts";
+import { renderSheetHtml, type SheetData } from "./sheet-html.ts";
 import { createMagus } from "../domain/create.ts";
 import { computeBudgets } from "../domain/budgets.ts";
 import { validate, isLegal } from "../domain/validate.ts";
@@ -121,7 +121,7 @@ export function cmdBuild(ctx: Ctx): number {
   // Optional one-call export alongside the build.
   let exportNote = "";
   const outPath = flagStr(ctx.flags, "out");
-  if (result.saved && outPath) exportNote = "\n" + writeSheets(result.character, outPath, exportFormat(ctx));
+  if (result.saved && outPath) exportNote = "\n" + writeSheets(ctx, result.character, outPath, exportFormat(ctx));
 
   const head = [
     `${result.saved ? "Built" : "Build FAILED (not saved)"} — ${spec.name} of House ${house}.`,
@@ -378,12 +378,20 @@ function writeFile(path: string, content: string): string {
   writeFileSync(path, content, "utf8");
   return `Wrote ${path}`;
 }
+/** Description lookups for the HTML sheet's clickable traits/spells, from the rules DB. */
+function sheetData(ctx: Ctx): SheetData {
+  return {
+    traitDesc: (n) => ctx.rules.virtueFlawRow(n)?.description,
+    spellDesc: (n) => ctx.rules.spell(n)?.description,
+  };
+}
+
 /** Write the requested sheet format(s) next to `outPath` (swapping extension). */
-function writeSheets(ch: ReturnType<typeof loadCharacter>, outPath: string, format: Format): string {
+function writeSheets(ctx: Ctx, ch: ReturnType<typeof loadCharacter>, outPath: string, format: Format): string {
   const base = outPath.replace(/\.(md|markdown|html?)$/i, "");
   const done: string[] = [];
   if (format === "md" || format === "both") done.push(writeFile(/\.(md|markdown)$/i.test(outPath) ? outPath : `${base}.md`, renderSheet(ch)));
-  if (format === "html" || format === "both") done.push(writeFile(/\.html?$/i.test(outPath) ? outPath : `${base}.html`, renderSheetHtml(ch)));
+  if (format === "html" || format === "both") done.push(writeFile(/\.html?$/i.test(outPath) ? outPath : `${base}.html`, renderSheetHtml(ch, sheetData(ctx))));
   return done.join("\n");
 }
 
@@ -392,9 +400,9 @@ export function cmdExport(ctx: Ctx): number {
   if (ctx.json) { console.log(JSON.stringify(ch, null, 2)); return 0; }
   const format = exportFormat(ctx);
   const outPath = flagStr(ctx.flags, "out");
-  if (outPath) { console.log(writeSheets(ch, outPath, format)); return 0; }
+  if (outPath) { console.log(writeSheets(ctx, ch, outPath, format)); return 0; }
   if (format === "both") return fail(ctx, `--format both needs --out <path> (writes <path>.md and <path>.html).`);
-  console.log(format === "html" ? renderSheetHtml(ch) : renderSheet(ch));
+  console.log(format === "html" ? renderSheetHtml(ch, sheetData(ctx)) : renderSheet(ch));
   if (format === "md") console.log(`\n(Tip: \`chargen export --out characters/${kebab(ch.name)}.md\`, or --format html|both.)`);
   return 0;
 }

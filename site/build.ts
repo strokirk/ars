@@ -9,9 +9,16 @@ import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync } from 
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import type { Character } from "../chargen/src/domain/character.ts";
-import { renderSheetHtml } from "../chargen/src/cli/sheet-html.ts";
+import { renderSheetHtml, type SheetData } from "../chargen/src/cli/sheet-html.ts";
 import { magusTitle, kebab } from "../chargen/src/cli/sheet.ts";
 import { ART_ABBR } from "../chargen/src/domain/glossary.ts";
+import { loadRules } from "../chargen/src/data/rules.ts";
+
+const rules = loadRules();
+const sheetData: SheetData = {
+  traitDesc: (n) => rules.virtueFlawRow(n)?.description,
+  spellDesc: (n) => rules.spell(n)?.description,
+};
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -98,14 +105,14 @@ function indexHtml(entries: Entry[]): string {
     <p>Characters of Mythic Europe · Ars Magica, Definitive Edition</p>
   </header>
 
-  <h2 class="section">Members (${entries.length})</h2>
-  <div class="gallery">
-${cards}
-  </div>
-
   <h2 class="section">Add to the Roster</h2>
   <div class="create">
 ${tiles}
+  </div>
+
+  <h2 class="section">Members (${entries.length})</h2>
+  <div class="gallery">
+${cards}
   </div>
 
   <footer>Built with the <code>chargen</code> rules engine. Sheets are rules-legal and validated.</footer>
@@ -117,7 +124,7 @@ if (!existsSync(OUT_CHARS)) mkdirSync(OUT_CHARS, { recursive: true });
 const entries: Entry[] = [];
 for (const { ch, base } of loadCharacters()) {
   const file = `${kebab(base)}.html`;
-  writeFileSync(join(OUT_CHARS, file), renderSheetHtml(ch), "utf8");
+  writeFileSync(join(OUT_CHARS, file), renderSheetHtml(ch, sheetData), "utf8");
   const spec = [ch.favoredTechnique && ch.favoredForm ? `${ART_ABBR[ch.favoredTechnique]}${ART_ABBR[ch.favoredForm]}` : "", ch.focus ? `focus: ${ch.focus}` : ""].filter(Boolean).join(" · ");
   entries.push({ title: magusTitle(ch), house: ch.house, concept: firstSentence(ch.concept), spec, file });
 }

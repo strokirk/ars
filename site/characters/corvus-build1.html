@@ -4,29 +4,41 @@
 <title>Corvus of Tytalus</title>
 <style>
 :root { --ink:#1c1a17; --muted:#6b6257; --line:#d8cfc0; --accent:#7a2e1d; --bg:#fbf8f3; }
-* { box-sizing: border-box; }
-body { margin:0; background:var(--bg); color:var(--ink);
-  font:15px/1.5 "Iowan Old Style",Palatino,Georgia,serif; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 "Iowan Old Style",Palatino,Georgia,serif; }
 main { max-width:820px; margin:0 auto; padding:2.5rem 1.5rem 4rem; }
 h1 { font-size:2rem; margin:0 0 .2rem; color:var(--accent); }
-h2 { font-size:1.1rem; text-transform:uppercase; letter-spacing:.06em;
-  border-bottom:2px solid var(--line); padding-bottom:.25rem; margin:2rem 0 .8rem; }
+h2 { font-size:1.1rem; text-transform:uppercase; letter-spacing:.06em; border-bottom:2px solid var(--line); padding-bottom:.25rem; margin:2rem 0 .8rem;
+  display:flex; align-items:baseline; gap:.6rem; flex-wrap:wrap; }
+h3.sub { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:1rem 0 .4rem; }
 .sub { color:var(--muted); margin:.1rem 0 1.4rem; }
 .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem; }
 .stat { background:#fff; border:1px solid var(--line); border-radius:6px; padding:.5rem .6rem; }
 .stat b { display:block; font-size:.7rem; text-transform:uppercase; color:var(--muted); letter-spacing:.04em; }
 .stat span { font-size:1.25rem; font-weight:600; }
 .arts { display:grid; grid-template-columns:repeat(5,1fr); gap:.4rem; }
-.art { background:#fff; border:1px solid var(--line); border-radius:6px; padding:.35rem .4rem; text-align:center; }
-.art b { display:block; font-size:.72rem; color:var(--accent); }
-.art span { font-size:1.1rem; font-weight:600; }
-ul { margin:.3rem 0; padding-left:1.2rem; }
-li { margin:.15rem 0; }
+.art { display:flex; align-items:center; gap:.35rem; background:#fff; border:1px solid var(--line);
+  border-left:4px solid var(--c); border-radius:6px; padding:.35rem .5rem; }
+.art .ic { font-size:.95rem; line-height:1; filter:saturate(.85); }
+.art b { color:var(--c); font-size:.9rem; }
+.art .sc { margin-left:auto; font-size:1.05rem; font-weight:600; }
+ul { margin:.3rem 0; padding-left:1.2rem; } li { margin:.15rem 0; }
+ul.sortable { list-style:none; padding-left:0; columns:2; column-gap:1.4rem; }
+ul.sortable li { break-inside:avoid; }
 .tag { color:var(--muted); }
 .free { color:var(--muted); font-style:italic; }
-table { border-collapse:collapse; width:100%; }
-td { padding:.2rem .4rem; border-bottom:1px solid var(--line); vertical-align:top; }
-td.lvl { width:3.5rem; color:var(--accent); font-weight:600; }
+.row { margin:.1rem 0; }
+details.row > summary { cursor:pointer; list-style:revert; }
+details.row > summary:hover { color:var(--accent); }
+.row.flat { color:var(--ink); }
+.desc { margin:.35rem 0 .6rem 1rem; padding:.5rem .8rem; border-left:3px solid var(--line);
+  color:#3c3630; font-size:.92rem; white-space:pre-wrap; }
+.lvl { color:var(--accent); font-weight:600; display:inline-block; min-width:4.2rem; }
+.ctl { font-size:.78rem; color:var(--muted); font-family:system-ui,sans-serif; text-transform:none; letter-spacing:0; font-weight:400; }
+.ctl button { font:inherit; color:var(--muted); background:#f3ece0; border:1px solid var(--line);
+  border-radius:999px; padding:.12rem .6rem; margin-left:.25rem; cursor:pointer; }
+.ctl button:hover { border-color:var(--accent); color:var(--accent); }
+.ctl button.on { background:var(--accent); color:#fff; border-color:var(--accent); }
 .notes { background:#fff; border:1px solid var(--line); border-radius:6px; padding:.2rem 1rem; }
 .ledger { color:var(--muted); font-size:.85rem; margin-top:.4rem; }
 </style></head>
@@ -40,25 +52,49 @@ td.lvl { width:3.5rem; color:var(--accent); font-weight:600; }
 
   <h2>Virtues &amp; Flaws</h2>
   <p class="free">Free: The Gift; Hermetic Magus; Self-Confident</p>
-  <ul><li>Flexible Formulaic Magic <span class="tag">(Major)</span></li><li>Affinity with Rego <span class="tag">(Minor)</span></li><li>Puissant Rego <span class="tag">(Minor)</span></li><li>Inventive Genius <span class="tag">(Minor)</span></li><li>Book Learner <span class="tag">(Minor)</span></li><li>Social Contacts <span class="tag">(Minor)</span></li><li>Temporal Influence <span class="tag">(Minor)</span></li><li>Clear Thinker <span class="tag">(Minor)</span></li></ul>
-  <p class="tag">Virtues 10 pts = Flaws 10 pts</p>
-  <ul><li>Deficient Perdo <span class="tag">(Major)</span></li><li>Enemies <span class="tag">(Major)</span></li><li>Ambitious <span class="tag">(Major)</span></li><li>Infamous Master <span class="tag">(Minor)</span></li></ul>
+  <h3 class="sub">Virtues · 10 pts</h3>
+  <details class="row"><summary>Flexible Formulaic Magic <span class="tag">(Major)</span></summary><div class="desc">You can vary the effects of Formulaic spells to a slight degree, while still getting the benefits of casting known magic. You may raise or lower the casting level of the spell by one magnitude to raise or lower one (only) of Range, Duration, Target category and Target size by one step, as long as this does not violate any of the normal limits on Formulaic magic. You may instead change one (only) of those parameters to another parameter at the same level, without modifying the casting level, as long as this does not violate any of the normal limits on Formulaic magic. Casting success, Fatigue loss, and Penetration are all calculated based on the final modified level of the spell. You cannot manipulate Ritual magic in this way.</div></details><details class="row"><summary>Affinity with Rego <span class="tag">(Minor)</span></summary><div class="desc">Your Advancement Totals for one Hermetic Art are increased by one half, rounded up. At character creation, any experience points you put into that Art are also increased by one half (rounded up), and you may exceed the normal recommended limits. You may take this Virtue twice, for two different Arts. ####’Alim Minor, Social Status You are a member of the religious elite. You may be a minor official, such as a mu’adhdhin or an imam, or you may be a major figure, such as a mufti (MUF-tee, someone formally entitled to give a legal opinion) or a qadi (QAW-dee, judge). You may purchase Academic Abilities during character generation. This Virtue is only available to male characters.</div></details><details class="row"><summary>Book Learner <span class="tag">(Minor)</span></summary><div class="desc">You have a talent for comprehending the writings of others. When studying from books, treat them as if they were three Quality levels higher than they actually are.</div></details><details class="row"><summary>Clear Thinker <span class="tag">(Minor)</span></summary><div class="desc">You think logically and rationally. You get a +3 bonus on all rolls to resist lies, confusion, befuddlement, and subterfuge — whether magical or mundane.</div></details><details class="row"><summary>Inventive Genius <span class="tag">(Minor)</span></summary><div class="desc">Invention comes naturally to you. You get +3 to your Lab Total if you are not using a Laboratory Text or being taught. If you experiment, you get +6.</div></details><details class="row"><summary>Puissant Rego <span class="tag">(Minor)</span></summary><div class="desc">You add 3 to the value of one Art whenever you use it. This means all totals in which the score of the Art is part of the total. It does not apply when learning, teaching, or writing about the Art. You may take this Virtue twice, for two different Arts. If a spell has requisites, include the bonus from Puissant Art with that Art when calculating which Art is higher. If the Puissant Art is higher, the bonus does not apply to the requisite.</div></details><details class="row"><summary>Social Contacts <span class="tag">(Minor)</span></summary><div class="desc">You have a broad range of acquaintances in a specific social circle (specified when this Virtue is purchased), accumulated over years of travel and socializing. Almost everywhere you go, you meet someone you know, or can get in touch with someone who can help you. Whenever you are somewhere new, you can contact someone on a simple Presence roll against an Ease Factor of 6. The storyguide may modify this target number upward for very small areas or areas where it is extremely unlikely that you would know someone. You may purchase this Virtue more than once, each time specifying a different social group.</div></details><details class="row"><summary>Temporal Influence <span class="tag">(Minor)</span></summary><div class="desc">Through blood or a position of trust, you enjoy some political weight in society. You have the ear of a leader and may yourself lead common folk at times, if they respect your position. The more influence you have, the more responsibility, and the harder it is to work unopposed with magi. Grogs may not take this Virtue.</div></details>
+  <h3 class="sub">Flaws · 10 pts (balanced)</h3>
+  <details class="row"><summary>Ambitious <span class="tag">(Major)</span></summary><div class="desc">You want to be the most successful or powerful person in the world in some respect. You will not be distracted into doing things that do not contribute to your ambition, and are very eager to do things that advance it.</div></details><details class="row"><summary>Deficient Perdo <span class="tag">(Major)</span></summary><div class="desc">All totals, including Lab and Casting totals, including a particular Technique are halved. Advancement Totals are not halved. Experience points required are based on the actual value of the Technique, before halving.</div></details><details class="row"><summary>Enemies <span class="tag">(Major)</span></summary><div class="desc">Someone is causing trouble for you, such as a local baron or bishop, a band of outlaws, or a really nasty innkeeper. The enemy must be powerful enough to endanger you — this is best agreed on with the storyguide and the rest of the troupe.</div></details><details class="row"><summary>Infamous Master <span class="tag">(Minor)</span></summary><div class="desc">Your master was a diabolist, bumbler, fool, widely despised, or held in contempt for some other reason. Most magi expect little better from you. Even if you’ve done nothing wrong, you are treated as though you don’t deserve to be a member of the Order. You have a bad Reputation of the appropriate type at level 3 among magi.</div></details>
 
-  <h2>Abilities</h2>
+  <h2>Abilities <span class="ctl">sort: <button data-sort="name" data-tgt="abilities" class="on">A–Z</button><button data-sort="score" data-tgt="abilities">score</button></span></h2>
   <p><strong>Native Language:</strong> German 5</p>
-  <ul><li>Area Lore 2</li><li>Folk Ken 2</li><li>Guile 2</li><li>Intrigue 3</li><li>Leadership 2</li><li>Magic Theory 3</li><li>Parma Magica 2</li><li>Latin 3</li><li>Bargain 3</li></ul>
+  <ul id="abilities" class="sortable"><li data-name="area lore" data-score="2">Area Lore 2</li><li data-name="bargain" data-score="3">Bargain 3</li><li data-name="folk ken" data-score="2">Folk Ken 2</li><li data-name="guile" data-score="2">Guile 2</li><li data-name="intrigue" data-score="3">Intrigue 3</li><li data-name="latin" data-score="3">Latin 3</li><li data-name="leadership" data-score="2">Leadership 2</li><li data-name="magic theory" data-score="3">Magic Theory 3</li><li data-name="parma magica" data-score="2">Parma Magica 2</li></ul>
   
   <p class="ledger">xp — childhood 45/45 · later life 75/75 · apprenticeship 239/240</p>
 
   <h2>Arts</h2>
-  <div class="arts"><div class="art"><b>Cr</b><span>0</span></div><div class="art"><b>In</b><span>5</span></div><div class="art"><b>Mu</b><span>5</span></div><div class="art"><b>Pe</b><span>0</span></div><div class="art"><b>Re</b><span>13</span></div><div class="art"><b>An</b><span>0</span></div><div class="art"><b>Aq</b><span>0</span></div><div class="art"><b>Au</b><span>0</span></div><div class="art"><b>Co</b><span>0</span></div><div class="art"><b>He</b><span>0</span></div><div class="art"><b>Ig</b><span>0</span></div><div class="art"><b>Im</b><span>0</span></div><div class="art"><b>Me</b><span>7</span></div><div class="art"><b>Te</b><span>9</span></div><div class="art"><b>Vi</b><span>0</span></div></div>
+  <h3 class="sub">Techniques</h3>
+  <div class="arts"><div class="art" style="--c:#3f8f5b"><span class="ic">✦</span><b>Cr</b><span class="sc">0</span></div><div class="art" style="--c:#3a6ea5"><span class="ic">◎</span><b>In</b><span class="sc">5</span></div><div class="art" style="--c:#8a5cb0"><span class="ic">⟳</span><b>Mu</b><span class="sc">5</span></div><div class="art" style="--c:#5a5550"><span class="ic">☠</span><b>Pe</b><span class="sc">0</span></div><div class="art" style="--c:#b08a2e"><span class="ic">✋</span><b>Re</b><span class="sc">13</span></div></div>
+  <h3 class="sub">Forms</h3>
+  <div class="arts"><div class="art" style="--c:#8a6d3b"><span class="ic">🐾</span><b>An</b><span class="sc">0</span></div><div class="art" style="--c:#2f8fb0"><span class="ic">💧</span><b>Aq</b><span class="sc">0</span></div><div class="art" style="--c:#7fb6d6"><span class="ic">🌬</span><b>Au</b><span class="sc">0</span></div><div class="art" style="--c:#c08a7a"><span class="ic">🧍</span><b>Co</b><span class="sc">0</span></div><div class="art" style="--c:#5a9e3f"><span class="ic">🌿</span><b>He</b><span class="sc">0</span></div><div class="art" style="--c:#c64a2e"><span class="ic">🔥</span><b>Ig</b><span class="sc">0</span></div><div class="art" style="--c:#b07fb0"><span class="ic">🎭</span><b>Im</b><span class="sc">0</span></div><div class="art" style="--c:#9a7bc0"><span class="ic">🧠</span><b>Me</b><span class="sc">7</span></div><div class="art" style="--c:#8a7a5a"><span class="ic">⛰</span><b>Te</b><span class="sc">9</span></div><div class="art" style="--c:#6a6fb0"><span class="ic">✨</span><b>Vi</b><span class="sc">0</span></div></div>
 
-  <h2>Spells Known <span class="tag">(119 levels)</span></h2>
-  <table><tr><td class="lvl">InTe 20</td><td>The Miner's Keen Eye</td></tr><tr><td class="lvl">ReMe 20</td><td>Aura of Rightful Authority</td></tr><tr><td class="lvl">ReTe 20</td><td>Crest of the Earth Wave</td></tr><tr><td class="lvl">MuTe 20</td><td>Earth That Breaks No More</td></tr><tr><td class="lvl">ReMe 10</td><td>The Call to Slumber</td></tr><tr><td class="lvl">ReTe 10</td><td>The Unseen Porter</td></tr><tr><td class="lvl">MuTe 15</td><td>Rock of Viscid Clay</td></tr><tr><td class="lvl">InTe 4</td><td>Probe for Pure Silver</td></tr></table>
+  <h2>Spells Known <span class="tag">(119 levels)</span> <span class="ctl">sort: <button data-sort="level" data-tgt="spells" class="on">level</button><button data-sort="name" data-tgt="spells">A–Z</button><button data-sort="tf" data-tgt="spells">Form</button></span></h2>
+  <div id="spells"><details class="row" data-name="probe for pure silver" data-level="4" data-tf="InTe"><summary><span class="lvl">InTe 4</span> Probe for Pure Silver</summary><div class="desc">You can smell silver, and follow the scent.</div></details><details class="row" data-name="the call to slumber" data-level="10" data-tf="ReMe"><summary><span class="lvl">ReMe 10</span> The Call to Slumber</summary><div class="desc">The target becomes sleepy and falls asleep within a few seconds.</div></details><details class="row" data-name="the unseen porter" data-level="10" data-tf="ReTe"><summary><span class="lvl">ReTe 10</span> The Unseen Porter</summary><div class="desc">Like _Unseen Arm_ (ReTe 5), but it can carry large objects such as crates. Roughly speaking, it has the capabilities of a very strong person (Str +5). The heavier the object is, the slower the unseen porter moves. If delicacy is required, high Finesse stress rolls (Ease Factor 12 or so) are needed. The spell can only carry inanimate objects, and cannot carry you. It also cannot lift things more than 6 feet above the ground. Casting requisites of an appropriate Form for the target are required.</div></details><details class="row" data-name="rock of viscid clay" data-level="15" data-tf="MuTe"><summary><span class="lvl">MuTe 15</span> Rock of Viscid Clay</summary><div class="desc">Softens rock enough that it may be dug out, molded, and otherwise manipulated in the same way that hard river clay can be. The rock is slightly sticky. The spell affects rock in a roughly spherical shape with a three-foot diameter.</div></details><details class="row" data-name="the miner's keen eye" data-level="20" data-tf="InTe"><summary><span class="lvl">InTe 20</span> The Miner's Keen Eye</summary><div class="desc">You can see any one type of mineral (gold, diamond, sand), specified at the time of casting, through up to 3 paces of intervening material. You have a good idea of how much is there and how pure it is, if appropriate.</div></details><details class="row" data-name="aura of rightful authority" data-level="20" data-tf="ReMe"><summary><span class="lvl">ReMe 20</span> Aura of Rightful Authority</summary><div class="desc">The target of the spell is strongly inclined to obey you, as if you were his natural superior.</div></details><details class="row" data-name="crest of the earth wave" data-level="20" data-tf="ReTe"><summary><span class="lvl">ReTe 20</span> Crest of the Earth Wave</summary><div class="desc">Creates a wave in the earth that starts at your feet and travels out to the range of your Voice in a designated direction. It starts as a narrow ripple and within 5 paces reaches its full size of 5 feet high and 30 paces wide. It moves about 50 paces per round. Those caught in its path must make Dexterity stress rolls against an Ease Factor of 12 to leap over the wave, or they are tossed aside and take +10 Damage. The wave overturns trees and damages buildings in its path.</div></details><details class="row" data-name="earth that breaks no more" data-level="20" data-tf="MuTe"><summary><span class="lvl">MuTe 20</span> Earth That Breaks No More</summary><div class="desc">Turns a volume of packed dirt up to ten cubic paces into stone.</div></details></div>
 
   <h2>Personality · Reputation · Confidence</h2>
   <p>Scheming +3, Ambitious +3, Pragmatic +2<br>
   Reputation: — · Confidence 2 (5 points)</p>
 
   <h2>Notes &amp; Description</h2>
-  <div class="notes"><p>—</p></div></main></body></html>
+  <div class="notes"><p>—</p></div></main><script>
+(function () {
+  function key(el, k) {
+    if (k === "name") return el.dataset.name || "";
+    if (k === "tf") return el.dataset.tf || "";
+    if (k === "score") return -Number(el.dataset.score);   // high → low
+    if (k === "level") return Number(el.dataset.level);     // low → high
+    return "";
+  }
+  document.querySelectorAll("button[data-sort]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var box = document.getElementById(b.dataset.tgt);
+      var items = Array.prototype.slice.call(box.children);
+      items.sort(function (x, y) { var a = key(x, b.dataset.sort), c = key(y, b.dataset.sort); return a < c ? -1 : a > c ? 1 : 0; });
+      items.forEach(function (i) { box.appendChild(i); });
+      b.parentElement.querySelectorAll("button").forEach(function (x) { x.classList.remove("on"); });
+      b.classList.add("on");
+    });
+  });
+})();
+</script></body></html>
