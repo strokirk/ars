@@ -3,7 +3,7 @@
 // LLM-facing surface added on top of the M1–M5 domain.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadRules } from "../src/data/rules.ts";
+import { loadRules } from "../src/data/load-node.ts";
 import { createMagus } from "../src/domain/create.ts";
 import { applyOps, type Op } from "../src/domain/operations.ts";
 import { setNotes, setMeta } from "../src/domain/mutations.ts";

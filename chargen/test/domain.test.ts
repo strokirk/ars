@@ -2,7 +2,7 @@
 // and the mutation accept/reject policy. Runs on the real data/*.json.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadRules } from "../src/data/rules.ts";
+import { loadRules } from "../src/data/load-node.ts";
 import { artXp, abilityXp, charCost, affinityXp } from "../src/domain/costs.ts";
 import { newCharacter } from "../src/domain/character.ts";
 import { applyHouse } from "../src/domain/houses.ts";

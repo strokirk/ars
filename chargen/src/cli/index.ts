@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Entry point: resolve global flags, load the rules data, dispatch to a command.
 import { parseArgs, flagBool, flagStr } from "./args.ts";
-import { loadRules } from "../data/rules.ts";
+import { loadRules } from "../data/load-node.ts";
 import { TOP_HELP, COMMAND_HELP } from "./help.ts";
 import {
   cmdAdd, cmdApply, cmdBuild, cmdCheck, cmdExport, cmdNew, cmdNotes,

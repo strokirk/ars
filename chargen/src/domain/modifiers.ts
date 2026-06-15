@@ -14,6 +14,7 @@ export interface Modifiers {
   bonusApprenticeshipXp: number;        // Skilled Parens: +60
   bonusSpellLevels: number;             // Skilled Parens: +30
   warriorXp: number;                    // Warrior: +50, Martial Abilities only
+  laterLifeXpPerYear: number;           // 15 normally; Wealthy 20, Poor 10 (companions)
 }
 
 export function deriveModifiers(ch: Character): Modifiers {
@@ -27,8 +28,13 @@ export function deriveModifiers(ch: Character): Modifiers {
     bonusApprenticeshipXp: 0,
     bonusSpellLevels: 0,
     warriorXp: 0,
+    laterLifeXpPerYear: 15,
   };
   const asArt = (p?: string): Art | undefined => (p && isArt(p) ? p : undefined);
+
+  // Wealthy/Poor adjust the later-life xp rate (companions only, by the rules).
+  if (ch.virtues.some((v) => v.name.toLowerCase() === "wealthy")) m.laterLifeXpPerYear = 20;
+  if (ch.flaws.some((f) => f.name.toLowerCase() === "poor")) m.laterLifeXpPerYear = 10;
 
   for (const v of ch.virtues) {
     switch (v.name) {

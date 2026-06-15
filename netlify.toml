@@ -1,4 +1,13 @@
-# The site is pre-built and committed under site/ (regenerate with `node site/build.ts`).
-# No build step runs on Netlify — we just publish the static directory.
+# The interactive site is a Vite + Preact app in web/. Netlify builds it on deploy.
+# It imports the chargen engine (../chargen) and rules data (../data) at build time,
+# so the whole repo must be checked out (the default).
 [build]
-  publish = "site"
+  base = "web"
+  command = "npm ci && npm run build"
+  publish = "web/dist"
+
+# SPA: every path serves the app shell (routing is client-side via the URL hash).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,6 +1,7 @@
 // Computes the five creation budgets from a Character. Pure: feeds both `status`
 // rendering and `validate`. Affinity discounts and Skilled-Parens/Warrior bonuses
 // come from the derived Modifiers.
+import { charKind } from "./character.ts";
 import type { AbilityPick, Character } from "./character.ts";
 import { abilityXp, affinityXp, artXp, charCost } from "./costs.ts";
 import { type Modifiers, deriveModifiers } from "./modifiers.ts";
@@ -36,11 +37,16 @@ export interface VFBudget extends BudgetLine {
   flawPoints: number;
   balanced: boolean;
   minorFlaws: number;
+  majorVirtues: number;
+  majorFlaws: number;
   majorHermeticVirtues: number;
+  hermeticVirtues: number;
   hermeticFlaws: number;
   storyFlaws: number;
   personalityFlaws: number;
   majorPersonalityFlaws: number;
+  /** Count of Social Status traits (free + paid). All characters need ≥1. */
+  socialStatuses: number;
 }
 
 export interface ApprenticeshipMinimums {
@@ -79,18 +85,25 @@ export function computeBudgets(ch: Character, mods: Modifiers = deriveModifiers(
   const virtuePoints = paidVirtues.reduce((s, v) => s + v.points, 0);
   const flawPoints = paidFlaws.reduce((s, f) => s + f.points, 0);
   const minorFlaws = paidFlaws.filter((f) => f.size === "Minor").length;
+  const majorVirtues = paidVirtues.filter((v) => v.size === "Major").length;
+  const majorFlaws = paidFlaws.filter((f) => f.size === "Major").length;
   const majorHermeticVirtues = paidVirtues.filter((v) => v.size === "Major" && isHermetic(v.category)).length;
+  const hermeticVirtues = paidVirtues.filter((v) => isHermetic(v.category)).length;
   const hermeticFlaws = paidFlaws.filter((f) => isHermetic(f.category)).length;
   const storyFlaws = paidFlaws.filter((f) => f.category === "Story").length;
   const personalityFlaws = paidFlaws.filter((f) => f.category === "Personality").length;
   const majorPersonalityFlaws = paidFlaws.filter((f) => f.category === "Personality" && f.size === "Major").length;
+  // Social Status traits are 0-point/Free; count free + paid (Hermetic Magus included).
+  const socialStatuses = ch.virtues.filter((v) => v.category === "Social Status").length;
+  // Flaw-point ceiling: grogs are minor characters (≤3); companions and magi ≤10.
+  const flawCap = charKind(ch) === "grog" ? 3 : 10;
 
   // 3-5. xp pools by stage
   const stageXp = (stage: AbilityPick["stage"]) =>
     ch.abilities.filter((a) => a.stage === stage).reduce((s, a) => s + abilityCost(a, mods), 0);
   const childhoodSpent = stageXp("childhood");
   const laterLifeSpent = stageXp("later-life");
-  const laterLifeCap = ch.laterLifeYears * XP_PER_YEAR;
+  const laterLifeCap = ch.laterLifeYears * mods.laterLifeXpPerYear;
 
   const artXpSpent = ARTS.reduce<number>((s, art) => s + (ch.arts[art] ? artCost(art, ch.arts[art]!, mods) : 0), 0);
   const apprenticeAbilityXp = stageXp("apprenticeship");
@@ -110,11 +123,12 @@ export function computeBudgets(ch: Character, mods: Modifiers = deriveModifiers(
   return {
     characteristics: line("characteristics", "Characteristics", charSpent, CHAR_POINTS),
     virtuesFlaws: {
-      ...line("virtues-flaws", "Virtues/Flaws", flawPoints, 10),
+      ...line("virtues-flaws", "Virtues/Flaws", flawPoints, flawCap),
       virtuePoints, flawPoints,
       balanced: virtuePoints === flawPoints,
-      minorFlaws, majorHermeticVirtues, hermeticFlaws, storyFlaws,
-      personalityFlaws, majorPersonalityFlaws,
+      minorFlaws, majorVirtues, majorFlaws, majorHermeticVirtues,
+      hermeticVirtues, hermeticFlaws, storyFlaws,
+      personalityFlaws, majorPersonalityFlaws, socialStatuses,
     },
     childhood: { ...line("childhood", "Childhood xp", childhoodSpent, CHILDHOOD_XP), nativeLanguageSet: !!ch.nativeLanguage },
     laterLife: { ...line("later-life", "Later life xp", laterLifeSpent, laterLifeCap), years: ch.laterLifeYears },

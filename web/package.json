@@ -1,0 +1,22 @@
+{
+  "name": "ars-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Interactive, pedagogical Ars Magica character creators (grog/companion/magus) — a static Vite + Preact app over the chargen rules engine.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.1",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "@preact/signals": "^2.0.1",
+    "preact": "^10.25.0"
+  }
+}

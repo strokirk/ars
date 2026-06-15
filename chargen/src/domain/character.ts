@@ -3,6 +3,9 @@
 // hold the same object in memory and drive the same mutations/validators.
 import type { Art, Characteristic, Form, House, Stage, Technique } from "./glossary.ts";
 
+/** Player-character category. Drives which budgets and V&F limits apply. */
+export type CharacterKind = "grog" | "companion" | "magus";
+
 export interface TraitPick {
   name: string;        // canonical data name, e.g. "Puissant Art"
   display: string;     // human form, e.g. "Puissant Ignem"
@@ -40,8 +43,11 @@ export interface PersonalityTrait {
 
 export interface Character {
   schema: 2;
+  /** "grog" | "companion" | "magus". Absent on legacy data → treated as "magus". */
+  kind: CharacterKind;
   name: string;
-  house: House;
+  /** Magi only. Undefined for grogs and companions. */
+  house?: House;
   concept: string;
   /** Freeform Markdown: fluff, goals, interpretation, GM notes. Off-budget. */
   notes: string;
@@ -64,7 +70,8 @@ export interface Character {
 
 export interface NewCharacterOpts {
   name: string;
-  house: House;
+  kind?: CharacterKind;
+  house?: House;
   concept?: string;
   notes?: string;
   age?: number;
@@ -76,6 +83,7 @@ export interface NewCharacterOpts {
 export function newCharacter(opts: NewCharacterOpts): Character {
   return {
     schema: 2,
+    kind: opts.kind ?? "magus",
     name: opts.name,
     house: opts.house,
     concept: opts.concept ?? "",
@@ -91,8 +99,14 @@ export function newCharacter(opts: NewCharacterOpts): Character {
     arts: {},
     spells: [],
     personality: [],
-    confidence: 1,
+    // Grogs are minor characters and have no Confidence (it marks central characters).
+    confidence: (opts.kind ?? "magus") === "grog" ? 0 : 1,
     reputation: null,
     laterLifeYears: 5,
   };
+}
+
+/** Resolve a character's kind, defaulting legacy data (no `kind`) to "magus". */
+export function charKind(ch: Pick<Character, "kind">): CharacterKind {
+  return ch.kind ?? "magus";
 }

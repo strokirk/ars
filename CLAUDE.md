@@ -1,8 +1,8 @@
 # Ars Magica reference + queryable rules database
 
 This directory holds the **Ars Magica: Definitive Edition** rulebook as Markdown,
-plus a generated SQLite database for fast, structured querying. There is no
-application here — it's a knowledge base for answering rules questions.
+a generated SQLite database for fast structured querying, the `chargen` rules
+engine, and a static web app of step-by-step character creators built on it.
 
 ## Layout
 
@@ -15,6 +15,8 @@ application here — it's a knowledge base for answering rules questions.
 | `skills/hermetic-magic.md` | Self-contained spellcasting-rules reference (casting totals, ranges/durations/targets, penetration, certamen). Read this first for adjudication. |
 | `tools/` | Extraction + build scripts (Python stdlib only). |
 | `data/` | Generated artifacts: canonical JSON + `spells.db`. See `data/SCHEMA.md`. |
+| `chargen/` | Pure TypeScript rules engine (`src/domain/*`) + CLI for building rules-legal **grogs, companions, and magi**. `npm test` is the regression gate. |
+| `web/` | Vite + Preact static site (the deployed app): the covenant roster plus the three interactive, validated character creators. Imports `chargen/` + `data/*.json` directly. |
 
 ## The rules database (`data/spells.db`)
 
@@ -39,6 +41,26 @@ sqlite3 -header -column data/spells.db \
 When the question is prose/conceptual ("how does Twilight work"), read the Markdown
 or `skills/hermetic-magic.md`. When it's a lookup or filter over many entries, query
 the database.
+
+## The character creators (`chargen/` engine + `web/` app)
+
+`chargen/src/domain/*` is a **pure, I/O-free** rules engine (budgets, validation,
+mutations) keyed off a character's `kind` (`grog | companion | magus`); the same
+engine backs both the CLI and the browser. `web/` is a Vite + Preact static site that
+imports the engine and `data/*.json` directly (no backend) and drives a multi-step,
+validated, mobile-first creator for each kind, plus the covenant roster, draft
+save/resume (localStorage), Markdown/JSON/print export, and shareable links.
+
+```sh
+cd web && npm install && npm run dev     # local dev server
+cd web && npm run build                  # static build → web/dist (what Netlify publishes)
+cd chargen && npm test                   # engine regression gate (run after any domain/ change)
+```
+
+Netlify (`netlify.toml`) builds `web/` on deploy. The whole repo must be checked out
+because `web/` imports `../chargen` and `../data` at build time. **The pure
+`RulesData` class lives in `chargen/src/data/rules.ts`; the Node-only file loader is
+`load-node.ts` — keep `node:*` imports out of `rules.ts` so it stays browser-safe.**
 
 ## Regenerating after editing the Markdown
 

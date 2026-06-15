@@ -3,6 +3,7 @@
 // problems (unbalanced V&F, unused xp, missing minimums) are returned as issues but
 // never block a mutation — they're expected mid-build. The CLI is a thin wrapper
 // over these; a web app can call them identically.
+import { charKind } from "./character.ts";
 import type { AbilityPick, Character, PersonalityTrait, SpellPick, TraitPick } from "./character.ts";
 import { type Art, type Characteristic, type Form, type Stage, type Technique, FORMS, TECHNIQUES, isArt, isCharacteristic } from "./glossary.ts";
 import type { ResolvedAbility, ResolvedTrait } from "../data/rules.ts";
@@ -245,6 +246,7 @@ export function setNotes(ch: Character, value: string, mode: "set" | "append" = 
 }
 
 export interface MetaFields {
+  name?: string;
   concept?: string;
   age?: number;
   focus?: string;
@@ -259,6 +261,7 @@ export interface MetaFields {
 export function setMeta(ch: Character, m: MetaFields, force = false): MutationResult {
   const candidate = clone(ch);
   const applied: string[] = [];
+  if (m.name !== undefined) { candidate.name = m.name; applied.push("name"); }
   if (m.concept !== undefined) { candidate.concept = m.concept; applied.push("concept"); }
   if (m.focus !== undefined) { candidate.focus = m.focus; applied.push(`focus "${m.focus}"`); }
   if (m.reputation !== undefined) { candidate.reputation = m.reputation; applied.push("reputation"); }
@@ -273,7 +276,11 @@ export function setMeta(ch: Character, m: MetaFields, force = false): MutationRe
     candidate.favoredForm = f; applied.push(`favored Form ${f}`);
   }
   if (m.age !== undefined) {
-    if (!Number.isInteger(m.age) || (m.age < 25 && !force)) return reject(ch, `Age ${m.age} is below the Gauntlet minimum of 25 (use --force).`);
+    // Magi finish a 15-year apprenticeship, so they're ≥25; grogs/companions can be younger.
+    const floor = charKind(ch) === "magus" ? 25 : 5;
+    if (!Number.isInteger(m.age) || (m.age < floor && !force)) {
+      return reject(ch, charKind(ch) === "magus" ? `Age ${m.age} is below the Gauntlet minimum of 25 (use --force).` : `Age ${m.age} is too low (minimum ${floor}; use --force).`);
+    }
     candidate.age = m.age; applied.push(`age ${m.age}`);
   }
   if (m.laterLifeYears !== undefined) {

@@ -5,7 +5,7 @@
 //    SheetData with description lookups (the CLI/site wire these from the rules DB).
 //  - Arts are split into Techniques and Forms, each Art colour- and icon-coded.
 //  - Virtues/Flaws are ordered Major→Minor then A–Z (hardcoded, no control).
-import type { Character, SpellPick, TraitPick, AbilityPick } from "../domain/character.ts";
+import { type Character, type SpellPick, type TraitPick, type AbilityPick, charKind } from "../domain/character.ts";
 import { type Budgets, computeBudgets } from "../domain/budgets.ts";
 import { confidenceScore } from "../domain/modifiers.ts";
 import {
@@ -159,6 +159,8 @@ const SCRIPT = `
 `;
 
 export function renderSheetHtml(ch: Character, data: SheetData = {}, b: Budgets = computeBudgets(ch)): string {
+  const magus = charKind(ch) === "magus";
+  const hasConfidence = charKind(ch) !== "grog"; // companions & magi have Confidence; grogs don't
   const spec = [ch.favoredTechnique, ch.favoredForm].filter(Boolean).join(" ");
   const specialty = [spec, ch.focus ? `focus: ${ch.focus}` : ""].filter(Boolean).join(" / ") || "—";
   const conf = confidenceScore(ch);
@@ -192,20 +194,20 @@ export function renderSheetHtml(ch: Character, data: SheetData = {}, b: Budgets 
   ${ch.nativeLanguage ? `<p><strong>Native Language:</strong> ${esc(ch.nativeLanguage)} 5</p>` : ""}
   <ul id="abilities" class="sortable">${abil.map(abilityItem).join("") || "<li>—</li>"}</ul>
   ${freeAb.length ? `<p class="free">Granted: ${freeAb.map((a) => `${esc(a.name)} ${a.score}`).join(", ")}</p>` : ""}
-  <p class="ledger">xp — childhood ${b.childhood.spent}/${b.childhood.cap} · later life ${b.laterLife.spent}/${b.laterLife.cap} · apprenticeship ${b.apprenticeship.spent}/${b.apprenticeship.cap}</p>
+  <p class="ledger">xp — childhood ${b.childhood.spent}/${b.childhood.cap} · later life ${b.laterLife.spent}/${b.laterLife.cap}${magus ? ` · apprenticeship ${b.apprenticeship.spent}/${b.apprenticeship.cap}` : ""}</p>
 
-  <h2>Arts</h2>
+  ${magus ? `<h2>Arts</h2>
   <h3 class="sub">Techniques</h3>
   <div class="arts">${TECHNIQUES.map((t) => artChip(t, ch.arts[t] ?? 0)).join("")}</div>
   <h3 class="sub">Forms</h3>
   <div class="arts">${FORMS.map((f) => artChip(f, ch.arts[f] ?? 0)).join("")}</div>
 
   <h2>Spells Known <span class="tag">(${b.apprenticeship.spells.spent} levels)</span>${spells.length ? ` <span class="ctl">sort: <button data-sort="level" data-tgt="spells" class="on">level</button><button data-sort="name" data-tgt="spells">A–Z</button><button data-sort="tf" data-tgt="spells">Form</button></span>` : ""}</h2>
-  <div id="spells">${spells.map((s) => spellItem(s, data)).join("") || '<div class="row flat">—</div>'}</div>
+  <div id="spells">${spells.map((s) => spellItem(s, data)).join("") || '<div class="row flat">—</div>'}</div>` : ""}
 
-  <h2>Personality · Reputation · Confidence</h2>
+  <h2>Personality · Reputation${hasConfidence ? " · Confidence" : ""}</h2>
   <p>${ch.personality.map((p) => `${esc(p.trait)} ${sign(p.value)}`).join(", ") || "—"}<br>
-  Reputation: ${ch.reputation ? esc(ch.reputation) : "—"} · Confidence ${conf.score} (${conf.points} points)</p>
+  Reputation: ${ch.reputation ? esc(ch.reputation) : "—"}${hasConfidence ? ` · Confidence ${conf.score} (${conf.points} points)` : ""}</p>
 
   <h2>Notes &amp; Description</h2>
   <div class="notes">${ch.notes?.trim() ? markdown(ch.notes) : "<p>—</p>"}</div>`;

@@ -32,7 +32,7 @@ export function renderStatus(ch: Character, b: Budgets, issues: Issue[], guidanc
   const eq = vf.balanced ? "=" : "≠";
   const lines: string[] = [];
   const spec = [ch.favoredTechnique, ch.favoredForm].filter(Boolean).join(" ");
-  lines.push(`${ch.name} of House ${ch.house} · age ${ch.age}${spec ? ` · ${spec}` : ""}${ch.focus ? `, focus: ${ch.focus}` : ""}`);
+  lines.push(`${ch.house ? `${ch.name} of House ${ch.house}` : ch.name} · age ${ch.age}${spec ? ` · ${spec}` : ""}${ch.focus ? `, focus: ${ch.focus}` : ""}`);
   if (ch.concept) lines.push(`“${ch.concept}”`);
   lines.push(`── Budgets ${RULE.slice(0, 56)}`);
   lines.push(`${ic.characteristics} Characteristics   ${b.characteristics.spent} / ${b.characteristics.cap} pts`);

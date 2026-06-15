@@ -60,14 +60,15 @@ bin/chargen export --out characters/marcus.md --format both
 `apply` takes a JSON array of ops (one whole stage per call). `add`/`set`/`remove`
 are single-op sugar; everything routes through the same validated `applyOps` core.
 
-## Architecture (reusable core for a future web app)
+## Architecture (reusable core — now also driving the `../web` app)
 
 ```
 src/
   domain/    PURE, no I/O — the reusable engine
     glossary, costs, character, houses, modifiers, budgets, ability-policy,
     labtotal, validate, mutations, create, operations, guidance
-  data/      loads data/*.json into typed lookups + trait/ability resolution
+  data/      rules.ts: typed lookups + trait/ability resolution (PURE, browser-safe)
+             load-node.ts: the Node fs loader (kept apart so rules.ts has no node:* imports)
   cli/       arg parsing, persistence, spec parsing, rendering, sheets (md + html),
              command handlers
 test/        node:test unit tests + golden end-to-end + batch/build/html tests
@@ -77,6 +78,11 @@ test/        node:test unit tests + golden end-to-end + batch/build/html tests
 into a plain serializable `Character`, validates once, and reports per-op results.
 The CLI is the only part that does I/O. A web app can import `domain/` + `data/
 rules.ts`, supply storage + UI, and reuse all the rules logic and the op batch.
+
+The domain is **kind-generic**: a `Character.kind` of `grog | companion | magus`
+selects the right budgets and V&F limits (`createGrog`/`createCompanion`/`createMagus`
+in `domain/create.ts`). The repo's `../web` Vite app realizes the reuse above. The
+CLI's own `new`/`build` still target magi.
 
 ## Develop
 

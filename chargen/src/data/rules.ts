@@ -1,15 +1,9 @@
-// Loads the committed data/*.json artifacts and exposes typed lookups, filters,
-// and trait resolution. This is the only data-source layer; a web app can swap
-// loadRules() for its own source and reuse all of domain/*.
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+// Typed lookups, filters, and trait resolution over the rules data. This module is
+// PURE (no Node built-ins) so it bundles for the browser unchanged; the file-system
+// loader lives in ./load-node.ts. A web app builds `new RulesData(...)` from JSON it
+// imports directly and reuses all of domain/*.
 import type { AbilityRow, AbilityType, Size, SpellRow, VirtueFlawRow } from "./types.ts";
 import { isArt, isForm, isTechnique } from "../domain/glossary.ts";
-
-const HERE = dirname(fileURLToPath(import.meta.url));
-// chargen/src/data -> ../../../data == <repo>/data
-const DEFAULT_DATA_DIR = join(HERE, "..", "..", "..", "data");
 
 const norm = (s: string) => s.trim().toLowerCase();
 
@@ -261,14 +255,4 @@ export class RulesData {
 
 function cap(s: string): string {
   return s.length ? s[0]!.toUpperCase() + s.slice(1).toLowerCase() : s;
-}
-
-export function loadRules(dataDir: string = DEFAULT_DATA_DIR): RulesData {
-  const read = <T>(file: string): T =>
-    JSON.parse(readFileSync(join(dataDir, file), "utf8")) as T;
-  return new RulesData(
-    read<VirtueFlawRow[]>("virtues_flaws.json"),
-    read<AbilityRow[]>("abilities.json"),
-    read<SpellRow[]>("spells.json"),
-  );
 }

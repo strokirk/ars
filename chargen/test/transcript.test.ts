@@ -3,7 +3,7 @@
 // and exports the expected sheet. Mirrors the mock transcript in the plan.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadRules } from "../src/data/rules.ts";
+import { loadRules } from "../src/data/load-node.ts";
 import { newCharacter, type Character } from "../src/domain/character.ts";
 import { applyHouse } from "../src/domain/houses.ts";
 import {
