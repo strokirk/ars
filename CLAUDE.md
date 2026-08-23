@@ -91,3 +91,19 @@ design lines, spells with no Technique/Form) for regressions.
 - A handful of spells legitimately lack a `(design)` line (General/reference spells
   such as Aegis of the Hearth); 3 abilities lack a `type` (cross-reference stubs).
   These are expected, not parse failures.
+
+## Push straight to main
+
+Do not create feature branches or hold changes for review. As soon as a
+change is in a good state (typecheck passes, build succeeds), commit it
+and push straight to `main`.
+
+## Commit eagerly
+
+Commit working increments as soon as they pass validation, rather than
+batching changes. Sessions run against a usage quota and can get cut off
+mid-task — uncommitted or unpushed work at that point is lost.
+
+Each pushed commit must still be coherent and functional: typecheck clean,
+build succeeding. Don't commit broken code, and don't sit on finished work
+waiting to bundle it with something later.
