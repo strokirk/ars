@@ -13,9 +13,11 @@ export function OptionList({ children, empty = "No matches." }: { children: Comp
  * clamped to two lines and expands on tap, and an optional action on the right.
  */
 export function OptionRow({
-  title, meta, description, action, defaultOpen = false,
+  title, badge, meta, description, action, defaultOpen = false,
 }: {
   title: ComponentChildren;
+  /** Leading visual identifier (e.g. an ArtBadge), shown before the title. */
+  badge?: ComponentChildren;
   meta?: ComponentChildren;
   description?: string;
   action?: ComponentChildren;
@@ -36,7 +38,8 @@ export function OptionRow({
           if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen(!open); }
         }}
       >
-        <div class="ttl">{title} {meta && <span class="sz">{meta}</span>}</div>
+        <div class="ttl">{badge}{title}</div>
+        {meta && <div class="sz">{meta}</div>}
         {description && <div class={`desc ${open ? "" : "clamp"}`}>{description}</div>}
       </div>
       {action}

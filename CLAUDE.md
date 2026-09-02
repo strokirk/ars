@@ -25,7 +25,7 @@ A single SQLite file (FTS5-enabled) with four tables and matching full-text
 indexes — **prefer it over `grep`/`awk` for anything structured** (level ranges,
 Technique/Form filters, damage, ritual flag, virtue category/size, ability type):
 
-- `spells` (336) · `guidelines` (578) · `virtues_flaws` (622) · `abilities` (74)
+- `spells` (347) · `guidelines` (578) · `virtues_flaws` (622) · `abilities` (74)
 - FTS: `spells_fts`, `guidelines_fts`, `virtues_flaws_fts`, `abilities_fts`
 
 Full schema and copy-paste example queries live in **`data/SCHEMA.md`** — read it
@@ -97,7 +97,8 @@ design lines, spells with no Technique/Form) for regressions.
   filenames.** Files like `14-creo-mentem-spells.md` contain multiple Technique
   sections (e.g. The Call to Slumber is *Rego* Mentem, not Creo). Trust the DB.
 - ~382 looks like the spell count from raw header greps, but the real total is
-  **336** — the rest are headers inside Guidelines sections or skipped front-matter.
+  **347** (33 of them General-level) — the rest are headers inside Guidelines
+  sections or skipped front-matter.
 - General-level spells have `level = NULL` / `is_general = 1`.
 - A handful of spells legitimately lack a `(design)` line (General/reference spells
   such as Aegis of the Hearth); 3 abilities lack a `type` (cross-reference stubs).

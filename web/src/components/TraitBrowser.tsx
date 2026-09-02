@@ -6,6 +6,7 @@ import type { VirtueFlawRow } from "../../../chargen/src/data/types.ts";
 import { SearchField } from "./ui/SearchField.tsx";
 import { ChipGroup } from "./ui/ChipGroup.tsx";
 import { OptionList, OptionRow } from "./ui/OptionList.tsx";
+import { TraitBadge, CategoryIcon } from "./ui/TraitBadge.tsx";
 
 const SIZES = ["Minor", "Major"] as const;
 
@@ -40,15 +41,22 @@ export function TraitBrowser({
 
   return (
     <div>
-      <div class="chips" style="margin-bottom:.7rem;">
-        <button class={`chip-toggle ${kind === "Virtue" ? "on" : ""}`} onClick={() => { setKind("Virtue"); setCategory(""); }}>Virtues</button>
-        <button class={`chip-toggle ${kind === "Flaw" ? "on" : ""}`} onClick={() => { setKind("Flaw"); setCategory(""); }}>Flaws</button>
+      <div class="chips kindswitch" style="margin-bottom:.7rem;">
+        <button class={`chip-toggle virtue ${kind === "Virtue" ? "on" : ""}`} onClick={() => { setKind("Virtue"); setCategory(""); }}>Virtues</button>
+        <button class={`chip-toggle flaw ${kind === "Flaw" ? "on" : ""}`} onClick={() => { setKind("Flaw"); setCategory(""); }}>Flaws</button>
       </div>
 
       <SearchField value={search} onInput={setSearch} placeholder={`Search ${kind.toLowerCase()}s by name or effect…`} />
 
+      <div class="artfilter" role="group" aria-label="Filter by category">
+        <button class={`chip-toggle ${category === "" ? "on" : ""}`} onClick={() => setCategory("")}>All categories</button>
+        {categories.map((c) => (
+          <button class={`chip-toggle ${category === c ? "on" : ""}`} key={c} onClick={() => setCategory(category === c ? "" : c)}>
+            <CategoryIcon category={c} /> {c}
+          </button>
+        ))}
+      </div>
       <div class="filters">
-        <ChipGroup options={categories} value={category} onChange={setCategory} allLabel="All categories" />
         <ChipGroup options={SIZES} value={size} onChange={(v) => setSize(v)} allLabel="Any size" />
       </div>
 
@@ -62,7 +70,8 @@ export function TraitBrowser({
           <OptionRow
             key={r.name}
             title={r.name}
-            meta={[r.size, r.category].filter(Boolean).join(" · ")}
+            badge={<TraitBadge kind={r.kind} size={r.size} category={r.category} />}
+            meta={r.categories.length > 1 ? r.categories.join(" · ") : r.category}
             description={r.description}
             action={action?.(r)}
           />

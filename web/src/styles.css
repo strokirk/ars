@@ -164,7 +164,7 @@ textarea { min-height: 5rem; resize: vertical; }
 }
 .option .meta { flex: 1; min-width: 0; }
 .option .ttl { font-weight: 600; }
-.option .sz { font-size: 0.72rem; color: var(--faint); text-transform: uppercase; letter-spacing: 0.04em; }
+.option .sz { font-size: 0.74rem; color: var(--faint); letter-spacing: 0.02em; }
 .option .desc { font-size: 0.82rem; color: var(--muted); margin-top: 0.2rem; }
 .option .desc.clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
@@ -217,3 +217,79 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
   white-space: pre; overflow-wrap: normal; overflow-x: auto;
 }
 .btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── Art colour + icon language ─────────────────────────── */
+/* Techniques carry a hue, Forms an icon; the pair stays mixed-case ("PeAn", never
+   "PEAN" — uppercasing destroys the word boundary that makes it scannable). */
+.artbadge {
+  display: inline-flex; align-items: center; gap: 0.3rem; flex: 0 0 auto;
+  border: 1px solid var(--line); border-radius: 999px; padding: 0.1rem 0.5rem 0.1rem 0.4rem;
+  background: color-mix(in srgb, var(--tech, var(--muted)) 8%, var(--card));
+  border-color: color-mix(in srgb, var(--tech, var(--line)) 30%, var(--line));
+  color: var(--muted); font-size: 0.78rem; line-height: 1.5; white-space: nowrap;
+}
+.artbadge svg { color: var(--tech, var(--muted)); }
+.artbadge .pair { font-weight: 600; letter-spacing: 0.01em; font-variant: normal; text-transform: none; }
+.artbadge .pair .t { color: var(--tech, var(--ink)); }
+.artbadge .lvl {
+  font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink);
+  border-left: 1px solid color-mix(in srgb, var(--tech, var(--line)) 30%, var(--line)); padding-left: 0.35rem;
+}
+
+.artfilter { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.35rem; }
+.artfilter .chip-toggle { display: inline-flex; align-items: center; gap: 0.3rem; }
+.artfilter .chip-toggle svg { color: var(--muted); }
+.artfilter .chip-toggle.on svg { color: #fff; }
+.chip-toggle.tech .ab { font-weight: 700; color: var(--tech); }
+.chip-toggle.tech { border-color: color-mix(in srgb, var(--tech) 35%, var(--line)); }
+.chip-toggle.tech.on { background: var(--tech); border-color: var(--tech); color: #fff; }
+.chip-toggle.tech.on .ab { color: #fff; }
+
+.pill-select {
+  width: auto; font-size: 0.8rem; min-height: 34px; padding: 0.2rem 0.5rem;
+  border-radius: 999px; background: var(--card); color: var(--muted); border: 1px solid var(--line);
+}
+.pill-select.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.group-head {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--tech, var(--muted)); background: var(--card); padding: 0.4rem 0.2rem 0.25rem;
+  border-bottom: 1px solid var(--line); margin-top: 0.3rem;
+}
+.group-head .n {
+  font-size: 0.7rem; font-weight: 400; background: var(--chip); color: var(--muted);
+  border-radius: 999px; padding: 0 0.45rem;
+}
+.group-head .swatch { width: .55rem; height: .55rem; border-radius: 50%; background: var(--tech); display: inline-block; }
+.option .ttl { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
+.option .sz { display: block; margin-top: 0.15rem; }
+
+/* ── library chrome ─────────────────────────────────────── */
+.libhero { margin: .8rem 0 1.2rem; }
+.libhero h1 { font-size: 1.7rem; display: inline-flex; align-items: center; gap: .5rem; justify-content: center; }
+.tab { display: inline-flex; align-items: center; gap: .4rem; }
+
+.legend { display: flex; flex-wrap: wrap; gap: .35rem .9rem; margin: 0 0 .9rem; font-size: .78rem; color: var(--muted); }
+.legend-item { display: inline-flex; align-items: center; gap: .3rem; }
+.legend-item b { color: var(--tech); }
+.legend .swatch { width: .6rem; height: .6rem; border-radius: 50%; background: var(--tech); display: inline-block; }
+.legend .note { font-size: .78rem; }
+
+.kindswitch .chip-toggle.virtue.on { background: var(--ok); border-color: var(--ok); color: #fff; }
+.kindswitch .chip-toggle.flaw.on { background: var(--err); border-color: var(--err); color: #fff; }
+
+.traitbadge {
+  display: inline-flex; align-items: center; gap: .25rem; flex: 0 0 auto;
+  border: 1px solid var(--line); border-radius: 999px; padding: .1rem .5rem .1rem .4rem;
+  font-size: .74rem; line-height: 1.5; white-space: nowrap; color: var(--muted);
+}
+.traitbadge.virtue { background: #eaf2ea; border-color: #cfe0cf; }
+.traitbadge.virtue svg { color: var(--ok); }
+.traitbadge.flaw { background: #f7ece7; border-color: #e6d2c4; }
+.traitbadge.flaw svg { color: var(--err); }
+.traitbadge .pair { font-weight: 600; }
+.char-row .nm .artname { display: inline-flex; align-items: center; gap: .35rem; color: var(--tech, inherit); font-weight: 600; }
+.char-row .nm .artname svg { color: var(--tech, var(--muted)); }
+.taken-chip { padding-left: .35rem; }

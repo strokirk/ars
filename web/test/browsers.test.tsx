@@ -22,8 +22,17 @@ const flush = () => new Promise((r) => setTimeout(r, 0));
 
 const rows = (el: HTMLElement) => [...el.querySelectorAll(".option .ttl")].map((n) => n.textContent!.trim());
 const count = (el: HTMLElement) => Number(el.querySelector("p.note")!.textContent!.match(/^\d+/)![0]);
-const chip = (el: HTMLElement, label: string) =>
-  [...el.querySelectorAll<HTMLButtonElement>("button")].find((b) => b.textContent!.trim() === label)!;
+const buttons = (el: HTMLElement) => [...el.querySelectorAll<HTMLButtonElement>("button")];
+/** Match a chip by its visible text (icons contribute none), trimmed. */
+const chip = (el: HTMLElement, label: string) => {
+  const b = buttons(el).find((x) => x.textContent!.replace(/\s+/g, " ").trim() === label);
+  if (!b) throw new Error(`no chip "${label}" among: ${buttons(el).map((x) => JSON.stringify(x.textContent!.replace(/\s+/g, " ").trim())).join(", ")}`);
+  return b;
+};
+/** Art chips carry the full Art name in title= so the abbreviation can't confuse the match. */
+const artChip = (el: HTMLElement, art: string) =>
+  buttons(el).find((b) => b.getAttribute("title") === art)!;
+const group = (el: HTMLElement) => [...el.querySelectorAll(".group-head")].map((n) => n.textContent!.trim());
 
 afterEach(() => {
   render(null, host);
@@ -41,23 +50,77 @@ describe("SpellBrowser", () => {
   test("a Technique chip narrows the list", async () => {
     const el = mount(<SpellBrowser />);
     const before = count(el);
-    chip(el, "Perdo").click();
+    artChip(el, "Perdo").click();
     await flush();
     expect(count(el)).toBeLessThan(before);
     expect(count(el)).toBeGreaterThan(0);
   });
 
+  test("a Form chip narrows the list independently of Technique", async () => {
+    const el = mount(<SpellBrowser />);
+    artChip(el, "Ignem").click();
+    await flush();
+    const ignem = count(el);
+    artChip(el, "Creo").click();
+    await flush();
+    expect(count(el)).toBeLessThan(ignem);
+    expect(count(el)).toBeGreaterThan(0);
+  });
+
   test("Rituals only and Formulaic only are mutually exclusive views", async () => {
     const el = mount(<SpellBrowser />);
+    chip(el, "▸ More filters").click();
+    await flush();
     chip(el, "Rituals only").click();
     await flush();
     const rituals = count(el);
     chip(el, "Rituals only").click();  // toggle off
+    await flush();
     chip(el, "Formulaic only").click();
     await flush();
     const formulaic = count(el);
     expect(rituals).toBeGreaterThan(0);
     expect(formulaic).toBeGreaterThan(rituals);
+  });
+
+  test("the extra filters are collapsed until asked for, and count themselves", async () => {
+    const el = mount(<SpellBrowser />);
+    expect(el.querySelector('select[aria-label="Range"]')).toBeNull();
+    chip(el, "▸ More filters").click();
+    await flush();
+    const range = el.querySelector<HTMLSelectElement>('select[aria-label="Range"]')!;
+    const before = count(el);
+    range.value = "Touch";
+    range.dispatchEvent(new Event("change", { bubbles: true }));
+    await flush();
+    expect(count(el)).toBeLessThan(before);
+    expect(el.textContent).toContain("More filters (1)");
+  });
+
+  test("Clear all resets every filter", async () => {
+    const el = mount(<SpellBrowser />);
+    const all = count(el);
+    artChip(el, "Perdo").click();
+    await flush();
+    expect(count(el)).toBeLessThan(all);
+    chip(el, "Clear all").click();
+    await flush();
+    expect(count(el)).toBe(all);
+  });
+
+  test("grouping splits the list under canonically ordered headings", async () => {
+    const el = mount(<SpellBrowser />);
+    expect(group(el)).toEqual([]);   // "none" by default
+    const select = el.querySelector<HTMLSelectElement>('select[aria-label="Group spells"]')!;
+    select.value = "technique";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+    await flush();
+    const heads = group(el).map((h) => h.split(/\s+/)[0]);
+    expect(heads.length).toBeGreaterThan(1);
+    // Canonical Technique order, not first-appearance.
+    expect(heads).toEqual([...heads].sort(
+      (a, b) => ["Creo", "Intellego", "Muto", "Perdo", "Rego"].indexOf(a) - ["Creo", "Intellego", "Muto", "Perdo", "Rego"].indexOf(b),
+    ));
   });
 
   test("the Lab Total filter appears only when a character is in play", async () => {
@@ -66,7 +129,7 @@ describe("SpellBrowser", () => {
     render(null, host); host.remove();
 
     const withChar = mount(<SpellBrowser labTotalOf={() => 15} />);
-    expect(withChar.textContent).toContain("LabTotal 15");
+    expect(withChar.textContent).toContain("Lab Total 15");
     const before = count(withChar);
     chip(withChar, "Within my Lab Total").click();
     await flush();
@@ -117,11 +180,11 @@ describe("Library", () => {
   test("defaults to the spells tab and falls back for an unknown tab", () => {
     for (const tab of [undefined, "nonsense"]) {
       const el = mount(<Library tab={tab} />);
-      expect(el.querySelector(".tab.on")!.textContent).toBe("Spells");
+      expect(el.querySelector(".tab.on")!.textContent!.trim()).toBe("Spells");
       render(null, host); host.remove();
     }
     const el = mount(<Library tab="virtues" />);
-    expect(el.querySelector(".tab.on")!.textContent).toBe("Virtues & Flaws");
+    expect(el.querySelector(".tab.on")!.textContent!.trim()).toBe("Virtues & Flaws");
   });
 });
 

@@ -9,7 +9,9 @@ import { TraitPicker } from "./components/TraitPicker.tsx";
 import { AbilityPicker } from "./components/AbilityPicker.tsx";
 import { SpellBrowser } from "./components/SpellBrowser.tsx";
 import { Stepper } from "./components/ui/Stepper.tsx";
-import { HOUSES, TECHNIQUES, FORMS, ART_ABBR, type Art } from "../../chargen/src/domain/glossary.ts";
+import { ArtBadge, FormIcon } from "./components/ui/ArtBadge.tsx";
+import { HOUSES, TECHNIQUES, FORMS, ART_ABBR, type Art, type Technique } from "../../chargen/src/domain/glossary.ts";
+import { TECHNIQUE_COLOR } from "./lib/arts.ts";
 import { HOUSE_PUISSANT_CHOICES } from "../../chargen/src/domain/houses.ts";
 import { deriveModifiers } from "../../chargen/src/domain/modifiers.ts";
 import { spellLabTotal } from "../../chargen/src/domain/labtotal.ts";
@@ -190,7 +192,10 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
     const score = ch.arts[art] ?? 0;
     return (
       <div class="char-row" key={art}>
-        <span class="nm">{art} <small>{ART_ABBR[art]} · {artXpOf(art, score)} xp</small></span>
+        <span class="nm" style={TECHNIQUE_COLOR[art as Technique] ? `--tech:${TECHNIQUE_COLOR[art as Technique]}` : undefined}>
+          <span class="artname"><FormIcon form={art} size={14} /> {art}</span>
+          <small>{ART_ABBR[art]} · {artXpOf(art, score)} xp</small>
+        </span>
         <Stepper value={score} min={0} label={art} onChange={(v) => setArt(art, v)} />
       </div>
     );
@@ -208,7 +213,8 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
         <div class="taken">
           {ch.spells.map((s) => (
             <span class="taken-chip" key={s.name}>
-              {s.name} ({ART_ABBR[s.technique]}{ART_ABBR[s.form]} {s.level})
+              <ArtBadge technique={s.technique} form={s.form} level={s.level} />
+              {s.name}
               <button class="x" title="remove" onClick={() => update([{ op: "remove", kind: "spell", name: s.name }])}>×</button>
             </span>
           ))}

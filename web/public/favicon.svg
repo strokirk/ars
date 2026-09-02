@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Crystal ball">
+  <title>The Covenant Roster</title>
+  <!-- Flat fills on purpose: gradients get dropped by some rasterisers, and solid
+       shapes read better at 16px than a soft orb, and a rotate() on the highlight
+       came out displaced in some rasterisers. -->
+  <path d="M17 53h30a3.5 3.5 0 0 1 0 7H17a3.5 3.5 0 0 1 0-7Z" fill="#7a2e1d"/>
+  <path d="M23 46h18l4 7H19l4-7Z" fill="#9c4a36"/>
+  <circle cx="32" cy="27" r="21" fill="#4a2668"/>
+  <circle cx="32" cy="27" r="21" fill="none" stroke="#2e1642" stroke-width="2"/>
+  <circle cx="29" cy="24" r="13" fill="#8b5cbf"/>
+  <circle cx="25" cy="19" r="5" fill="#e8dcf5"/>
+  <circle cx="41" cy="36" r="2.6" fill="#c9a8e8"/>
+</svg>

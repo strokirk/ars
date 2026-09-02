@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { querySpells, queryTraits, sortSpells, traitCategories } from "../src/lib/queries.ts";
+import { querySpells, queryTraits, sortSpells, groupSpells, traitCategories } from "../src/lib/queries.ts";
 import type { SpellRow, VirtueFlawRow } from "../../chargen/src/data/types.ts";
 
 function spell(p: Partial<SpellRow> & { name: string }): SpellRow {
@@ -81,6 +81,69 @@ describe("sortSpells", () => {
   test("breaks ties by name", () => {
     const out = sortSpells(SPELLS, "level-desc").map((s) => s.name);
     expect(out.slice(0, 2)).toEqual(["Ball of Abysmal Flame", "Incantation of Lightning"]);
+  });
+});
+
+describe("groupSpells", () => {
+  test('"none" yields a single unlabelled group holding everything', () => {
+    const [g, ...rest] = groupSpells(SPELLS, "none");
+    expect(rest).toEqual([]);
+    expect(g!.label).toBe("");
+    expect(g!.rows).toHaveLength(SPELLS.length);
+  });
+
+  test("groups by Technique in canonical order, not first appearance", () => {
+    // SPELLS starts with Creo and ends with Perdo; Perdo must still sort last.
+    expect(groupSpells(SPELLS, "technique").map((g) => g.label)).toEqual(["Creo", "Perdo"]);
+  });
+
+  test("groups by Form in canonical order", () => {
+    expect(groupSpells(SPELLS, "form").map((g) => g.label)).toEqual(["Auram", "Corpus", "Ignem", "Vim"]);
+  });
+
+  test("groups by Technique+Form with a readable label", () => {
+    const g = groupSpells(SPELLS, "art");
+    expect(g[0]!.key).toBe("CrAu");
+    expect(g[0]!.label).toBe("Creo Auram");
+  });
+
+  test("groups by level band, with General last", () => {
+    expect(groupSpells(SPELLS, "level").map((g) => g.label))
+      .toEqual(["Level 6–10", "Level 16–20", "Level 26–30", "Level 31–40", "General level"]);
+  });
+
+  test("preserves incoming row order inside a group", () => {
+    const sorted = sortSpells(SPELLS, "level");
+    const ignem = groupSpells(sorted, "form").find((g) => g.label === "Ignem")!;
+    expect(ignem.rows.map((s) => s.level)).toEqual([10, 20, 35, null]);
+  });
+
+  test("every spell lands in exactly one group", () => {
+    for (const by of ["technique", "form", "art", "level"] as const) {
+      const total = groupSpells(SPELLS, by).reduce((n, g) => n + g.rows.length, 0);
+      expect(total).toBe(SPELLS.length);
+    }
+  });
+});
+
+describe("querySpells range/duration/target filters", () => {
+  test("match on the canonical form, so long spellings are not missed", () => {
+    const rows = [
+      spell({ name: "A", duration: "Mom" }),
+      spell({ name: "B", duration: "Momentary" }),
+      spell({ name: "C", duration: "Sun" }),
+    ];
+    expect(querySpells(rows, { duration: "Mom" }).map((s) => s.name)).toEqual(["A", "B"]);
+  });
+
+  test("range and target filter independently", () => {
+    const rows = [
+      spell({ name: "A", range: "Touch", target: "Ind" }),
+      spell({ name: "B", range: "Voice", target: "Ind" }),
+      spell({ name: "C", range: "Touch", target: "Group" }),
+    ];
+    expect(querySpells(rows, { range: "Touch" }).map((s) => s.name)).toEqual(["A", "C"]);
+    expect(querySpells(rows, { range: "Touch", target: "Ind" }).map((s) => s.name)).toEqual(["A"]);
   });
 });
 
