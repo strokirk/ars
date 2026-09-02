@@ -1,4 +1,10 @@
+# pnpm 11 requires build scripts to be approved explicitly.
+# esbuild's postinstall fetches its platform binary — Vite/vitest need it.
+# fsevents is the optional macOS file watcher used by the dev server.
 allowBuilds:
   esbuild: true
+  fsevents: true
+# pnpm's supply-chain gate holds back very new releases; lucide-preact was
+# published inside that window and is deliberately allowed.
 minimumReleaseAgeExclude:
   - lucide-preact@1.39.0

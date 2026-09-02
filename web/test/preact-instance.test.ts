@@ -1,3 +1,4 @@
+/// <reference types="node" />
 // Guards against the failure that took down every icon: a second copy of preact.
 // When `lucide-preact` resolves a different preact than the app, it gets its own
 // `preact/hooks` module whose `currentComponent` our renderer never sets, and the

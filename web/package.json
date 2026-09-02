@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "packageManager": "pnpm@11.24.0",
   "description": "Interactive, pedagogical Ars Magica character creators (grog/companion/magus) — a static Vite + Preact app over the chargen rules engine.",
   "scripts": {
     "dev": "vite",
@@ -14,6 +15,7 @@
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.1",
+    "@types/node": "^26.4.0",
     "jsdom": "^30.0.1",
     "typescript": "^5.7.0",
     "vite": "^6.0.0",

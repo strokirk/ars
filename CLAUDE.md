@@ -15,7 +15,7 @@ engine, and a static web app of step-by-step character creators built on it.
 | `skills/hermetic-magic.md` | Self-contained spellcasting-rules reference (casting totals, ranges/durations/targets, penetration, certamen). Read this first for adjudication. |
 | `tools/` | Extraction + build scripts (Python stdlib only). |
 | `data/` | Generated artifacts: canonical JSON + `spells.db`. See `data/SCHEMA.md`. |
-| `chargen/` | Pure TypeScript rules engine (`src/domain/*`) + CLI for building rules-legal **grogs, companions, and magi**. `npm test` is the regression gate. |
+| `chargen/` | Pure TypeScript rules engine (`src/domain/*`) + CLI for building rules-legal **grogs, companions, and magi**. `pnpm test` is the regression gate. |
 | `web/` | Vite + Preact static site (the deployed app): the covenant roster, the three interactive validated character creators, and the reference Library. Imports `chargen/` + `data/*.json` directly. |
 | `docs/FUTURE.md` | Planned-but-not-started work (incl. the Chrome LanguageModel auto-grog experiment). |
 
@@ -25,7 +25,7 @@ A single SQLite file (FTS5-enabled) with four tables and matching full-text
 indexes — **prefer it over `grep`/`awk` for anything structured** (level ranges,
 Technique/Form filters, damage, ritual flag, virtue category/size, ability type):
 
-- `spells` (347) · `guidelines` (578) · `virtues_flaws` (622) · `abilities` (74)
+- `spells` · `guidelines` · `virtues_flaws` · `abilities`
 - FTS: `spells_fts`, `guidelines_fts`, `virtues_flaws_fts`, `abilities_fts`
 
 Full schema and copy-paste example queries live in **`data/SCHEMA.md`** — read it
@@ -62,11 +62,15 @@ deliberately shared between the creator and the Library; give them an `action` p
 to make rows actionable rather than forking a second copy.
 
 ```sh
-cd web && npm install && npm run dev     # local dev server
-cd web && npm run build                  # static build → web/dist (what Netlify publishes)
-cd web && npm test                       # web regression gate (vitest)
-cd chargen && npm test                   # engine regression gate (run after any domain/ change)
+cd web && pnpm install && pnpm dev       # local dev server
+cd web && pnpm build                     # static build → web/dist (what Netlify publishes)
+cd web && pnpm test                      # web regression gate (vitest)
+cd chargen && pnpm test                  # engine regression gate (run after any domain/ change)
 ```
+
+**This repo uses pnpm** (`packageManager` in each `package.json` pins the version;
+there are no npm lockfiles — don't reintroduce one, a mixed tree gives `web/` two
+copies of preact and every lucide icon dies in `useContext`).
 
 Netlify (`netlify.toml`) builds `web/` on deploy. The whole repo must be checked out
 because `web/` imports `../chargen` and `../data` at build time. **The pure

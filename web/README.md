@@ -6,11 +6,11 @@ the [`chargen`](../chargen) rules engine and the committed [`data/*.json`](../da
 directly — no backend, no server logic.
 
 ```sh
-npm install
-npm run dev         # local dev server (http://localhost:5173)
-npm run build       # static build → dist/
-npm run typecheck   # tsc --noEmit
-npm test            # vitest run — the regression gate for this package
+pnpm install
+pnpm dev            # local dev server (http://localhost:5173)
+pnpm build          # static build → dist/
+pnpm typecheck      # tsc --noEmit
+pnpm test           # vitest run — the regression gate for this package
 ```
 
 ## How it works
@@ -47,13 +47,23 @@ npm test            # vitest run — the regression gate for this package
 | `#/library[/spells\|virtues]` | Reference browsers, no character needed |
 | `#/c/:data` | A character shared by link |
 
+## Package manager
+
+**pnpm only.** `packageManager` in `package.json` pins the version. Adding an npm
+lockfile alongside `pnpm-lock.yaml` produces a half-migrated `node_modules` where
+the app and `lucide-preact` resolve *different* copies of preact — every icon then
+throws `Cannot read properties of undefined (reading 'context')` from `useContext`.
+`vite.config.ts` dedupes preact and `test/preact-instance.test.ts` fails loudly if
+it happens again. After any install trouble: `rm -rf node_modules/.vite` (the dep
+cache pins the broken module graph).
+
 ## Tests
 
-`npm test` runs vitest: pure logic in `src/lib` plus the share-link codec, the
+`pnpm test` runs vitest: pure logic in `src/lib` plus the share-link codec, the
 router, and jsdom render tests asserting the browsers mount and their filters
 actually narrow the list. Most files run on the node environment; the few that need
 a DOM opt in per-file with `// @vitest-environment jsdom`.
 
-Deployment is configured in the repo-root `netlify.toml` (Netlify runs `npm run build`
-here and publishes `dist/`). The whole repo must be checked out because this app
+Deployment is configured in the repo-root `netlify.toml` (Netlify runs
+`pnpm install --frozen-lockfile && pnpm run build` here and publishes `dist/`). The whole repo must be checked out because this app
 imports `../chargen` and `../data` at build time.

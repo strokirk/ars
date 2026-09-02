@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Iterative CLI for building rules-legal Ars Magica (Definitive Edition) Hermetic magi.",
   "type": "module",
+  "packageManager": "pnpm@11.24.0",
   "bin": {
     "chargen": "bin/chargen"
   },
