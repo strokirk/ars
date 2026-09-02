@@ -21,7 +21,7 @@ export function App() {
         {m.name === "home" && <Home />}
         {m.name === "new" && <Wizard kindParam={m.param!} />}
         {m.name === "edit" && <Wizard draftId={m.param!} />}
-        {(m.name === "sheet" || m.name === "share") && <SheetView match={m} />}
+        {(m.name === "sheet" || m.name === "roster" || m.name === "share") && <SheetView match={m} />}
         {m.name === "notfound" && (
           <div class="panel">
             <p>Nothing here. <a href="#/" onClick={() => navigate("/")}>Back to the roster.</a></p>

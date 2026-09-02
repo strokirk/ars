@@ -1,24 +1,11 @@
 import { useMemo, useState } from "preact/hooks";
 import { rules, charKind, type Character, type Op } from "../engine.ts";
+import { isTraitSelectable } from "../lib/eligibility.ts";
+import { queryTraits, traitCategories } from "../lib/queries.ts";
 import { ARTS, TECHNIQUES, FORMS } from "../../../chargen/src/domain/glossary.ts";
 import type { VirtueFlawRow } from "../../../chargen/src/data/types.ts";
 
 type Mode = "Virtue" | "Flaw";
-
-const hasGift = (ch: Character) => ch.virtues.some((v) => /^the gift$/i.test(v.name));
-
-/** Whether a character of this kind may even consider a row (we hide the rest, and
- *  explain why in the step's "why" panel). The engine still validates regardless. */
-function selectable(row: VirtueFlawRow, ch: Character): boolean {
-  const kind = charKind(ch);
-  if (kind !== "magus" && row.category === "Hermetic" && !hasGift(ch)) return false;
-  if (/^the gift$/i.test(row.name)) return kind === "companion"; // grogs never; magi get it free
-  if (kind === "grog") {
-    if (row.category === "Story") return false;
-    if (row.size === "Major") return false; // grogs: Minor only
-  }
-  return true;
-}
 
 function paramOptions(kind: ReturnType<typeof rules.paramKind>): readonly string[] | null {
   if (kind === "art") return ARTS;
@@ -39,17 +26,14 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
   const grog = charKind(ch) === "grog";
 
   const pool = useMemo(
-    () => rules.filterVirtuesFlaws({ kind: mode }).filter((r) => selectable(r, ch)),
+    () => queryTraits(rules.virtuesFlaws, { kind: mode }).filter((r) => isTraitSelectable(r, ch)),
     [mode, ch.kind, ch.virtues.length],
   );
-  const categories = useMemo(() => [...new Set(pool.map((r) => r.category))].sort(), [pool]);
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return rules
-      .filterVirtuesFlaws({ kind: mode, category: cat || undefined, search: q || undefined })
-      .filter((r) => selectable(r, ch))
-      .slice(0, 60);
-  }, [mode, cat, query, ch.kind, ch.virtues.length]);
+  const categories = useMemo(() => traitCategories(pool), [pool]);
+  const results = useMemo(
+    () => queryTraits(pool, { category: cat || undefined, search: query.trim() || undefined }).slice(0, 60),
+    [pool, cat, query],
+  );
 
   const taken = mode === "Virtue" ? ch.virtues : ch.flaws;
 

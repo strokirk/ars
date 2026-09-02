@@ -3,6 +3,7 @@ import type { Match } from "../router.ts";
 import { navigate } from "../router.ts";
 import { getDraft, saveDraft, newId, encodeCharacter, decodeCharacter } from "../store.ts";
 import { rules, isCharacterLegal, type Character } from "../engine.ts";
+import { rosterEntry } from "../lib/roster.ts";
 import { renderSheetHtml } from "../../../chargen/src/cli/sheet-html.ts";
 import { renderSheet } from "../../../chargen/src/cli/sheet.ts";
 import { title } from "../charutil.ts";
@@ -24,12 +25,17 @@ export function SheetView({ match }: { match: Match }) {
   const iframe = useRef<HTMLIFrameElement>(null);
   const [copied, setCopied] = useState(false);
 
+  // Three sources feed the same sheet: a local draft (editable), a committed roster
+  // member (read-only, but copyable into a draft), or a shared base64 link.
   const { ch, draftId, shared } = useMemo(() => {
     if (match.name === "sheet") {
       const d = getDraft(match.param!);
       return { ch: d?.character ?? null, draftId: match.param!, shared: false };
     }
-    return { ch: decodeCharacter(match.param!), draftId: undefined as string | undefined, shared: true };
+    if (match.name === "roster") {
+      return { ch: rosterEntry(match.param!)?.character ?? null, draftId: undefined, shared: true };
+    }
+    return { ch: decodeCharacter(match.param!), draftId: undefined, shared: true };
   }, [match.name, match.param]);
 
   if (!ch) {
