@@ -6,6 +6,7 @@ import { render } from "preact";
 import { SpellBrowser } from "../src/components/SpellBrowser.tsx";
 import { TraitBrowser } from "../src/components/TraitBrowser.tsx";
 import { CopyBox } from "../src/components/ui/CopyBox.tsx";
+import { ArtBadge, FormIcon } from "../src/components/ui/ArtBadge.tsx";
 import { Library } from "../src/pages/Library.tsx";
 
 let host: HTMLElement;
@@ -185,6 +186,31 @@ describe("Library", () => {
     }
     const el = mount(<Library tab="virtues" />);
     expect(el.querySelector(".tab.on")!.textContent!.trim()).toBe("Virtues & Flaws");
+  });
+});
+
+describe("Art icons and badges", () => {
+  test("a lucide icon renders an svg — it calls useContext, so a duplicate preact breaks it", () => {
+    const el = mount(<FormIcon form="Ignem" size={20} />);
+    const svg = el.querySelector("svg")!;
+    expect(svg).not.toBeNull();
+    expect(svg.getAttribute("width")).toBe("20");
+  });
+
+  test("an unknown Form renders nothing rather than throwing", () => {
+    expect(mount(<FormIcon form="Nonsense" />).querySelector("svg")).toBeNull();
+  });
+
+  test("the Art pair keeps its mixed case and tints the Technique half", () => {
+    const el = mount(<ArtBadge technique="Perdo" form="Animal" level={15} />);
+    expect(el.querySelector(".pair")!.textContent).toBe("PeAn");
+    expect(el.querySelector(".pair .t")!.textContent).toBe("Pe");
+    expect(el.querySelector(".artbadge")!.getAttribute("style")).toContain("--tech");
+    expect(el.querySelector(".lvl")!.textContent).toBe("15");
+  });
+
+  test("General-level spells show Gen instead of a number", () => {
+    expect(mount(<ArtBadge technique="Rego" form="Vim" level="Gen" />).querySelector(".lvl")!.textContent).toBe("Gen");
   });
 });
 
