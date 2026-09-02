@@ -4,6 +4,7 @@
 //   #/edit/:id        wizard resuming a saved draft
 //   #/sheet/:id       finished-sheet view of a draft
 //   #/roster/:slug    sheet of a committed covenant member
+//   #/library[/:tab]  reference browser (spells | virtues), no character needed
 //   #/c/:data         shared character (base64 in the hash)
 import { signal } from "@preact/signals";
 
@@ -22,7 +23,7 @@ export function navigate(path: string): void {
   scrollTo(0, 0);
 }
 
-export interface Match { name: "home" | "new" | "edit" | "sheet" | "roster" | "share" | "notfound"; param?: string; }
+export interface Match { name: "home" | "new" | "edit" | "sheet" | "roster" | "library" | "share" | "notfound"; param?: string; }
 
 export function matchRoute(path: string): Match {
   const p = path.split("/").filter(Boolean); // ["new","grog"]
@@ -31,6 +32,7 @@ export function matchRoute(path: string): Match {
   if (p[0] === "edit" && p[1]) return { name: "edit", param: p[1] };
   if (p[0] === "sheet" && p[1]) return { name: "sheet", param: p[1] };
   if (p[0] === "roster" && p[1]) return { name: "roster", param: p[1] };
+  if (p[0] === "library") return { name: "library", param: p[1] };
   if (p[0] === "c" && p[1]) return { name: "share", param: p.slice(1).join("/") };
   return { name: "notfound" };
 }

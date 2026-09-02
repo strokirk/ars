@@ -1,6 +1,7 @@
 import { CHARACTERISTICS, CHARACTERISTIC_NAMES } from "../../../chargen/src/domain/glossary.ts";
 import { charCost } from "../../../chargen/src/domain/costs.ts";
 import type { Character, Op } from "../engine.ts";
+import { Stepper } from "./ui/Stepper.tsx";
 
 const HINT: Partial<Record<(typeof CHARACTERISTICS)[number], string>> = {
   Int: "Lab & Arts (magi)",
@@ -24,11 +25,11 @@ export function CharacteristicsAllocator({ ch, update }: { ch: Character; update
             <span class="nm">
               {CHARACTERISTIC_NAMES[c]} <small>{c}{HINT[c] ? ` · ${HINT[c]}` : ""}</small>
             </span>
-            <span class="stepper">
-              <button type="button" aria-label={`decrease ${c}`} disabled={v <= -3} onClick={() => set(c, v - 1)}>−</button>
-              <span class="val">{v > 0 ? `+${v}` : v}</span>
-              <button type="button" aria-label={`increase ${c}`} disabled={v >= 3} onClick={() => set(c, v + 1)}>+</button>
-            </span>
+            <Stepper
+              value={v} min={-3} max={3} label={CHARACTERISTIC_NAMES[c]}
+              format={(n) => (n > 0 ? `+${n}` : String(n))}
+              onChange={(next) => set(c, next)}
+            />
             <span class="cost">{cost === 0 ? "—" : cost > 0 ? `${cost} pt` : `+${-cost} back`}</span>
           </div>
         );

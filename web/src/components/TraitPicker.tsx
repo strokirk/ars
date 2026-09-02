@@ -4,6 +4,9 @@ import { isTraitSelectable } from "../lib/eligibility.ts";
 import { queryTraits, traitCategories } from "../lib/queries.ts";
 import { ARTS, TECHNIQUES, FORMS } from "../../../chargen/src/domain/glossary.ts";
 import type { VirtueFlawRow } from "../../../chargen/src/data/types.ts";
+import { SearchField } from "./ui/SearchField.tsx";
+import { ChipGroup } from "./ui/ChipGroup.tsx";
+import { OptionList, OptionRow } from "./ui/OptionList.tsx";
 
 type Mode = "Virtue" | "Flaw";
 
@@ -21,7 +24,6 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
   const [active, setActive] = useState<VirtueFlawRow | null>(null);
   const [param, setParam] = useState("");
   const [size, setSize] = useState<"Minor" | "Major">("Minor");
-  const [expanded, setExpanded] = useState<string | null>(null);
 
   const grog = charKind(ch) === "grog";
 
@@ -79,14 +81,9 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
         </div>
       )}
 
-      <div class="toolbar">
-        <input type="text" placeholder={`Search ${mode.toLowerCase()}s…`} value={query} onInput={(e) => setQuery((e.target as HTMLInputElement).value)} />
-      </div>
-      <div class="chips" style="margin-bottom:.7rem;">
-        <button class={`chip-toggle ${cat === "" ? "on" : ""}`} onClick={() => setCat("")}>All</button>
-        {categories.map((c) => (
-          <button class={`chip-toggle ${cat === c ? "on" : ""}`} key={c} onClick={() => setCat(c)}>{c}</button>
-        ))}
+      <SearchField value={query} onInput={setQuery} placeholder={`Search ${mode.toLowerCase()}s…`} />
+      <div class="filters">
+        <ChipGroup options={categories} value={cat} onChange={setCat} allLabel="All" />
       </div>
 
       {active && (
@@ -121,21 +118,17 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
         </div>
       )}
 
-      <ul class="option-list">
-        {results.map((r) => {
-          const open = expanded === r.name;
-          return (
-            <li class="option" key={r.name}>
-              <div class="meta" onClick={() => setExpanded(open ? null : r.name)}>
-                <div class="ttl">{r.name} <span class="sz">{r.size}{r.category ? ` · ${r.category}` : ""}</span></div>
-                <div class={`desc ${open ? "" : "clamp"}`}>{r.description}</div>
-              </div>
-              <button class="btn btn-sm btn-primary" onClick={() => begin(r)}>Add</button>
-            </li>
-          );
-        })}
-        {results.length === 0 && <li class="note">No matches.</li>}
-      </ul>
+      <OptionList empty={`No ${mode.toLowerCase()}s match.`}>
+        {results.map((r) => (
+          <OptionRow
+            key={r.name}
+            title={r.name}
+            meta={[r.size, r.category].filter(Boolean).join(" · ")}
+            description={r.description}
+            action={<button class="btn btn-sm btn-primary" onClick={() => begin(r)}>Add</button>}
+          />
+        ))}
+      </OptionList>
     </div>
   );
 }

@@ -3,15 +3,18 @@
 // and companion share all of these; the magus adds House fields here and an Arts &
 // Spells step (see ArtsSpellsStep).
 import { useState } from "preact/hooks";
-import { charKind, rules, type Character, type Op } from "./engine.ts";
+import { charKind, type Character, type Op } from "./engine.ts";
 import { CharacteristicsAllocator } from "./components/CharacteristicsAllocator.tsx";
 import { TraitPicker } from "./components/TraitPicker.tsx";
 import { AbilityPicker } from "./components/AbilityPicker.tsx";
+import { SpellBrowser } from "./components/SpellBrowser.tsx";
+import { Stepper } from "./components/ui/Stepper.tsx";
 import { HOUSES, TECHNIQUES, FORMS, ART_ABBR, type Art } from "../../chargen/src/domain/glossary.ts";
 import { HOUSE_PUISSANT_CHOICES } from "../../chargen/src/domain/houses.ts";
 import { deriveModifiers } from "../../chargen/src/domain/modifiers.ts";
 import { spellLabTotal } from "../../chargen/src/domain/labtotal.ts";
 import { artXp, affinityXp } from "../../chargen/src/domain/costs.ts";
+import type { SpellRow } from "../../chargen/src/data/types.ts";
 
 export interface StepProps {
   ch: Character;
@@ -173,27 +176,22 @@ export function PersonalityStep({ ch, update }: StepProps) {
 
 // ── magus-only: Arts & Spells ────────────────────────────────────────────────
 export function ArtsSpellsStep({ ch, update }: StepProps) {
-  const [query, setQuery] = useState("");
   const mods = deriveModifiers(ch);
   const setArt = (art: Art, score: number) => update([{ op: "art", name: art, score: Math.max(0, score) }]);
   const artXpOf = (art: Art, score: number) => {
     const raw = artXp(score);
     return mods.affinityArt.has(art) ? affinityXp(raw) : raw;
   };
-  const results = query.trim()
-    ? rules.filterSpells({ search: query.trim(), isGeneral: false }).slice(0, 30)
-    : [];
+  const labTotalOf = (s: SpellRow) =>
+    spellLabTotal(ch, mods, { technique: s.technique as never, form: s.form as never, requisites: s.requisites }).total;
+  const known = new Set(ch.spells.map((s) => s.name.toLowerCase()));
 
   const artControl = (art: Art) => {
     const score = ch.arts[art] ?? 0;
     return (
       <div class="char-row" key={art}>
         <span class="nm">{art} <small>{ART_ABBR[art]} · {artXpOf(art, score)} xp</small></span>
-        <span class="stepper">
-          <button type="button" disabled={score <= 0} onClick={() => setArt(art, score - 1)}>−</button>
-          <span class="val">{score}</span>
-          <button type="button" onClick={() => setArt(art, score + 1)}>+</button>
-        </span>
+        <Stepper value={score} min={0} label={art} onChange={(v) => setArt(art, v)} />
       </div>
     );
   };
@@ -211,34 +209,29 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
           {ch.spells.map((s) => (
             <span class="taken-chip" key={s.name}>
               {s.name} ({ART_ABBR[s.technique]}{ART_ABBR[s.form]} {s.level})
-              <button class="x" onClick={() => update([{ op: "remove", kind: "spell", name: s.name }])}>×</button>
+              <button class="x" title="remove" onClick={() => update([{ op: "remove", kind: "spell", name: s.name }])}>×</button>
             </span>
           ))}
         </div>
       )}
-      <div class="toolbar">
-        <input type="text" placeholder="Search spells to learn…" value={query} onInput={(e) => setQuery((e.target as HTMLInputElement).value)} />
-      </div>
-      {query.trim() && (
-        <ul class="option-list">
-          {results.map((s) => {
-            const lt = spellLabTotal(ch, mods, { technique: s.technique as never, form: s.form as never, requisites: s.requisites });
-            const ok = (s.level ?? 0) <= lt.total;
-            return (
-              <li class="option" key={s.name}>
-                <div class="meta">
-                  <div class="ttl">{s.name} <span class="sz">{s.tech_abbr}{s.form_abbr} {s.level} · LabTotal {lt.total}</span></div>
-                  <div class="desc clamp">{s.description}</div>
-                </div>
-                <button class="btn btn-sm btn-primary" title={ok ? "" : `Level ${s.level} exceeds your Lab Total of ${lt.total}`} onClick={() => update([{ op: "spell", name: s.name }])}>
-                  {ok ? "Learn" : "Learn ⚠"}
-                </button>
-              </li>
-            );
-          })}
-          {results.length === 0 && <li class="note">No matches.</li>}
-        </ul>
-      )}
+      <SpellBrowser
+        labTotalOf={labTotalOf}
+        action={(s) => {
+          const lt = labTotalOf(s);
+          const reachable = (s.level ?? 0) <= lt;
+          const taken = known.has(s.name.toLowerCase());
+          return (
+            <button
+              class="btn btn-sm btn-primary"
+              disabled={taken}
+              title={taken ? "Already learned" : reachable ? "" : `Level ${s.level} exceeds your Lab Total of ${lt}`}
+              onClick={() => update([{ op: "spell", name: s.name }])}
+            >
+              {taken ? "Known" : reachable ? "Learn" : "Learn ⚠"}
+            </button>
+          );
+        }}
+      />
       <p class="note">Highest learnable level = Technique + Form + Int + Magic Theory + 3 (aura 3), plus your Virtues. Split xp between a Technique and a Form for higher totals.</p>
     </div>
   );

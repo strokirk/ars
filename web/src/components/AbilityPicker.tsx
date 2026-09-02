@@ -4,6 +4,9 @@ import { abilityXp, affinityXp } from "../../../chargen/src/domain/costs.ts";
 import { ageAbilityMax } from "../../../chargen/src/domain/budgets.ts";
 import { deriveModifiers } from "../../../chargen/src/domain/modifiers.ts";
 import type { Stage } from "../../../chargen/src/domain/glossary.ts";
+import { SearchField } from "./ui/SearchField.tsx";
+import { OptionList, OptionRow } from "./ui/OptionList.tsx";
+import { Stepper } from "./ui/Stepper.tsx";
 
 interface Props {
   ch: Character;
@@ -45,11 +48,7 @@ export function AbilityPicker({ ch, update, stage, suggestions, searchable }: Pr
           {taken.map((a) => (
             <div class="char-row" key={a.name}>
               <span class="nm">{a.name}<small>{a.type ?? "General"} · {xpOf(a.name, a.score)} xp</small></span>
-              <span class="stepper">
-                <button type="button" disabled={a.score <= 1} onClick={() => setScore(a.name, a.score - 1, a.type)}>−</button>
-                <span class="val">{a.score}</span>
-                <button type="button" disabled={a.score >= max} onClick={() => setScore(a.name, a.score + 1, a.type)}>+</button>
-              </span>
+              <Stepper value={a.score} min={1} max={max} label={a.name} onChange={(v) => setScore(a.name, v, a.type)} />
               <button class="btn btn-sm btn-ghost" onClick={() => update([{ op: "remove", kind: "ability", name: a.name }])}>remove</button>
             </div>
           ))}
@@ -65,22 +64,21 @@ export function AbilityPicker({ ch, update, stage, suggestions, searchable }: Pr
       )}
       {(!suggestions || searchable) && (
         <>
-          <div class="toolbar">
-            <input type="text" placeholder="Search abilities to add…" value={query} onInput={(e) => setQuery((e.target as HTMLInputElement).value)} />
-          </div>
+          <SearchField value={query} onInput={setQuery} placeholder="Search abilities to add…" />
           {query.trim() && (
-            <ul class="option-list">
+            <OptionList empty="No abilities match.">
               {results.map((r) => (
-                <li class="option" key={r.name}>
-                  <div class="meta">
-                    <div class="ttl">{r.name} <span class="sz">{r.type ?? "General"}{r.restricted ? " · needs Virtue" : ""}</span></div>
-                    <div class="desc clamp">{r.description}</div>
-                  </div>
-                  <button class="btn btn-sm btn-primary" disabled={takenNames.has(r.name.toLowerCase())} onClick={() => setScore(r.name, 1, r.type)}>Add</button>
-                </li>
+                <OptionRow
+                  key={r.name}
+                  title={r.name}
+                  meta={`${r.type ?? "General"}${r.restricted ? " · needs Virtue" : ""}`}
+                  description={r.description}
+                  action={
+                    <button class="btn btn-sm btn-primary" disabled={takenNames.has(r.name.toLowerCase())} onClick={() => setScore(r.name, 1, r.type)}>Add</button>
+                  }
+                />
               ))}
-              {results.length === 0 && <li class="note">No matches.</li>}
-            </ul>
+            </OptionList>
           )}
         </>
       )}

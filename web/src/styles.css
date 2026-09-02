@@ -193,3 +193,28 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
 @media print {
   .topbar, .budgetbar, .navrow, .steps { display: none !important; }
 }
+
+/* ── browsers / reference library ───────────────────────── */
+.filters { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.4rem; }
+.filters .chips { align-items: center; }
+.filters select { font-size: 0.8rem; min-height: 34px; padding: 0.2rem 0.5rem; border-radius: 999px; background: var(--card); color: var(--muted); }
+.option-list.tall { max-height: none; }
+
+.tabs { display: flex; gap: 0.4rem; margin-bottom: 1rem; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: 0 0 auto; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--muted); padding: 0.35rem 0.9rem; font-size: 0.9rem; min-height: 38px; }
+.tab.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.topbar .navlink { font-size: 0.85rem; color: var(--muted); text-decoration: none; padding: 0.2rem 0.5rem; border-radius: 999px; }
+.topbar .navlink:hover, .topbar .navlink.on { color: var(--accent); background: var(--chip); }
+
+/* ── inline export viewer ───────────────────────────────── */
+.copybox { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); padding: 0.7rem 0.8rem; margin-bottom: 1rem; }
+.copybox-head { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+.copybox-actions { display: flex; gap: 0.4rem; }
+.copybox-text {
+  width: 100%; resize: vertical; border: 1px solid var(--line-soft); border-radius: 8px;
+  background: #fff; color: var(--ink); padding: 0.6rem 0.7rem;
+  font: 12px/1.5 ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  white-space: pre; overflow-wrap: normal; overflow-x: auto;
+}
+.btn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
