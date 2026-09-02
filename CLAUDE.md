@@ -16,7 +16,8 @@ engine, and a static web app of step-by-step character creators built on it.
 | `tools/` | Extraction + build scripts (Python stdlib only). |
 | `data/` | Generated artifacts: canonical JSON + `spells.db`. See `data/SCHEMA.md`. |
 | `chargen/` | Pure TypeScript rules engine (`src/domain/*`) + CLI for building rules-legal **grogs, companions, and magi**. `npm test` is the regression gate. |
-| `web/` | Vite + Preact static site (the deployed app): the covenant roster plus the three interactive, validated character creators. Imports `chargen/` + `data/*.json` directly. |
+| `web/` | Vite + Preact static site (the deployed app): the covenant roster, the three interactive validated character creators, and the reference Library. Imports `chargen/` + `data/*.json` directly. |
+| `docs/FUTURE.md` | Planned-but-not-started work (incl. the Chrome LanguageModel auto-grog experiment). |
 
 ## The rules database (`data/spells.db`)
 
@@ -48,12 +49,22 @@ the database.
 mutations) keyed off a character's `kind` (`grog | companion | magus`); the same
 engine backs both the CLI and the browser. `web/` is a Vite + Preact static site that
 imports the engine and `data/*.json` directly (no backend) and drives a multi-step,
-validated, mobile-first creator for each kind, plus the covenant roster, draft
-save/resume (localStorage), Markdown/JSON/print export, and shareable links.
+validated, mobile-first creator for each kind, plus the covenant roster (each member's
+sheet at `#/roster/:slug`), a standalone spell + Virtue/Flaw Library at `#/library`,
+draft save/resume (localStorage), inline copyable Markdown/JSON export, print, and
+shareable links.
+
+`web/src/lib/*` holds the app's own pure logic (queries, roster slugs, trait
+eligibility, wizard steps) and `web/src/components/ui/*` the shared primitives —
+**put new logic in `lib/` and new markup patterns in `ui/` rather than inlining
+either in a page or picker.** The two browsers (`SpellBrowser`, `TraitBrowser`) are
+deliberately shared between the creator and the Library; give them an `action` prop
+to make rows actionable rather than forking a second copy.
 
 ```sh
 cd web && npm install && npm run dev     # local dev server
 cd web && npm run build                  # static build → web/dist (what Netlify publishes)
+cd web && npm test                       # web regression gate (vitest)
 cd chargen && npm test                   # engine regression gate (run after any domain/ change)
 ```
 
