@@ -198,7 +198,6 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
 .filters { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.4rem; }
 .filters .chips { align-items: center; }
 .filters select { font-size: 0.8rem; min-height: 34px; padding: 0.2rem 0.5rem; border-radius: 999px; background: var(--card); color: var(--muted); }
-.option-list.tall { max-height: none; }
 
 .tabs { display: flex; gap: 0.4rem; margin-bottom: 1rem; overflow-x: auto; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }

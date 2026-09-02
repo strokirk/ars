@@ -1,3 +1,5 @@
+import type { ComponentChildren } from "preact";
+
 /** The search box that heads every picker and browser. */
 export function SearchField({
   value, onInput, placeholder, children,
@@ -6,7 +8,7 @@ export function SearchField({
   onInput: (v: string) => void;
   placeholder: string;
   /** Extra controls rendered alongside the input (sort selects, toggles). */
-  children?: preact.ComponentChildren;
+  children?: ComponentChildren;
 }) {
   return (
     <div class="toolbar">
