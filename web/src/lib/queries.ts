@@ -10,7 +10,7 @@ const norm = (s: string) => s.trim().toLowerCase();
 
 // ── spells ───────────────────────────────────────────────────────────────────
 
-export type SpellSort = "name" | "level" | "level-desc" | "art";
+export type SpellSort = "name" | "name-desc" | "level" | "level-desc" | "art" | "damage" | "random";
 
 export interface SpellQuery {
   search?: string;
@@ -29,6 +29,8 @@ export interface SpellQuery {
   /** Keep only spells whose level is within the character's Lab Total. */
   onlyReachable?: boolean;
   sort?: SpellSort;
+  /** Seed for the "random" sort — the same seed always gives the same order. */
+  seed?: number;
 }
 
 const TECH_ORDER = new Map(TECHNIQUES.map((t, i) => [t, i]));
@@ -63,15 +65,41 @@ export function querySpells(
     if (s && !norm(sp.name).includes(s) && !norm(sp.description).includes(s)) return false;
     return true;
   });
-  return sortSpells(out, q.sort ?? "name");
+  return sortSpells(out, q.sort ?? "name", q.seed);
 }
 
-export function sortSpells(rows: SpellRow[], sort: SpellSort): SpellRow[] {
+/**
+ * Deterministic Fisher-Yates (mulberry32) shuffle. A seeded shuffle rather than
+ * `Math.random()` so a "Random" ordering survives re-renders — the list only
+ * reshuffles when the caller hands over a new seed.
+ */
+export function shuffle<T>(rows: readonly T[], seed = 1): T[] {
+  const out = rows.slice();
+  let s = (seed >>> 0) || 1;
+  const rand = () => {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
+}
+
+export function sortSpells(rows: SpellRow[], sort: SpellSort, seed?: number): SpellRow[] {
   const byName = (a: SpellRow, b: SpellRow) => a.name.localeCompare(b.name);
   // General spells sort last in level orders — they have no fixed level.
   const lvl = (s: SpellRow) => (s.level === null ? Number.POSITIVE_INFINITY : s.level);
+  if (sort === "random") return shuffle(rows, seed);
   const out = rows.slice();
+  if (sort === "name-desc") return out.sort((a, b) => byName(b, a));
   if (sort === "level") return out.sort((a, b) => lvl(a) - lvl(b) || byName(a, b));
+  // Damage-less spells sort last rather than counting as zero damage.
+  if (sort === "damage") return out.sort((a, b) => (b.damage ?? -1) - (a.damage ?? -1) || byName(a, b));
   if (sort === "level-desc") {
     const d = (s: SpellRow) => (s.level === null ? Number.NEGATIVE_INFINITY : s.level);
     return out.sort((a, b) => d(b) - d(a) || byName(a, b));
@@ -156,25 +184,43 @@ function groupOf(s: SpellRow, by: SpellGroupBy): { key: string; label: string; o
 
 // ── virtues & flaws ──────────────────────────────────────────────────────────
 
+export type TraitSort = "name" | "name-desc" | "size" | "category" | "random";
+
 export interface TraitQuery {
   search?: string;
   kind?: "Virtue" | "Flaw";
   category?: string;
   size?: "Minor" | "Major";
+  sort?: TraitSort;
+  /** Seed for the "random" sort — see `shuffle`. */
+  seed?: number;
 }
 
-/** Filter virtues/flaws, name-sorted. "Major or Minor" rows match either size. */
+/** Filter virtues/flaws, name-sorted by default. "Major or Minor" rows match either size. */
 export function queryTraits(all: readonly VirtueFlawRow[], q: TraitQuery = {}): VirtueFlawRow[] {
   const s = q.search ? norm(q.search) : undefined;
-  return all
+  const out = all
     .filter((r) => {
       if (q.kind && r.kind !== q.kind) return false;
       if (q.size && r.size !== q.size && r.size !== "Major or Minor") return false;
       if (q.category && norm(r.category) !== norm(q.category) && !r.categories.some((c) => norm(c) === norm(q.category!))) return false;
       if (s && !norm(r.name).includes(s) && !norm(r.description).includes(s)) return false;
       return true;
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
+    });
+  return sortTraits(out, q.sort ?? "name", q.seed);
+}
+
+// "Major or Minor" rows sit between the two — they can be taken either way.
+const SIZE_RANK: Record<string, number> = { Minor: 0, "Major or Minor": 1, Major: 2 };
+
+export function sortTraits(rows: VirtueFlawRow[], sort: TraitSort, seed?: number): VirtueFlawRow[] {
+  const byName = (a: VirtueFlawRow, b: VirtueFlawRow) => a.name.localeCompare(b.name);
+  if (sort === "random") return shuffle(rows, seed);
+  const out = rows.slice();
+  if (sort === "name-desc") return out.sort((a, b) => byName(b, a));
+  if (sort === "size") return out.sort((a, b) => (SIZE_RANK[a.size] ?? 9) - (SIZE_RANK[b.size] ?? 9) || byName(a, b));
+  if (sort === "category") return out.sort((a, b) => a.category.localeCompare(b.category) || byName(a, b));
+  return out.sort(byName);
 }
 
 /** Distinct categories present in a set of rows, name-sorted. */

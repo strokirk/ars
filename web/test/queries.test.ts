@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { querySpells, queryTraits, sortSpells, groupSpells, traitCategories } from "../src/lib/queries.ts";
+import { querySpells, queryTraits, sortSpells, sortTraits, groupSpells, traitCategories, shuffle } from "../src/lib/queries.ts";
 import type { SpellRow, VirtueFlawRow } from "../../chargen/src/data/types.ts";
 
 function spell(p: Partial<SpellRow> & { name: string }): SpellRow {
@@ -81,6 +81,57 @@ describe("sortSpells", () => {
   test("breaks ties by name", () => {
     const out = sortSpells(SPELLS, "level-desc").map((s) => s.name);
     expect(out.slice(0, 2)).toEqual(["Ball of Abysmal Flame", "Incantation of Lightning"]);
+  });
+
+  test("Z→A is the exact reverse of A→Z", () => {
+    expect(sortSpells(SPELLS, "name-desc").map((s) => s.name))
+      .toEqual(sortSpells(SPELLS, "name").map((s) => s.name).reverse());
+  });
+
+  test("orders by damage, with damage-less spells last rather than as zero", () => {
+    const rows = [
+      spell({ name: "Blunt", damage: null }),
+      spell({ name: "Sharp", damage: 10 }),
+      spell({ name: "Sharpest", damage: 30 }),
+      spell({ name: "Scratch", damage: 0 }),
+    ];
+    expect(sortSpells(rows, "damage").map((s) => s.name)).toEqual(["Sharpest", "Sharp", "Scratch", "Blunt"]);
+  });
+
+  test("a random order keeps every spell and repeats for the same seed", () => {
+    const a = sortSpells(SPELLS, "random", 7).map((s) => s.name);
+    const b = sortSpells(SPELLS, "random", 7).map((s) => s.name);
+    expect(a).toEqual(b);
+    expect([...a].sort()).toEqual(SPELLS.map((s) => s.name).sort());
+  });
+
+  test("a new seed gives a new order", () => {
+    const many = Array.from({ length: 40 }, (_, i) => spell({ name: `S${String(i).padStart(2, "0")}` }));
+    expect(sortSpells(many, "random", 1).map((s) => s.name))
+      .not.toEqual(sortSpells(many, "random", 2).map((s) => s.name));
+  });
+
+  test("sorting never mutates the caller's array", () => {
+    const before = SPELLS.map((s) => s.name);
+    sortSpells(SPELLS, "random", 3);
+    sortSpells(SPELLS, "level");
+    expect(SPELLS.map((s) => s.name)).toEqual(before);
+  });
+});
+
+describe("shuffle", () => {
+  test("is a permutation, not a sample", () => {
+    const rows = Array.from({ length: 50 }, (_, i) => i);
+    const out = shuffle(rows, 42);
+    expect(out).toHaveLength(rows.length);
+    expect([...out].sort((a, b) => a - b)).toEqual(rows);
+  });
+
+  test("handles the degenerate cases", () => {
+    expect(shuffle([], 1)).toEqual([]);
+    expect(shuffle(["only"], 1)).toEqual(["only"]);
+    // A zero seed must still produce a usable stream rather than a fixed point.
+    expect(shuffle([1, 2, 3, 4, 5], 0)).toHaveLength(5);
   });
 });
 
@@ -177,6 +228,28 @@ describe("queryTraits", () => {
 
   test("searches descriptions", () => {
     expect(queryTraits(TRAITS, { search: "rich" }).map((t) => t.name)).toEqual(["Wealthy"]);
+  });
+
+  test("takes a sort like the spell list does", () => {
+    expect(queryTraits(TRAITS, { kind: "Flaw", sort: "name-desc" }).map((t) => t.name)).toEqual(["Poor", "Ambitious"]);
+  });
+});
+
+describe("sortTraits", () => {
+  test("orders by size, with the either-way rows between Minor and Major", () => {
+    expect(sortTraits(TRAITS, "size").map((t) => t.size))
+      .toEqual(["Minor", "Minor", "Major or Minor", "Major"]);
+  });
+
+  test("orders by category, then name", () => {
+    expect(sortTraits(TRAITS, "category").map((t) => t.category))
+      .toEqual(["General", "General", "Hermetic", "Personality"]);
+  });
+
+  test("a random order is stable for a seed and keeps every row", () => {
+    const a = sortTraits(TRAITS, "random", 5).map((t) => t.name);
+    expect(a).toEqual(sortTraits(TRAITS, "random", 5).map((t) => t.name));
+    expect([...a].sort()).toEqual(TRAITS.map((t) => t.name).sort());
   });
 });
 

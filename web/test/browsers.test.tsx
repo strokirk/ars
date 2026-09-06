@@ -22,7 +22,7 @@ function mount(vnode: preact.ComponentChild): HTMLElement {
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 const rows = (el: HTMLElement) => [...el.querySelectorAll(".option .ttl")].map((n) => n.textContent!.trim());
-const count = (el: HTMLElement) => Number(el.querySelector("p.note")!.textContent!.match(/^\d+/)![0]);
+const count = (el: HTMLElement) => Number(el.querySelector("p.count")!.textContent!.match(/^\d+/)![0]);
 const buttons = (el: HTMLElement) => [...el.querySelectorAll<HTMLButtonElement>("button")];
 /** Match a chip by its visible text (icons contribute none), trimmed. */
 const chip = (el: HTMLElement, label: string) => {
@@ -34,6 +34,14 @@ const chip = (el: HTMLElement, label: string) => {
 const artChip = (el: HTMLElement, art: string) =>
   buttons(el).find((b) => b.getAttribute("title") === art)!;
 const group = (el: HTMLElement) => [...el.querySelectorAll(".group-head")].map((n) => n.textContent!.trim());
+/** The filter controls live behind a dismissible panel — open it before reaching in. */
+const openFilters = async (el: HTMLElement) => { chip(el, "Filters").click(); await flush(); };
+const select = (el: HTMLElement, label: string) => el.querySelector<HTMLSelectElement>(`select[aria-label="${label}"]`)!;
+const choose = async (sel: HTMLSelectElement, value: string) => {
+  sel.value = value;
+  sel.dispatchEvent(new Event("change", { bubbles: true }));
+  await flush();
+};
 
 afterEach(() => {
   render(null, host);
@@ -51,6 +59,7 @@ describe("SpellBrowser", () => {
   test("a Technique chip narrows the list", async () => {
     const el = mount(<SpellBrowser />);
     const before = count(el);
+    await openFilters(el);
     artChip(el, "Perdo").click();
     await flush();
     expect(count(el)).toBeLessThan(before);
@@ -59,6 +68,7 @@ describe("SpellBrowser", () => {
 
   test("a Form chip narrows the list independently of Technique", async () => {
     const el = mount(<SpellBrowser />);
+    await openFilters(el);
     artChip(el, "Ignem").click();
     await flush();
     const ignem = count(el);
@@ -70,8 +80,7 @@ describe("SpellBrowser", () => {
 
   test("Rituals only and Formulaic only are mutually exclusive views", async () => {
     const el = mount(<SpellBrowser />);
-    chip(el, "▸ More filters").click();
-    await flush();
+    await openFilters(el);
     chip(el, "Rituals only").click();
     await flush();
     const rituals = count(el);
@@ -84,23 +93,39 @@ describe("SpellBrowser", () => {
     expect(formulaic).toBeGreaterThan(rituals);
   });
 
-  test("the extra filters are collapsed until asked for, and count themselves", async () => {
+  test("the filters stay dismissed until asked for, and count themselves", async () => {
     const el = mount(<SpellBrowser />);
     expect(el.querySelector('select[aria-label="Range"]')).toBeNull();
-    chip(el, "▸ More filters").click();
-    await flush();
-    const range = el.querySelector<HTMLSelectElement>('select[aria-label="Range"]')!;
+    await openFilters(el);
     const before = count(el);
-    range.value = "Touch";
-    range.dispatchEvent(new Event("change", { bubbles: true }));
-    await flush();
+    await choose(select(el, "Range"), "Touch");
     expect(count(el)).toBeLessThan(before);
-    expect(el.textContent).toContain("More filters (1)");
+    expect(el.textContent).toContain("Filters (1)");
+    // Dismissing the panel keeps the filter, and says so where it can't be missed.
+    chip(el, "Done").click();
+    await flush();
+    expect(el.querySelector('select[aria-label="Range"]')).toBeNull();
+    expect(el.querySelector(".active-chip")!.textContent).toContain("Touch");
+  });
+
+  test("an active filter can be lifted from its chip without reopening the panel", async () => {
+    const el = mount(<SpellBrowser />);
+    const all = count(el);
+    await openFilters(el);
+    artChip(el, "Perdo").click();
+    await flush();
+    chip(el, "Done").click();
+    await flush();
+    expect(count(el)).toBeLessThan(all);
+    el.querySelector<HTMLButtonElement>(".active-chip")!.click();
+    await flush();
+    expect(count(el)).toBe(all);
   });
 
   test("Clear all resets every filter", async () => {
     const el = mount(<SpellBrowser />);
     const all = count(el);
+    await openFilters(el);
     artChip(el, "Perdo").click();
     await flush();
     expect(count(el)).toBeLessThan(all);
@@ -112,10 +137,8 @@ describe("SpellBrowser", () => {
   test("grouping splits the list under canonically ordered headings", async () => {
     const el = mount(<SpellBrowser />);
     expect(group(el)).toEqual([]);   // "none" by default
-    const select = el.querySelector<HTMLSelectElement>('select[aria-label="Group spells"]')!;
-    select.value = "technique";
-    select.dispatchEvent(new Event("change", { bubbles: true }));
-    await flush();
+    await openFilters(el);
+    await choose(select(el, "Group spells"), "technique");
     const heads = group(el).map((h) => h.split(/\s+/)[0]);
     expect(heads.length).toBeGreaterThan(1);
     // Canonical Technique order, not first-appearance.
@@ -126,15 +149,77 @@ describe("SpellBrowser", () => {
 
   test("the Lab Total filter appears only when a character is in play", async () => {
     const plain = mount(<SpellBrowser />);
+    await openFilters(plain);
     expect(plain.textContent).not.toContain("Within my Lab Total");
     render(null, host); host.remove();
 
     const withChar = mount(<SpellBrowser labTotalOf={() => 15} />);
     expect(withChar.textContent).toContain("Lab Total 15");
+    await openFilters(withChar);
     const before = count(withChar);
     chip(withChar, "Within my Lab Total").click();
     await flush();
     expect(count(withChar)).toBeLessThan(before);
+  });
+
+  test("reveals the whole list a page at a time instead of truncating it", async () => {
+    const el = mount(<SpellBrowser pageSize={20} />);
+    const total = count(el);
+    expect(total).toBeGreaterThan(300);
+    expect(rows(el)).toHaveLength(20);
+
+    chip(el, "Show 20 more").click();
+    await flush();
+    expect(rows(el)).toHaveLength(40);
+
+    buttons(el).find((b) => b.textContent!.startsWith("Show all"))!.click();
+    await flush();
+    expect(rows(el)).toHaveLength(total);
+    expect(el.querySelector(".more")).toBeNull();
+  });
+
+  test("a new filter starts the page count over", async () => {
+    const el = mount(<SpellBrowser pageSize={20} />);
+    chip(el, "Show 20 more").click();
+    await flush();
+    expect(rows(el)).toHaveLength(40);
+    await openFilters(el);
+    artChip(el, "Perdo").click();
+    await flush();
+    expect(rows(el)).toHaveLength(20);
+  });
+
+  test("sorts by level, and by a random order that only reshuffles on demand", async () => {
+    const el = mount(<SpellBrowser />);
+    const alphabetical = rows(el);
+    await choose(select(el, "Sort"), "level-desc");
+    expect(rows(el)).not.toEqual(alphabetical);
+
+    // No shuffle control until a random order is actually in play.
+    expect(el.textContent).not.toContain("Shuffle");
+    await choose(select(el, "Sort"), "random");
+    const first = rows(el);
+    expect(first).not.toEqual(alphabetical);
+
+    chip(el, "Shuffle").click();
+    await flush();
+    expect(rows(el)).not.toEqual(first);
+  });
+
+  test("the badge sits below the title, so every title starts at the same edge", () => {
+    const el = mount(<SpellBrowser />);
+    const row = el.querySelector(".option")!;
+    // A badge inside the title would indent each name by its own width.
+    expect(row.querySelector(".ttl .artbadge")).toBeNull();
+    expect(row.querySelector(".sz .artbadge")).not.toBeNull();
+    // The Technique colour moves to the row's edge instead.
+    expect(row.getAttribute("style")).toContain("--row");
+  });
+
+  test("the result list is not trapped in its own scroll box", () => {
+    const el = mount(<SpellBrowser />);
+    expect(el.querySelector(".option-list")!.className).not.toContain("scroll");
+    expect(el.querySelector(".filterbar")).not.toBeNull();
   });
 
   test("renders a caller-supplied action per row", () => {
@@ -165,9 +250,36 @@ describe("TraitBrowser", () => {
   test("a size chip narrows the list", async () => {
     const el = mount(<TraitBrowser />);
     const before = count(el);
+    await openFilters(el);
     chip(el, "Major").click();
     await flush();
     expect(count(el)).toBeLessThan(before);
+  });
+
+  test("takes its kind from the caller, and then shows no switch of its own", () => {
+    const el = mount(<TraitBrowser kind="Flaw" />);
+    expect(el.textContent).toMatch(/\d+ flaws/);
+    expect(el.querySelector(".kindswitch")).toBeNull();
+  });
+
+  test("sorts by size and by a stable random order", async () => {
+    const el = mount(<TraitBrowser />);
+    const alphabetical = rows(el);
+    await choose(select(el, "Sort"), "size");
+    expect(rows(el)).not.toEqual(alphabetical);
+    await choose(select(el, "Sort"), "random");
+    expect(rows(el)).not.toEqual(alphabetical);
+    expect(rows(el)).toEqual(rows(el));
+  });
+
+  test("pages through the whole list rather than stopping at the first screenful", async () => {
+    const el = mount(<TraitBrowser pageSize={20} />);
+    const total = count(el);
+    expect(total).toBeGreaterThan(20);
+    expect(rows(el)).toHaveLength(20);
+    buttons(el).find((b) => b.textContent!.startsWith("Show all"))!.click();
+    await flush();
+    expect(rows(el)).toHaveLength(total);
   });
 
   test("honours a caller-supplied eligibility filter", () => {
@@ -185,7 +297,19 @@ describe("Library", () => {
       render(null, host); host.remove();
     }
     const el = mount(<Library tab="virtues" />);
-    expect(el.querySelector(".tab.on")!.textContent!.trim()).toBe("Virtues & Flaws");
+    expect(el.querySelector(".tab.on")!.textContent!.trim()).toBe("Virtues");
+  });
+
+  test("gives Flaws a tab of their own rather than a switch nested in one", () => {
+    const el = mount(<Library tab="flaws" />);
+    expect(el.querySelector(".tab.on")!.textContent!.trim()).toBe("Flaws");
+    expect(el.textContent).toMatch(/\d+ flaws/);
+    expect(el.querySelector(".kindswitch")).toBeNull();
+  });
+
+  test("puts the browser straight on the page, not inside another panel", () => {
+    const el = mount(<Library />);
+    expect(el.querySelector(".panel")).toBeNull();
   });
 });
 
