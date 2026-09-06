@@ -17,7 +17,7 @@ const SORTS: SortOption<SpellSort>[] = [
   { value: "name-desc", label: "Sort: Z → A" },
   { value: "level", label: "Sort: Level ↑" },
   { value: "level-desc", label: "Sort: Level ↓" },
-  { value: "art", label: "Sort: Technique/Form" },
+  { value: "art", label: "Sort: Arts" },
   { value: "damage", label: "Sort: Damage ↓" },
   { value: "random", label: "Sort: Random" },
 ];
