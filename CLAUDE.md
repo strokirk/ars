@@ -59,7 +59,11 @@ eligibility, wizard steps) and `web/src/components/ui/*` the shared primitives â
 **put new logic in `lib/` and new markup patterns in `ui/` rather than inlining
 either in a page or picker.** The two browsers (`SpellBrowser`, `TraitBrowser`) are
 deliberately shared between the creator and the Library; give them an `action` prop
-to make rows actionable rather than forking a second copy.
+to make rows actionable rather than forking a second copy. Their chrome is shared
+too: `ui/FilterBar` is the sticky search + sort + active-filter header (the bulky
+controls go in its dismissible panel, as `children`), and `ui/OptionList` holds the
+row and the `useVisibleCount`/`MoreRows` paging â€” results scroll with the page, so
+never wrap a list in its own scroll box.
 
 ```sh
 cd web && pnpm install && pnpm dev       # local dev server
