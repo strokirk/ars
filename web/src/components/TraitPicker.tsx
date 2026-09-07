@@ -8,6 +8,7 @@ import { SearchField } from "./ui/SearchField.tsx";
 import { ChipGroup } from "./ui/ChipGroup.tsx";
 import { OptionList, OptionRow } from "./ui/OptionList.tsx";
 import { Select } from "./ui/Select.tsx";
+import { Button } from "./ui/Button.tsx";
 
 type Mode = "Virtue" | "Flaw";
 
@@ -114,8 +115,8 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
             </div>
           )}
           <div class="navrow">
-            <button class="btn btn-primary" onClick={confirm}>Add</button>
-            <button class="btn btn-ghost" onClick={() => setActive(null)}>Cancel</button>
+            <Button variant="brand" appearance="accent" onClick={confirm}>Add</Button>
+            <Button appearance="plain" onClick={() => setActive(null)}>Cancel</Button>
           </div>
         </div>
       )}
@@ -127,7 +128,7 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
             title={r.name}
             meta={[r.size, r.category].filter(Boolean).join(" · ")}
             description={r.description}
-            action={<button class="btn btn-sm btn-primary" onClick={() => begin(r)}>Add</button>}
+            action={<Button size="small" variant="brand" appearance="accent" onClick={() => begin(r)}>Add</Button>}
           />
         ))}
       </OptionList>

@@ -1,6 +1,7 @@
 import type { JSX } from "preact";
 import { useEffect, useMemo, useState } from "preact/hooks";
 import { navigate } from "../router.ts";
+import { Button } from "../components/ui/Button.tsx";
 import { getDraft, saveDraft, newId } from "../store.ts";
 import {
   apply, reseedMagus, budgetsOf, issuesOf, isCharacterLegal, freshCharacter, charKind,
@@ -91,17 +92,17 @@ export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: s
             )}
             <Issues issues={issues} />
             <div class="navrow" style="margin-top:1rem;">
-              <button class="btn btn-primary" onClick={() => { saveDraft(id, ch); navigate(`/sheet/${id}`); }}>View sheet →</button>
+              <Button variant="brand" appearance="accent" onClick={() => { saveDraft(id, ch); navigate(`/sheet/${id}`); }}>View sheet →</Button>
             </div>
           </div>
         )}
       </div>
 
       <div class="navrow">
-        <button class="btn" disabled={step === 0} onClick={() => setStep(step - 1)}>← Back</button>
+        <Button disabled={step === 0} onClick={() => setStep(step - 1)}>← Back</Button>
         {step < steps.length - 1
-          ? <button class="btn btn-primary" onClick={() => setStep(step + 1)}>Next →</button>
-          : <button class="btn" onClick={() => navigate("/")}>Done</button>}
+          ? <Button variant="brand" appearance="accent" onClick={() => setStep(step + 1)}>Next →</Button>
+          : <Button onClick={() => navigate("/")}>Done</Button>}
       </div>
 
       {!isReview && <BudgetBar meters={metersFor(cur, b)} />}

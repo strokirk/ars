@@ -1,4 +1,5 @@
 import { useState } from "preact/hooks";
+import { Button } from "./Button.tsx";
 
 /**
  * Read-only text shown inline with a copy button — how the app hands over
@@ -35,8 +36,8 @@ export function CopyBox({ text, label, filename }: { text: string; label: string
       <div class="copybox-head">
         <span class="note">{label} · {text.length.toLocaleString()} characters</span>
         <span class="copybox-actions">
-          {filename && <button class="btn btn-sm btn-ghost" onClick={save}>Save file</button>}
-          <button class="btn btn-sm btn-primary" onClick={copy}>{copied ? "✓ Copied" : "Copy"}</button>
+          {filename && <Button size="small" appearance="plain" onClick={save}>Save file</Button>}
+          <Button size="small" variant="brand" appearance="accent" onClick={copy}>{copied ? "✓ Copied" : "Copy"}</Button>
         </span>
       </div>
       <textarea id="copybox-text" class="copybox-text" readOnly rows={18} value={text} onFocus={(e) => (e.target as HTMLTextAreaElement).select()} />

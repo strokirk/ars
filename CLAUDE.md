@@ -74,7 +74,10 @@ classes, and the `--wa-*` token block at the top of `styles.css` is the entire t
 point tokens at the parchment palette rather than writing per-component CSS. The
 wrapper never imports the custom elements, so under test the tags stay inert DOM that
 still carries `value` and emits `change`; drive them in vitest with
-`wa-select[aria-label="…"]`, not `<select>`.
+`wa-select[aria-label="…"]`, not `<select>`. Buttons go through `ui/Button`
+(`<wa-button>`, `appearance` for hierarchy) the same way — but the **filter chips stay
+plain `<button class="chip-toggle">`**: they are toggles carrying Technique colours,
+which no button variant expresses. Test helpers must query `"button, wa-button"`.
 
 ```sh
 cd web && pnpm install && pnpm dev       # local dev server

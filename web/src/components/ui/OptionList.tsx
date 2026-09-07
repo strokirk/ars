@@ -1,5 +1,6 @@
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
+import { Button } from "./Button.tsx";
 
 /** Result list. Scrolls with the page — a nested scroll box hides the results. */
 export function OptionList({ children, empty = "No matches." }: { children: ComponentChildren; empty?: string }) {
@@ -84,8 +85,8 @@ export function MoreRows({
   if (hidden === 0) return null;
   return (
     <div class="more">
-      <button class="btn btn-sm" onClick={onMore}>Show {Math.min(pageSize, hidden)} more</button>
-      <button class="btn btn-sm btn-ghost" onClick={onAll}>Show all {hidden} remaining</button>
+      <Button size="small" onClick={onMore}>Show {Math.min(pageSize, hidden)} more</Button>
+      <Button size="small" appearance="plain" onClick={onAll}>Show all {hidden} remaining</Button>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "preact/hooks";
 import type { Match } from "../router.ts";
 import { navigate } from "../router.ts";
+import { Button } from "../components/ui/Button.tsx";
 import { getDraft, saveDraft, newId, encodeCharacter, decodeCharacter } from "../store.ts";
 import { rules, isCharacterLegal, type Character } from "../engine.ts";
 import { rosterEntry } from "../lib/roster.ts";
@@ -61,12 +62,13 @@ export function SheetView({ match }: { match: Match }) {
   return (
     <div>
       <div class="toolbar" style="margin-bottom:.6rem;">
-        {!shared && draftId && <button class="btn btn-sm btn-primary" onClick={() => navigate(`/edit/${draftId}`)}>✎ Edit</button>}
-        {shared && <button class="btn btn-sm btn-primary" onClick={saveCopy}>＋ Save to my drafts</button>}
-        <button class={`btn btn-sm ${view === "markdown" ? "on" : ""}`} onClick={() => setView(view === "markdown" ? null : "markdown")}>Markdown</button>
-        <button class={`btn btn-sm ${view === "json" ? "on" : ""}`} onClick={() => setView(view === "json" ? null : "json")}>JSON</button>
-        <button class="btn btn-sm" onClick={() => iframe.current?.contentWindow?.print()}>Print</button>
-        <button class="btn btn-sm" onClick={copyShare}>{copied ? "✓ Link copied" : "Share link"}</button>
+        {!shared && draftId && <Button size="small" variant="brand" appearance="accent" onClick={() => navigate(`/edit/${draftId}`)}>✎ Edit</Button>}
+        {shared && <Button size="small" variant="brand" appearance="accent" onClick={saveCopy}>＋ Save to my drafts</Button>}
+        {/* The two export views are toggles: the open one shows as filled. */}
+        <Button size="small" appearance={view === "markdown" ? "filled" : "outlined"} onClick={() => setView(view === "markdown" ? null : "markdown")}>Markdown</Button>
+        <Button size="small" appearance={view === "json" ? "filled" : "outlined"} onClick={() => setView(view === "json" ? null : "json")}>JSON</Button>
+        <Button size="small" onClick={() => iframe.current?.contentWindow?.print()}>Print</Button>
+        <Button size="small" onClick={copyShare}>{copied ? "✓ Link copied" : "Share link"}</Button>
       </div>
 
       {view && (

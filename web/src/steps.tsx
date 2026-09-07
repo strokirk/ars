@@ -9,6 +9,7 @@ import { TraitPicker } from "./components/TraitPicker.tsx";
 import { AbilityPicker } from "./components/AbilityPicker.tsx";
 import { SpellBrowser } from "./components/SpellBrowser.tsx";
 import { Select } from "./components/ui/Select.tsx";
+import { Button } from "./components/ui/Button.tsx";
 import { Stepper } from "./components/ui/Stepper.tsx";
 import { ArtBadge, FormIcon } from "./components/ui/ArtBadge.tsx";
 import { HOUSES, TECHNIQUES, FORMS, ART_ABBR, type Art, type Technique } from "../../chargen/src/domain/glossary.ts";
@@ -162,7 +163,7 @@ export function PersonalityStep({ ch, update }: StepProps) {
             <div class="char-row" key={p.trait}>
               <span class="nm">{p.trait}</span>
               <span class="val">{p.value > 0 ? `+${p.value}` : p.value}</span>
-              <button class="btn btn-sm btn-ghost" onClick={() => update([{ op: "personality", trait: p.trait, value: 0 }])}>remove</button>
+              <Button size="small" appearance="plain" onClick={() => update([{ op: "personality", trait: p.trait, value: 0 }])}>remove</Button>
             </div>
           ))}
         </div>
@@ -176,7 +177,7 @@ export function PersonalityStep({ ch, update }: StepProps) {
           <label>Value</label>
           <input type="number" min={-3} max={3} value={value} onInput={(e) => setValue(Number((e.target as HTMLInputElement).value))} />
         </div>
-        <button class="btn btn-primary" onClick={() => { add(trait, value); setTrait(""); }}>Add</button>
+        <Button variant="brand" appearance="accent" onClick={() => { add(trait, value); setTrait(""); }}>Add</Button>
       </div>
       <p class="note">Personality Traits range −3…+3. {kind === "grog" ? "Grogs should have a score in Loyal; warriors in Brave." : "These guide roleplaying; a Personality Flaw is mirrored by a ±3 trait."}</p>
     </div>
@@ -234,14 +235,14 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
           const reachable = (s.level ?? 0) <= lt;
           const taken = known.has(s.name.toLowerCase());
           return (
-            <button
-              class="btn btn-sm btn-primary"
+            <Button
+              size="small" variant="brand" appearance="accent"
               disabled={taken}
               title={taken ? "Already learned" : reachable ? "" : `Level ${s.level} exceeds your Lab Total of ${lt}`}
               onClick={() => update([{ op: "spell", name: s.name }])}
             >
               {taken ? "Known" : reachable ? "Learn" : "Learn ⚠"}
-            </button>
+            </Button>
           );
         }}
       />

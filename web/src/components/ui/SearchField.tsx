@@ -1,4 +1,5 @@
 import type { ComponentChildren } from "preact";
+import { Button } from "./Button.tsx";
 
 /** The search box that heads every picker and browser. */
 export function SearchField({
@@ -16,7 +17,7 @@ export function SearchField({
         type="text" value={value} placeholder={placeholder} aria-label={placeholder}
         onInput={(e) => onInput((e.target as HTMLInputElement).value)}
       />
-      {value && <button class="btn btn-sm btn-ghost" title="Clear search" onClick={() => onInput("")}>×</button>}
+      {value && <Button size="small" appearance="plain" title="Clear search" onClick={() => onInput("")}>×</Button>}
       {children}
     </div>
   );

@@ -23,7 +23,9 @@ const flush = () => new Promise((r) => setTimeout(r, 0));
 
 const rows = (el: HTMLElement) => [...el.querySelectorAll(".option .ttl")].map((n) => n.textContent!.trim());
 const count = (el: HTMLElement) => Number(el.querySelector("p.count")!.textContent!.match(/^\d+/)![0]);
-const buttons = (el: HTMLElement) => [...el.querySelectorAll<HTMLButtonElement>("button")];
+// Buttons are a mix of plain <button> (the filter chips) and <wa-button>; both
+// answer to .click() and carry their label as text.
+const buttons = (el: HTMLElement) => [...el.querySelectorAll<HTMLElement>("button, wa-button")];
 /** Match a chip by its visible text (icons contribute none), trimmed. */
 const chip = (el: HTMLElement, label: string) => {
   const b = buttons(el).find((x) => x.textContent!.replace(/\s+/g, " ").trim() === label);

@@ -1,4 +1,5 @@
 import { navigate } from "../router.ts";
+import { Button } from "../components/ui/Button.tsx";
 import { drafts, deleteDraft, newId, saveDraft } from "../store.ts";
 import { freshCharacter, KIND_BLURB, KIND_LABEL, isCharacterLegal, type CharacterKind } from "../engine.ts";
 import { title, specLine, firstSentence, kindLabel } from "../charutil.ts";
@@ -27,9 +28,9 @@ export function Home() {
           <div class="card create-tile" key={k}>
             <h3>{KIND_LABEL[k]}</h3>
             <p>{KIND_BLURB[k]}</p>
-            <button class="btn btn-primary btn-block" onClick={() => startNew(k)}>
+            <Button variant="brand" appearance="accent" block onClick={() => startNew(k)}>
               Create a {KIND_LABEL[k]}
-            </button>
+            </Button>
           </div>
         ))}
       </div>
@@ -44,9 +45,9 @@ export function Home() {
                 <span class="name">{title(d.character)}</span>
                 {d.character.concept && <span class="concept">{firstSentence(d.character.concept)}</span>}
                 <div class="navrow">
-                  <button class="btn btn-sm" onClick={() => navigate(`/edit/${d.id}`)}>Resume</button>
-                  <button class="btn btn-sm" onClick={() => navigate(`/sheet/${d.id}`)}>Sheet</button>
-                  <button class="btn btn-sm btn-ghost" onClick={() => { if (confirm("Delete this draft?")) deleteDraft(d.id); }}>Delete</button>
+                  <Button size="small" onClick={() => navigate(`/edit/${d.id}`)}>Resume</Button>
+                  <Button size="small" onClick={() => navigate(`/sheet/${d.id}`)}>Sheet</Button>
+                  <Button size="small" appearance="plain" variant="danger" onClick={() => { if (confirm("Delete this draft?")) deleteDraft(d.id); }}>Delete</Button>
                 </div>
               </div>
             ))}

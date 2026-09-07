@@ -75,6 +75,11 @@ h1, h2, h3 { line-height: 1.18; }
   --wa-color-focus: var(--accent-soft);
 }
 
+/* Buttons keep the app's touch target and inherit the parchment tokens. */
+.ui-button { --wa-form-control-height: var(--tap); }
+.ui-button[size="small"], .ui-button.small { --wa-form-control-height: 34px; }
+.ui-button.block { display: block; width: 100%; }
+
 /* Form-field shape: full width, matching the native inputs beside it. */
 .ui-select { display: block; width: 100%; }
 /* Pill shape: width comes from the longest label (the component would otherwise

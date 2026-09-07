@@ -7,6 +7,7 @@ import type { Stage } from "../../../chargen/src/domain/glossary.ts";
 import { SearchField } from "./ui/SearchField.tsx";
 import { OptionList, OptionRow } from "./ui/OptionList.tsx";
 import { Stepper } from "./ui/Stepper.tsx";
+import { Button } from "./ui/Button.tsx";
 
 interface Props {
   ch: Character;
@@ -49,7 +50,7 @@ export function AbilityPicker({ ch, update, stage, suggestions, searchable }: Pr
             <div class="char-row" key={a.name}>
               <span class="nm">{a.name}<small>{a.type ?? "General"} · {xpOf(a.name, a.score)} xp</small></span>
               <Stepper value={a.score} min={1} max={max} label={a.name} onChange={(v) => setScore(a.name, v, a.type)} />
-              <button class="btn btn-sm btn-ghost" onClick={() => update([{ op: "remove", kind: "ability", name: a.name }])}>remove</button>
+              <Button size="small" appearance="plain" onClick={() => update([{ op: "remove", kind: "ability", name: a.name }])}>remove</Button>
             </div>
           ))}
         </div>
@@ -74,7 +75,7 @@ export function AbilityPicker({ ch, update, stage, suggestions, searchable }: Pr
                   meta={`${r.type ?? "General"}${r.restricted ? " · needs Virtue" : ""}`}
                   description={r.description}
                   action={
-                    <button class="btn btn-sm btn-primary" disabled={takenNames.has(r.name.toLowerCase())} onClick={() => setScore(r.name, 1, r.type)}>Add</button>
+                    <Button size="small" variant="brand" appearance="accent" disabled={takenNames.has(r.name.toLowerCase())} onClick={() => setScore(r.name, 1, r.type)}>Add</Button>
                   }
                 />
               ))}
