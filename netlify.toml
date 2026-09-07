@@ -6,7 +6,9 @@
   # pnpm is the package manager for this repo (web/pnpm-lock.yaml, and the
   # packageManager field in web/package.json pins the version via corepack).
   command = "pnpm install --frozen-lockfile && pnpm run build"
-  publish = "web/dist"
+  # Relative to `base`, so this is web/dist — spelling it "web/dist" here resolves
+  # to web/web/dist and the deploy fails with "directory does not exist".
+  publish = "dist"
 
 # SPA: every path serves the app shell (routing is client-side via the URL hash).
 [[redirects]]
