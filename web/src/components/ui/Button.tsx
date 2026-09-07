@@ -1,4 +1,4 @@
-import type { ComponentChildren } from "preact";
+import type { Component, ComponentChildren } from "preact";
 
 /**
  * The app's button, wrapping Web Awesome's `<wa-button>` so hierarchy, sizing,
@@ -12,8 +12,16 @@ import type { ComponentChildren } from "preact";
  * under test the tag stays inert DOM that still bubbles `click`.
  */
 export function Button({
-  children, onClick, appearance = "outlined", variant = "neutral",
-  size, disabled, title, block, class: klass = "",
+  children,
+  onClick,
+  appearance = "outlined",
+  variant = "neutral",
+  size,
+  disabled,
+  title,
+  block,
+  class: klass = "",
+  start,
 }: {
   children: ComponentChildren;
   onClick?: () => void;
@@ -26,6 +34,7 @@ export function Button({
   /** Stretch to the full width of the container. */
   block?: boolean;
   class?: string;
+  start?: Component;
 }) {
   return (
     <wa-button
@@ -38,6 +47,7 @@ export function Button({
       title={title}
       onClick={onClick}
     >
+      {start}
       {children}
     </wa-button>
   );

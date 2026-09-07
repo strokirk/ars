@@ -1,9 +1,15 @@
+import { Button } from "./Button.tsx";
+
 /**
  * A row of filter chips behaving as a single-select. `value` of "" is the
  * catch-all option (labelled by `allLabel`); pass allLabel={null} to omit it.
  */
 export function ChipGroup<T extends string>({
-  options, value, onChange, allLabel = "All", labelOf,
+  options,
+  value,
+  onChange,
+  allLabel = "All",
+  labelOf,
 }: {
   options: readonly T[];
   value: T | "";
@@ -14,12 +20,25 @@ export function ChipGroup<T extends string>({
   return (
     <div class="chips">
       {allLabel !== null && (
-        <button class={`chip-toggle ${value === "" ? "on" : ""}`} onClick={() => onChange("")}>{allLabel}</button>
+        <Button
+          onClick={() => onChange("")}
+          variant="brand"
+          size={"small"}
+          appearance={value === "" ? "accent" : "outlined"}
+        >
+          {allLabel}
+        </Button>
       )}
       {options.map((o) => (
-        <button class={`chip-toggle ${value === o ? "on" : ""}`} key={o} onClick={() => onChange(value === o ? "" : o)}>
+        <Button
+          variant="brand"
+          size={"small"}
+          appearance={value === o ? "accent" : "outlined"}
+          key={o}
+          onClick={() => onChange(value === o ? "" : o)}
+        >
           {labelOf ? labelOf(o) : o}
-        </button>
+        </Button>
       ))}
     </div>
   );

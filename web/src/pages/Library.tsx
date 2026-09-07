@@ -6,6 +6,7 @@ import { TraitBrowser } from "../components/TraitBrowser.tsx";
 import { rules } from "../engine.ts";
 import { Sparkles, Plus, Minus, Library as LibraryIcon } from "lucide-preact";
 import { TECHNIQUES, TECHNIQUE_LEGEND } from "../lib/legend.ts";
+import { Button } from "../components/ui/Button.tsx";
 
 // Virtues and Flaws get a tab each rather than a switch nested inside a tab.
 const TABS = [
@@ -17,35 +18,54 @@ const TABS = [
 export type LibraryTab = (typeof TABS)[number]["key"];
 
 export function Library({ tab }: { tab?: string }) {
-  const active: LibraryTab = TABS.some((t) => t.key === tab) ? (tab as LibraryTab) : "spells";
+  const active: LibraryTab = TABS.some((t) => t.key === tab)
+    ? (tab as LibraryTab)
+    : "spells";
   return (
     <div>
       <div class="libhead">
-        <h1><LibraryIcon size={20} aria-hidden="true" /> The Library</h1>
+        <h1>
+          <LibraryIcon size={20} aria-hidden="true" /> The Library
+        </h1>
         <p class="note">
-          {rules.spells.length} spells · {rules.virtuesFlaws.length} Virtues &amp; Flaws — Ars Magica, Definitive Edition
+          {rules.spells.length} spells · {rules.virtuesFlaws.length} Virtues
+          &amp; Flaws — Ars Magica, Definitive Edition
         </p>
       </div>
 
       <div class="tabs">
         {TABS.map((t) => (
-          <button class={`tab ${active === t.key ? "on" : ""}`} key={t.key} onClick={() => navigate(`/library/${t.key}`)}>
-            <t.Icon size={15} aria-hidden="true" /> {t.label}
-          </button>
+          <Button
+            variant="brand"
+            appearance={active === t.key ? "accent" : "outlined"}
+            key={t.key}
+            onClick={() => navigate(`/library/${t.key}`)}
+          >
+            <t.Icon size={15} aria-hidden="true" slot="start" /> {t.label}
+          </Button>
         ))}
       </div>
 
       {active === "spells" && (
         <div class="legend" aria-label="Technique colours">
           {TECHNIQUES.map((t) => (
-            <span class="legend-item" key={t} style={`--tech:${TECHNIQUE_LEGEND[t]!.color}`} title={`${t} — ${TECHNIQUE_LEGEND[t]!.gloss}`}>
+            <span
+              class="legend-item"
+              key={t}
+              style={`--tech:${TECHNIQUE_LEGEND[t]!.color}`}
+              title={`${t} — ${TECHNIQUE_LEGEND[t]!.gloss}`}
+            >
               <i class="swatch" /> <b>{TECHNIQUE_LEGEND[t]!.abbr}</b> {t}
             </span>
           ))}
         </div>
       )}
 
-      {active === "spells" ? <SpellBrowser /> : <TraitBrowser kind={active === "flaws" ? "Flaw" : "Virtue"} />}
+      {active === "spells" ? (
+        <SpellBrowser />
+      ) : (
+        <TraitBrowser kind={active === "flaws" ? "Flaw" : "Virtue"} />
+      )}
     </div>
   );
 }

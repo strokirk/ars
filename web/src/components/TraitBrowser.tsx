@@ -1,12 +1,27 @@
 import type { ComponentChildren } from "preact";
 import { useMemo, useState } from "preact/hooks";
 import { rules } from "../engine.ts";
-import { queryTraits, traitCategories, type TraitQuery, type TraitSort } from "../lib/queries.ts";
+import {
+  queryTraits,
+  traitCategories,
+  type TraitQuery,
+  type TraitSort,
+} from "../lib/queries.ts";
 import type { VirtueFlawRow } from "../../../chargen/src/data/types.ts";
-import { FilterBar, type ActiveFilter, type SortOption } from "./ui/FilterBar.tsx";
+import {
+  FilterBar,
+  type ActiveFilter,
+  type SortOption,
+} from "./ui/FilterBar.tsx";
 import { ChipGroup } from "./ui/ChipGroup.tsx";
-import { OptionList, OptionRow, MoreRows, useVisibleCount } from "./ui/OptionList.tsx";
+import {
+  OptionList,
+  OptionRow,
+  MoreRows,
+  useVisibleCount,
+} from "./ui/OptionList.tsx";
 import { TraitBadge, CategoryIcon } from "./ui/TraitBadge.tsx";
+import { Button } from "./ui/Button.tsx";
 
 const SIZES = ["Minor", "Major"] as const;
 const SORTS: SortOption<TraitSort>[] = [
@@ -29,7 +44,11 @@ const newSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
  * outside (the library's tabs do) — otherwise the browser shows its own switch.
  */
 export function TraitBrowser({
-  filter, action, pageSize = 60, kind: kindProp, initialKind = "Virtue",
+  filter,
+  action,
+  pageSize = 60,
+  kind: kindProp,
+  initialKind = "Virtue",
 }: {
   filter?: (r: VirtueFlawRow) => boolean;
   action?: (r: VirtueFlawRow) => ComponentChildren;
@@ -46,58 +65,112 @@ export function TraitBrowser({
   const [seed, setSeed] = useState(newSeed);
 
   const pool = useMemo(
-    () => queryTraits(rules.virtuesFlaws, { kind }).filter((r) => !filter || filter(r)),
+    () =>
+      queryTraits(rules.virtuesFlaws, { kind }).filter(
+        (r) => !filter || filter(r),
+      ),
     [kind, filter],
   );
   const categories = useMemo(() => traitCategories(pool), [pool]);
   const matches = useMemo(
-    () => queryTraits(pool, {
-      category: category || undefined,
-      size: (size || undefined) as TraitQuery["size"],
-      search: search || undefined,
-      sort, seed,
-    }),
+    () =>
+      queryTraits(pool, {
+        category: category || undefined,
+        size: (size || undefined) as TraitQuery["size"],
+        search: search || undefined,
+        sort,
+        seed,
+      }),
     [pool, category, size, search, sort, seed],
   );
-  const { visible, hidden, showMore, showAll } = useVisibleCount(matches, pageSize);
+  const { visible, hidden, showMore, showAll } = useVisibleCount(
+    matches,
+    pageSize,
+  );
 
   const active: ActiveFilter[] = [
     category && { label: category, clear: () => setCategory("") },
     size && { label: size, clear: () => setSize("") },
   ].filter(Boolean) as ActiveFilter[];
 
-  const clearAll = () => { setSearch(""); setCategory(""); setSize(""); };
+  const clearAll = () => {
+    setSearch("");
+    setCategory("");
+    setSize("");
+  };
   const noun = kind.toLowerCase();
 
   return (
     <div class="browser">
       <FilterBar
-        search={search} onSearch={setSearch} placeholder={`Search ${noun}s by name or effect…`}
-        sort={sort} sorts={SORTS} onSort={setSort}
+        search={search}
+        onSearch={setSearch}
+        placeholder={`Search ${noun}s by name or effect…`}
+        sort={sort}
+        sorts={SORTS}
+        onSort={setSort}
         onShuffle={sort === "random" ? () => setSeed(newSeed()) : undefined}
-        active={active} onClear={clearAll}
-        lead={kindProp ? undefined : (
-          <span class="chips kindswitch">
-            <button class={`chip-toggle virtue ${kind === "Virtue" ? "on" : ""}`} onClick={() => { setOwnKind("Virtue"); setCategory(""); }}>Virtues</button>
-            <button class={`chip-toggle flaw ${kind === "Flaw" ? "on" : ""}`} onClick={() => { setOwnKind("Flaw"); setCategory(""); }}>Flaws</button>
-          </span>
-        )}
+        active={active}
+        onClear={clearAll}
+        lead={
+          kindProp ? undefined : (
+            <span class="chips kindswitch">
+              <button
+                class={`chip-toggle virtue ${kind === "Virtue" ? "on" : ""}`}
+                onClick={() => {
+                  setOwnKind("Virtue");
+                  setCategory("");
+                }}
+              >
+                Virtues
+              </button>
+              <button
+                class={`chip-toggle flaw ${kind === "Flaw" ? "on" : ""}`}
+                onClick={() => {
+                  setOwnKind("Flaw");
+                  setCategory("");
+                }}
+              >
+                Flaws
+              </button>
+            </span>
+          )
+        }
         summary={
           <>
-            {matches.length} {noun}{matches.length === 1 ? "" : "s"}
+            {matches.length} {noun}
+            {matches.length === 1 ? "" : "s"}
             {hidden > 0 && ` · showing ${visible.length}`}
           </>
         }
       >
         <div class="artfilter" role="group" aria-label="Filter by category">
-          <button class={`chip-toggle ${category === "" ? "on" : ""}`} onClick={() => setCategory("")}>All categories</button>
+          <Button
+            onClick={() => setCategory("")}
+            size={"small"}
+            appearance={category === "" ? "accent" : "outlined"}
+            variant="brand"
+          >
+            All categories
+          </Button>
           {categories.map((c) => (
-            <button class={`chip-toggle ${category === c ? "on" : ""}`} key={c} onClick={() => setCategory(category === c ? "" : c)}>
-              <CategoryIcon category={c} /> {c}
-            </button>
+            <Button
+              size={"small"}
+              appearance={category === c ? "accent" : "outlined"}
+              variant="brand"
+              key={c}
+              onClick={() => setCategory(category === c ? "" : c)}
+            >
+              <CategoryIcon category={c} slot="start" /> {c}
+            </Button>
           ))}
         </div>
-        <ChipGroup options={SIZES} value={size} onChange={(v) => setSize(v)} allLabel="Any size" />
+        <ChipGroup
+          options={SIZES}
+          value={size}
+          onChange={(v) => setSize(v)}
+          allLabel="Any size"
+        />
       </FilterBar>
 
       <OptionList empty={`No ${noun}s match these filters.`}>
@@ -106,14 +179,23 @@ export function TraitBrowser({
             key={r.name}
             title={r.name}
             accent={ACCENT[r.kind as keyof typeof ACCENT]}
-            badge={<TraitBadge kind={r.kind} size={r.size} category={r.category} />}
-            meta={r.categories.length > 1 ? r.categories.join(" · ") : r.category}
+            badge={
+              <TraitBadge kind={r.kind} size={r.size} category={r.category} />
+            }
+            meta={
+              r.categories.length > 1 ? r.categories.join(" · ") : r.category
+            }
             description={r.description}
             action={action?.(r)}
           />
         ))}
       </OptionList>
-      <MoreRows hidden={hidden} pageSize={pageSize} onMore={showMore} onAll={showAll} />
+      <MoreRows
+        hidden={hidden}
+        pageSize={pageSize}
+        onMore={showMore}
+        onAll={showAll}
+      />
     </div>
   );
 }

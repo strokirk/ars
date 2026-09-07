@@ -3,6 +3,7 @@ import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { SlidersHorizontal, Shuffle, X } from "lucide-preact";
 import { SearchField } from "./SearchField.tsx";
 import { Select } from "./Select.tsx";
+import { Button } from "./Button.tsx";
 
 export interface SortOption<T extends string> {
   value: T;
@@ -24,9 +25,18 @@ export interface ActiveFilter {
  * Both browsers share it — the only difference is what goes in `children`.
  */
 export function FilterBar<S extends string>({
-  search, onSearch, placeholder,
-  sort, sorts, onSort, onShuffle,
-  lead, summary, active = [], onClear, children,
+  search,
+  onSearch,
+  placeholder,
+  sort,
+  sorts,
+  onSort,
+  onShuffle,
+  lead,
+  summary,
+  active = [],
+  onClear,
+  children,
 }: {
   search: string;
   onSearch: (v: string) => void;
@@ -53,7 +63,11 @@ export function FilterBar<S extends string>({
   useLayoutEffect(() => {
     const el = row.current;
     if (!el) return;
-    const publish = () => document.documentElement.style.setProperty("--filterbar-h", `${el.offsetHeight}px`);
+    const publish = () =>
+      document.documentElement.style.setProperty(
+        "--filterbar-h",
+        `${el.offsetHeight}px`,
+      );
     publish();
     if (typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(publish);
@@ -64,36 +78,59 @@ export function FilterBar<S extends string>({
   return (
     <div class={`filterbar ${open ? "open" : ""}`}>
       <div class="filterbar-row" ref={row}>
-        <SearchField value={search} onInput={onSearch} placeholder={placeholder}>
+        <SearchField
+          value={search}
+          onInput={onSearch}
+          placeholder={placeholder}
+        >
           {lead}
           {sorts && sort !== undefined && onSort && (
-            <Select label="Sort" pill value={sort} options={sorts} onChange={(v) => onSort(v as S)} />
+            <Select
+              label="Sort"
+              pill
+              value={sort}
+              options={sorts}
+              onChange={(v) => onSort(v as S)}
+            />
           )}
           {onShuffle && (
-            <button class="chip-toggle" title="Shuffle again" onClick={onShuffle}>
+            <Button title="Shuffle again" onClick={onShuffle}>
               <Shuffle size={13} aria-hidden="true" /> Shuffle
-            </button>
+            </Button>
           )}
           {children && (
-            <button
-              class={`chip-toggle ${open || active.length ? "on" : ""}`}
+            <Button
+              class={`${open || active.length ? "on" : ""}`}
               aria-expanded={open}
+              size={"small"}
+              appearance={open || active.length ? "accent" : "outlined"}
+              variant="brand"
               onClick={() => setOpen(!open)}
             >
-              <SlidersHorizontal size={13} aria-hidden="true" /> Filters{active.length ? ` (${active.length})` : ""}
-            </button>
+              <SlidersHorizontal size={13} aria-hidden="true" /> Filters
+              {active.length ? ` (${active.length})` : ""}
+            </Button>
           )}
         </SearchField>
 
         <div class="filterbar-meta">
           <p class="note count">{summary}</p>
           {active.map((f) => (
-            <button class="active-chip" key={f.label} title={`Remove filter: ${f.label}`} onClick={f.clear}>
-              {f.label} <X size={12} aria-hidden="true" />
-            </button>
+            <Button
+              key={f.label}
+              size={"small"}
+              appearance="plain"
+              variant="brand"
+              title={`Remove filter: ${f.label}`}
+              onClick={f.clear}
+            >
+              {f.label} <X size={12} aria-hidden="true" slot="end" />
+            </Button>
           ))}
           {(active.length > 0 || search) && onClear && (
-            <button class="linkish" onClick={onClear}>Clear all</button>
+            <Button size={"small"} onClick={onClear}>
+              Clear all
+            </Button>
           )}
         </div>
       </div>
@@ -101,10 +138,6 @@ export function FilterBar<S extends string>({
       {open && children && (
         <div class="filterpanel">
           {children}
-          <div class="filterpanel-foot">
-            {onClear && <button class="chip-toggle" onClick={onClear}>Clear all</button>}
-            <button class="chip-toggle" onClick={() => setOpen(false)}>Done</button>
-          </div>
         </div>
       )}
     </div>

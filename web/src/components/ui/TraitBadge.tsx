@@ -1,5 +1,13 @@
 import {
-  Sparkles, Crown, BookOpen, Drama, Moon, Wand2, Circle, Plus, Minus,
+  Sparkles,
+  Crown,
+  BookOpen,
+  Drama,
+  Moon,
+  Wand2,
+  Circle,
+  Plus,
+  Minus,
   type LucideProps,
 } from "lucide-preact";
 import type { ComponentType } from "preact";
@@ -14,9 +22,17 @@ const CATEGORY_ICON: Record<string, ComponentType<LucideProps>> = {
   General: Circle,
 };
 
-export function CategoryIcon({ category, size = 14 }: { category: string; size?: number }) {
+export function CategoryIcon({
+  category,
+  size = 14,
+  slot,
+}: {
+  category: string;
+  size?: number;
+  slot?: string;
+}) {
   const Icon = CATEGORY_ICON[category] ?? Sparkles;
-  return <Icon size={size} aria-hidden="true" />;
+  return <Icon size={size} aria-hidden="true" slot={slot} />;
 }
 
 /**
@@ -24,11 +40,26 @@ export function CategoryIcon({ category, size = 14 }: { category: string; size?:
  * icon, and the size. Virtues read green, Flaws red — the same polarity the
  * budget meters use.
  */
-export function TraitBadge({ kind, size, category }: { kind: "Virtue" | "Flaw"; size: string; category: string }) {
+export function TraitBadge({
+  kind,
+  size,
+  category,
+}: {
+  kind: "Virtue" | "Flaw";
+  size: string;
+  category: string;
+}) {
   const virtue = kind === "Virtue";
   return (
-    <span class={`traitbadge ${virtue ? "virtue" : "flaw"}`} title={`${size} ${kind}${category ? ` · ${category}` : ""}`}>
-      {virtue ? <Plus size={13} aria-hidden="true" /> : <Minus size={13} aria-hidden="true" />}
+    <span
+      class={`traitbadge ${virtue ? "virtue" : "flaw"}`}
+      title={`${size} ${kind}${category ? ` · ${category}` : ""}`}
+    >
+      {virtue ? (
+        <Plus size={13} aria-hidden="true" />
+      ) : (
+        <Minus size={13} aria-hidden="true" />
+      )}
       <CategoryIcon category={category} size={13} />
       <span class="pair">{size === "Major or Minor" ? "Maj/Min" : size}</span>
     </span>

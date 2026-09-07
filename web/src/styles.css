@@ -293,7 +293,7 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
 /* Phone: search takes the first line on its own, sort and Filters share the next —
    all three only fit on one line once there's room for them. */
 @media (max-width: 560px) { .filterbar .toolbar input[type="text"] { flex: 1 1 100%; } }
-.filterbar-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem; }
+.filterbar-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem; padding-bottom: 0.6rem; }
 .filterbar-meta .count { margin: 0; font-size: 0.78rem; }
 .active-chip {
   font-size: 0.74rem; padding: 0.1rem 0.5rem; min-height: 30px; gap: 0.25rem;
