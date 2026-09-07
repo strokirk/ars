@@ -22,6 +22,7 @@
     "vitest": "^4.1.11"
   },
   "dependencies": {
+    "@awesome.me/webawesome": "^3.12.0",
     "@preact/signals": "^2.0.1",
     "lucide-preact": "^1.39.0",
     "preact": "^10.25.0"

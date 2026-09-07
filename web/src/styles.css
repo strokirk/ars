@@ -34,6 +34,65 @@ body {
 a { color: var(--accent); }
 h1, h2, h3 { line-height: 1.18; }
 
+/* ── Web Awesome, in parchment ───────────────────────────
+   The library's components read their look from --wa-* tokens, so pointing those
+   at the palette above is the whole theme — no per-component CSS, and anything
+   adopted later inherits it. */
+:root {
+  --wa-font-family-body: "Iowan Old Style", Palatino, Georgia, serif;
+  --wa-font-family-heading: var(--wa-font-family-body);
+  --wa-font-size-m: 0.95rem;
+  --wa-font-size-s: 0.85rem;
+
+  --wa-color-surface-default: var(--card);
+  --wa-color-surface-raised: var(--card);
+  --wa-color-surface-lowered: var(--chip);
+  --wa-color-surface-border: var(--line);
+  --wa-color-text-normal: var(--ink);
+  --wa-color-text-quiet: var(--muted);
+  --wa-color-text-link: var(--accent);
+
+  /* The one brand colour, so selection and focus read as ours. */
+  --wa-color-brand-fill-loud: var(--accent);
+  --wa-color-brand-fill-normal: var(--accent-soft);
+  --wa-color-brand-fill-quiet: var(--chip);
+  --wa-color-brand-border-loud: var(--accent);
+  --wa-color-brand-border-normal: var(--accent-soft);
+  --wa-color-brand-border-quiet: var(--line);
+  --wa-color-brand-on-loud: #fff;
+  --wa-color-brand-on-normal: #fff;
+  --wa-color-brand-on-quiet: var(--accent);
+
+  --wa-form-control-background-color: #fff;
+  --wa-form-control-border-color: var(--line);
+  --wa-form-control-border-width: 1px;
+  --wa-form-control-border-radius: 8px;
+  --wa-form-control-placeholder-color: var(--faint);
+  --wa-form-control-label-color: var(--muted);
+
+  --wa-panel-border-radius: var(--radius);
+  --wa-panel-border-color: var(--line);
+  --wa-color-focus: var(--accent-soft);
+}
+
+/* Form-field shape: full width, matching the native inputs beside it. */
+.ui-select { display: block; width: 100%; }
+/* Pill shape: width comes from the longest label (the component would otherwise
+   take the full line), so a row of dropdowns stays a row. */
+.ui-select.pill {
+  /* `ch` is the width of "0"; the serif's average glyph runs wider, hence the slack. */
+  display: inline-block; width: calc(var(--label-width, 8ch) * 1.15 + 3.4rem);
+  --wa-form-control-height: 34px;
+  --wa-form-control-border-radius: 999px;
+  --wa-form-control-background-color: var(--card);
+}
+.ui-select.pill::part(combobox) { padding-inline: 0.75rem; gap: 0.3rem; color: var(--muted); }
+.ui-select.pill::part(display-input) { width: 100%; min-width: 0; }
+.ui-select.on::part(combobox) {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+}
+.ui-select.on::part(expand-icon) { color: #fff; }
+
 /* ── layout ─────────────────────────────────────────────── */
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 1rem 1rem 6rem; }
 /* Every nested box costs text width on a phone, so the pads shrink with the screen. */
@@ -226,6 +285,9 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
 .panel .filterbar { background: rgba(255, 253, 249, 0.96); }
 .filterbar .toolbar { margin-bottom: 0.35rem; gap: 0.4rem; }
 .filterbar .toolbar input[type="text"] { min-height: 38px; padding: 0.35rem 0.6rem; }
+/* Phone: search takes the first line on its own, sort and Filters share the next —
+   all three only fit on one line once there's room for them. */
+@media (max-width: 560px) { .filterbar .toolbar input[type="text"] { flex: 1 1 100%; } }
 .filterbar-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem; }
 .filterbar-meta .count { margin: 0; font-size: 0.78rem; }
 .active-chip {

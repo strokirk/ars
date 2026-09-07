@@ -8,6 +8,7 @@ import {
 import { TECHNIQUES, FORMS, ART_ABBR, type Technique } from "../../../chargen/src/domain/glossary.ts";
 import type { SpellRow } from "../../../chargen/src/data/types.ts";
 import { FilterBar, type ActiveFilter, type SortOption } from "./ui/FilterBar.tsx";
+import { Select } from "./ui/Select.tsx";
 import { OptionList, OptionRow, MoreRows, useVisibleCount } from "./ui/OptionList.tsx";
 import { ArtBadge, FormIcon } from "./ui/ArtBadge.tsx";
 
@@ -129,16 +130,15 @@ export function SpellBrowser({
           <Picker label="Range" value={range} onChange={setRange} options={RANGES} names={RANGE_NAME} />
           <Picker label="Duration" value={duration} onChange={setDuration} options={DURATIONS} names={DURATION_NAME} />
           <Picker label="Target" value={target} onChange={setTarget} options={TARGETS} names={TARGET_NAME} />
-          <select aria-label="Maximum level" class={`pill-select ${maxLevel === "" ? "" : "on"}`} value={String(maxLevel)} onChange={(e) => {
-            const v = (e.target as HTMLSelectElement).value;
-            setMaxLevel(v === "" ? "" : Number(v));
-          }}>
-            <option value="">Any level</option>
-            {MAX_LEVELS.map((l) => <option value={l} key={l}>Level ≤ {l}</option>)}
-          </select>
-          <select aria-label="Group spells" class={`pill-select ${groupBy === "none" ? "" : "on"}`} value={groupBy} onChange={(e) => setGroupBy((e.target as HTMLSelectElement).value as SpellGroupBy)}>
-            {GROUPS.map((g) => <option value={g.value} key={g.value}>{g.label}</option>)}
-          </select>
+          <Select
+            label="Maximum level" pill active={maxLevel !== ""} value={String(maxLevel)}
+            options={[{ value: "", label: "Any level" }, ...MAX_LEVELS.map((l) => ({ value: String(l), label: `Level ≤ ${l}` }))]}
+            onChange={(v) => setMaxLevel(v === "" ? "" : Number(v))}
+          />
+          <Select
+            label="Group spells" pill active={groupBy !== "none"} value={groupBy} options={GROUPS}
+            onChange={(v) => setGroupBy(v as SpellGroupBy)}
+          />
         </div>
         <div class="chips">
           <button class={`chip-toggle ${ritual === "exclude" ? "on" : ""}`} onClick={() => setRitual(ritual === "exclude" ? "any" : "exclude")}>Formulaic only</button>
@@ -192,10 +192,13 @@ function Picker({
   names: Record<string, string>;
 }) {
   return (
-    <select aria-label={label} class={`pill-select ${value ? "on" : ""}`} value={value} onChange={(e) => onChange((e.target as HTMLSelectElement).value)}>
-      <option value="">Any {label.toLowerCase()}</option>
-      {options.map((o) => <option value={o} key={o}>{names[o] ?? o}</option>)}
-    </select>
+    <Select
+      label={label} pill active={Boolean(value)} value={value} onChange={onChange}
+      options={[
+        { value: "", label: `Any ${label.toLowerCase()}` },
+        ...options.map((o) => ({ value: o, label: names[o] ?? o })),
+      ]}
+    />
   );
 }
 

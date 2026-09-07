@@ -65,6 +65,17 @@ controls go in its dismissible panel, as `children`), and `ui/OptionList` holds 
 row and the `useVisibleCount`/`MoreRows` paging — results scroll with the page, so
 never wrap a list in its own scroll box.
 
+**Dropdowns are `ui/Select` (Web Awesome `<wa-select>`), not `<select>`** — a native
+select hands its popup to the OS, which draws it in the platform's style and takes no
+CSS. `src/webawesome.ts` registers the cherry-picked components once for the whole app
+(and serves their internal chrome icons inline, so nothing calls Font Awesome's CDN);
+`index.html` carries the required `wa-theme-default wa-palette-default wa-light`
+classes, and the `--wa-*` token block at the top of `styles.css` is the entire theme —
+point tokens at the parchment palette rather than writing per-component CSS. The
+wrapper never imports the custom elements, so under test the tags stay inert DOM that
+still carries `value` and emits `change`; drive them in vitest with
+`wa-select[aria-label="…"]`, not `<select>`.
+
 ```sh
 cd web && pnpm install && pnpm dev       # local dev server
 cd web && pnpm build                     # static build → web/dist (what Netlify publishes)

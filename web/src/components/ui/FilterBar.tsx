@@ -2,6 +2,7 @@ import type { ComponentChildren } from "preact";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { SlidersHorizontal, Shuffle, X } from "lucide-preact";
 import { SearchField } from "./SearchField.tsx";
+import { Select } from "./Select.tsx";
 
 export interface SortOption<T extends string> {
   value: T;
@@ -66,12 +67,7 @@ export function FilterBar<S extends string>({
         <SearchField value={search} onInput={onSearch} placeholder={placeholder}>
           {lead}
           {sorts && sort !== undefined && onSort && (
-            <select
-              aria-label="Sort" class="pill-select" value={sort}
-              onChange={(e) => onSort((e.target as HTMLSelectElement).value as S)}
-            >
-              {sorts.map((s) => <option value={s.value} key={s.value}>{s.label}</option>)}
-            </select>
+            <Select label="Sort" pill value={sort} options={sorts} onChange={(v) => onSort(v as S)} />
           )}
           {onShuffle && (
             <button class="chip-toggle" title="Shuffle again" onClick={onShuffle}>

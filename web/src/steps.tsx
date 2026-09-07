@@ -8,6 +8,7 @@ import { CharacteristicsAllocator } from "./components/CharacteristicsAllocator.
 import { TraitPicker } from "./components/TraitPicker.tsx";
 import { AbilityPicker } from "./components/AbilityPicker.tsx";
 import { SpellBrowser } from "./components/SpellBrowser.tsx";
+import { Select } from "./components/ui/Select.tsx";
 import { Stepper } from "./components/ui/Stepper.tsx";
 import { ArtBadge, FormIcon } from "./components/ui/ArtBadge.tsx";
 import { HOUSES, TECHNIQUES, FORMS, ART_ABBR, type Art, type Technique } from "../../chargen/src/domain/glossary.ts";
@@ -38,6 +39,8 @@ const APPRENTICE_ABILITIES = [
 export function ConceptStep({ ch, update, reseed }: StepProps) {
   const kind = charKind(ch);
   const houseChoices = ch.house ? HOUSE_PUISSANT_CHOICES[ch.house] : undefined;
+  // The choice isn't stored on the character — it shows up as the granted Virtue.
+  const puissant = houseChoices?.find((c) => ch.virtues.some((v) => v.display === `Puissant ${c}`)) ?? "";
   return (
     <div>
       <div class="field">
@@ -64,32 +67,36 @@ export function ConceptStep({ ch, update, reseed }: StepProps) {
           <hr class="soft" />
           <div class="field">
             <label>House</label>
-            <select value={ch.house} onChange={(e) => reseed({ house: (e.target as HTMLSelectElement).value })}>
-              {HOUSES.map((h) => <option value={h} key={h}>{h}</option>)}
-            </select>
+            <Select
+              label="House" value={ch.house ?? ""} onChange={(house) => reseed({ house })}
+              options={HOUSES.map((h) => ({ value: h, label: h }))}
+            />
           </div>
           {houseChoices && (
             <div class="field">
               <label>House benefit (Puissant)</label>
-              <select onChange={(e) => reseed({ puissant: (e.target as HTMLSelectElement).value })}>
-                {houseChoices.map((c) => <option value={c} key={c}>{c}</option>)}
-              </select>
+              <Select
+                label="House benefit" value={puissant} onChange={(choice) => reseed({ puissant: choice })}
+                options={houseChoices.map((c) => ({ value: c, label: c }))}
+              />
             </div>
           )}
           <div class="field" style="display:flex; gap:.8rem;">
             <div style="flex:1;">
               <label>Favored Technique</label>
-              <select value={ch.favoredTechnique ?? ""} onChange={(e) => update([{ op: "meta", fields: { favoredTechnique: (e.target as HTMLSelectElement).value } }])}>
-                <option value="">—</option>
-                {TECHNIQUES.map((t) => <option value={t} key={t}>{t}</option>)}
-              </select>
+              <Select
+                label="Favored Technique" value={ch.favoredTechnique ?? ""}
+                onChange={(favoredTechnique) => update([{ op: "meta", fields: { favoredTechnique } }])}
+                options={[{ value: "", label: "—" }, ...TECHNIQUES.map((t) => ({ value: t, label: t }))]}
+              />
             </div>
             <div style="flex:1;">
               <label>Favored Form</label>
-              <select value={ch.favoredForm ?? ""} onChange={(e) => update([{ op: "meta", fields: { favoredForm: (e.target as HTMLSelectElement).value } }])}>
-                <option value="">—</option>
-                {FORMS.map((f) => <option value={f} key={f}>{f}</option>)}
-              </select>
+              <Select
+                label="Favored Form" value={ch.favoredForm ?? ""}
+                onChange={(favoredForm) => update([{ op: "meta", fields: { favoredForm } }])}
+                options={[{ value: "", label: "—" }, ...FORMS.map((f) => ({ value: f, label: f }))]}
+              />
             </div>
           </div>
           <div class="field">

@@ -7,6 +7,7 @@ import type { VirtueFlawRow } from "../../../chargen/src/data/types.ts";
 import { SearchField } from "./ui/SearchField.tsx";
 import { ChipGroup } from "./ui/ChipGroup.tsx";
 import { OptionList, OptionRow } from "./ui/OptionList.tsx";
+import { Select } from "./ui/Select.tsx";
 
 type Mode = "Virtue" | "Flaw";
 
@@ -93,10 +94,11 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
             <div class="field" style="margin-top:.6rem;">
               <label>{paramLabel(rules.paramKind(active.name)!)}</label>
               {paramOptions(rules.paramKind(active.name)) ? (
-                <select value={param} onChange={(e) => setParam((e.target as HTMLSelectElement).value)}>
-                  <option value="">Choose…</option>
-                  {paramOptions(rules.paramKind(active.name))!.map((o) => <option value={o} key={o}>{o}</option>)}
-                </select>
+                <Select
+                  label={paramLabel(rules.paramKind(active.name)!)} value={param} onChange={setParam}
+                  placeholder="Choose…"
+                  options={paramOptions(rules.paramKind(active.name))!.map((o) => ({ value: o, label: o }))}
+                />
               ) : (
                 <input type="text" value={param} placeholder="e.g. fire, or an Ability name" onInput={(e) => setParam((e.target as HTMLInputElement).value)} />
               )}

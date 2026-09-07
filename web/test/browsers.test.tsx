@@ -36,8 +36,15 @@ const artChip = (el: HTMLElement, art: string) =>
 const group = (el: HTMLElement) => [...el.querySelectorAll(".group-head")].map((n) => n.textContent!.trim());
 /** The filter controls live behind a dismissible panel — open it before reaching in. */
 const openFilters = async (el: HTMLElement) => { chip(el, "Filters").click(); await flush(); };
-const select = (el: HTMLElement, label: string) => el.querySelector<HTMLSelectElement>(`select[aria-label="${label}"]`)!;
-const choose = async (sel: HTMLSelectElement, value: string) => {
+/**
+ * The dropdowns are <wa-select> custom elements. Their definitions are registered
+ * by the app entry, not by the components, so under test they stay inert DOM —
+ * which still carries `value` and still dispatches `change`, exactly what the
+ * wrapper listens for.
+ */
+const select = (el: HTMLElement, label: string) =>
+  el.querySelector<HTMLElement & { value?: string }>(`wa-select[aria-label="${label}"]`)!;
+const choose = async (sel: HTMLElement & { value?: string }, value: string) => {
   sel.value = value;
   sel.dispatchEvent(new Event("change", { bubbles: true }));
   await flush();
@@ -95,7 +102,7 @@ describe("SpellBrowser", () => {
 
   test("the filters stay dismissed until asked for, and count themselves", async () => {
     const el = mount(<SpellBrowser />);
-    expect(el.querySelector('select[aria-label="Range"]')).toBeNull();
+    expect(el.querySelector('wa-select[aria-label="Range"]')).toBeNull();
     await openFilters(el);
     const before = count(el);
     await choose(select(el, "Range"), "Touch");
@@ -104,7 +111,7 @@ describe("SpellBrowser", () => {
     // Dismissing the panel keeps the filter, and says so where it can't be missed.
     chip(el, "Done").click();
     await flush();
-    expect(el.querySelector('select[aria-label="Range"]')).toBeNull();
+    expect(el.querySelector('wa-select[aria-label="Range"]')).toBeNull();
     expect(el.querySelector(".active-chip")!.textContent).toContain("Touch");
   });
 
