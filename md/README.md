@@ -25,3 +25,12 @@
 - **Spell database** — queryable SQLite (+FTS5) extract of Chapter 9 spells and
   guideline tables. See [`data/SCHEMA.md`](../data/SCHEMA.md). Regenerate with
   `./tools/build.sh`.
+- **Guideline metadata** — the prose around the guideline tables (the Range / Duration
+  / Target ladders, each Form's base Individual, the per-Technique-and-Form notes), as
+  hand-maintained YAML, one file per book. See
+  [`data/guidelines/README.md`](../data/guidelines/README.md).
+- **Rules engine** — [`chargen/`](../chargen), a pure TypeScript library for building
+  rules-legal grogs, companions and magi, with a CLI.
+- **Web app** — [`web/`](../web), the covenant roster, the three character creators,
+  the reference Library (spells, guidelines, R/D/T, Virtues & Flaws) and the spell
+  designer. See [`web/README.md`](../web/README.md).

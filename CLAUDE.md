@@ -15,8 +15,9 @@ engine, and a static web app of step-by-step character creators built on it.
 | `skills/hermetic-magic.md` | Self-contained spellcasting-rules reference (casting totals, ranges/durations/targets, penetration, certamen). Read this first for adjudication. |
 | `tools/` | Extraction + build scripts (Python stdlib only). |
 | `data/` | Generated artifacts: canonical JSON + `spells.db`. See `data/SCHEMA.md`. |
+| `data/guidelines/` | **Hand-maintained** YAML: the R/D/T ladders, Form sizes, per-Art notes. One file per book. See its `README.md`. |
 | `chargen/` | Pure TypeScript rules engine (`src/domain/*`) + CLI for building rules-legal **grogs, companions, and magi**. `pnpm test` is the regression gate. |
-| `web/` | Vite + Preact static site (the deployed app): the covenant roster, the three interactive validated character creators, and the reference Library. Imports `chargen/` + `data/*.json` directly. |
+| `web/` | Vite + Preact static site (the deployed app): the covenant roster, the three interactive validated character creators, the reference Library (spells, guidelines, R/D/T ladders, Virtues & Flaws) and the spell designer. Imports `chargen/` + `data/*.json` + `data/guidelines/*.yaml` directly. |
 | `docs/FUTURE.md` | Planned-but-not-started work (incl. the Chrome LanguageModel auto-grog experiment). |
 
 ## The rules database (`data/spells.db`)
@@ -48,18 +49,20 @@ the database.
 `chargen/src/domain/*` is a **pure, I/O-free** rules engine (budgets, validation,
 mutations) keyed off a character's `kind` (`grog | companion | magus`); the same
 engine backs both the CLI and the browser. `web/` is a Vite + Preact static site that
-imports the engine and `data/*.json` directly (no backend) and drives a multi-step,
-validated, mobile-first creator for each kind, plus the covenant roster (each member's
-sheet at `#/roster/:slug`), a standalone spell + Virtue/Flaw Library at `#/library`,
-draft save/resume (localStorage), inline copyable Markdown/JSON export, print, and
-shareable links.
+imports the engine, `data/*.json` and `data/guidelines/*.yaml` directly (no backend)
+and drives a multi-step, validated, mobile-first creator for each kind, plus the
+covenant roster (each member's sheet at `#/roster/:slug`), the reference Library at
+`#/library` (spells, guideline effects, the R/D/T ladders, Virtues & Flaws) and the
+spell designer at `#/library/design`, draft save/resume (localStorage), inline
+copyable Markdown/JSON export, print, and shareable links.
 
 `web/src/lib/*` holds the app's own pure logic (queries, roster slugs, trait
-eligibility, wizard steps) and `web/src/components/ui/*` the shared primitives —
+eligibility, wizard steps, the guideline model + spell-level arithmetic) and `web/src/components/ui/*` the shared primitives —
 **put new logic in `lib/` and new markup patterns in `ui/` rather than inlining
-either in a page or picker.** The two browsers (`SpellBrowser`, `TraitBrowser`) are
-deliberately shared between the creator and the Library; give them an `action` prop
-to make rows actionable rather than forking a second copy. Their chrome is shared
+either in a page or picker.** The three browsers (`SpellBrowser`, `TraitBrowser`,
+`GuidelineBrowser`) are deliberately shared between the creator, the Library and the
+designer; give them an `action`/`onPick` prop to make rows actionable rather than
+forking a second copy. Their chrome is shared
 too: `ui/FilterBar` is the sticky search + sort + active-filter header (the bulky
 controls go in its dismissible panel, as `children`), and `ui/OptionList` holds the
 row and the `useVisibleCount`/`MoreRows` paging — results scroll with the page, so
@@ -115,11 +118,19 @@ design lines, spells with no Technique/Form) for regressions.
 
 ## Gotchas worth knowing
 
+- **Spell levels are a ladder, not a scale.** They run 1,2,3,4,5,10,15,20,… so a
+  magnitude is one step along it — `level + 5 * n` is wrong below level 5 (the
+  rulebook's own example takes level 15 down five magnitudes to **2**, not to -10).
+  Use `addMagnitudes()` from `web/src/lib/guidelines.ts`.
+- **Guideline tables come in two flavours** — `<table>` HTML and pipe-Markdown — and
+  their headers are `##` in the two files that hold nothing else. `tools/extract.py`
+  handles all four combinations; it silently dropped 7 of the 50 Technique/Form pairs
+  until it did.
 - **Technique/Form come from the `### <Tech> <Form>` section headers, not
   filenames.** Files like `14-creo-mentem-spells.md` contain multiple Technique
   sections (e.g. The Call to Slumber is *Rego* Mentem, not Creo). Trust the DB.
 - ~382 looks like the spell count from raw header greps, but the real total is
-  **347** (33 of them General-level) — the rest are headers inside Guidelines
+  **347** (33 of them General-level; 613 guideline rows across all 50 Art pairs) — the rest are headers inside Guidelines
   sections or skipped front-matter.
 - General-level spells have `level = NULL` / `is_general = 1`.
 - A handful of spells legitimately lack a `(design)` line (General/reference spells
