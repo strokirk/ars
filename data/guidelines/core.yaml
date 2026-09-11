@@ -1,0 +1,1474 @@
+# Spell guideline metadata — the parts of Chapter 9 that are prose, not table rows.
+#
+# One file per BOOK. The loader (web/src/lib/guidelines.ts) globs this directory,
+# so a supplement is added by dropping in another *.yaml with the same shape and
+# its own `book:` header — no code change. Every entry inherits `book.key` unless
+# it names its own. See README.md in this directory for the schema.
+#
+# The guideline EFFECT rows themselves are not here: they are generated from the
+# Markdown by tools/extract.py into data/guidelines.json. Only add a `guidelines:`
+# list to a file for a book whose Markdown this repo does not carry.
+book:
+  key: core
+  name: Ars Magica — Definitive Edition
+  abbr: Core
+ranges:
+- key: Per
+  name: Personal
+  magnitudes: 0
+  summary: The spell only affects the caster.
+  description: >-
+    The spell only affects the caster, defined in the same way as an Individual Target. A
+    spell that has a continuing effect remains in effect even if the caster moves out of range.
+    A spell that allows the caster to control the effect only permits that control as long
+    as the caster is within range. However, it does not expire if the caster moves out of
+    range, and he may control it again if he moves back into range.
+  notes:
+  - Personal Range spells can never have a container Target.
+- key: Touch
+  name: Touch
+  magnitudes: 1
+  summary: The magus or anything he touches.
+  description: >-
+    The magus or anything he touches, whether a person or thing. The range of a spell is the
+    distance to the nearest part of the target of the spell. Thus, if the caster is touching
+    the external wall of a room, he can cast a Target Room Corpus spell on the people within
+    at Touch Range, even though he is not touching any of those people.
+  notes: []
+- key: Eye
+  name: Eye
+  magnitudes: 1
+  summary: Any person or creature with established eye contact.
+  description: >-
+    The magus may target any person or creature that he has established eye contact with.
+    A human being who knows of no reason to avoid eye contact makes it automatically if dealing
+    with the magus in a social setting. The Gift does not make people avoid eye contact. It
+    is impossible to make eye contact with an unwilling human without getting at least two
+    people to hold the victim down. It is effectively impossible to make eye contact with
+    an enemy in combat; they aren't looking at your eyes. It typically takes a combat round
+    to establish eye contact with a calm animal, before the magus can start casting the spell.
+    (Touch and Eye are the same "level" of range.)
+  notes: []
+- key: Voice
+  name: Voice
+  magnitudes: 2
+  summary: Anything to which the magus's voice carries.
+  description: >-
+    Anything to which the magus's voice carries. Typically, firm words carry about 15 paces,
+    while quiet words are audible within 5 paces and a shout carries about 50. Magical enhancement
+    of the voice does not increase this range, and a spell cast silently at this range can
+    affect only the caster. The range of Ritual and ceremonial spells with Voice Range is
+    about 50 paces, because the process of casting involves a loud voice at some point. Non-human
+    casters, including Bjornaer in Heartbeast form, may have different ranges for their voice.
+    Magical shapeshifting falls under magical enhancement of the voice, however. The range
+    is based on the distance that the caster's voice carries, not on whether the target can
+    hear it. Deaf targets, stones, targets in a noisy environment, and targets under the influence
+    of Perdo spells that stop sounds from reaching them can all be affected at the normal
+    range. However, if the caster is silenced or quietened by magic, the range is reduced.
+    Such a spell must penetrate the caster's Magic Resistance. Magic items use the wielder's
+    voice; independent items need to be given a voice (Creo Imaginem) to use this range. The
+    range is established when the spell is cast, and remains the same even if the magus changes
+    the loudness of his voice. Thus, a Voice range spell can allow silent control, but only
+    as long as the target is within the distance that the magus's voice carried when he cast
+    the spell.
+  notes: []
+- key: Sight
+  name: Sight
+  magnitudes: 3
+  summary: Anything that the magus can see.
+  description: >-
+    Anything that the magus can see. If the magus is standing on the highest point for miles,
+    this range can be immense. A blind magus can only affect himself. A magic item uses the
+    wielder's sight; independent items need to be able to see (Intellego Imaginem) to use
+    this range.
+  notes: []
+- key: Arc
+  name: Arcane Connection
+  magnitudes: 4
+  summary: Anything that the magus has an Arcane Connection to.
+  description: >-
+    Anything that the magus has an Arcane Connection to. Distance is immaterial unless the
+    storyguide chooses to impose some limit. Such limits are usually provided in the example
+    spells. Note that while Arcane Connection is a range, it is different from a physical
+    item that is an Arcane Connection. This distinction is important, because some spells
+    require that the caster have an Arcane Connection, but the spell must be cast as some
+    range other than Arcane Connection.
+  notes: []
+durations:
+- key: Mom
+  name: Momentary
+  magnitudes: 0
+  ritual: false
+  summary: The spell lasts but a moment and dissipates.
+  description: >-
+    The spell lasts but a moment and then dissipates. In many cases the effects of the spell
+    will endure long after the spell itself finishes. For example, a Rego spell that moves
+    a rock from the bottom of the hill to the top might have Momentary duration, but the rock
+    stays at the top of the hill. Similar considerations apply to most Perdo spells; the magic
+    lasts but a moment, but the target stays destroyed. While a moment is a very short period
+    of time, it may be rather more than an instant. It could be as long as a combat round
+    (six seconds) for some spells, and maybe even very slightly longer, although that would
+    be unusual. A single spell effect happens, over a short period of time, and then the spell
+    stops. Ritual Creo spells with Momentary Duration create things that last as any other
+    thing of that type. The magic is gone in a moment and so cannot be dispelled. This also
+    applies to Ritual healing spells. Note that unnatural things do not naturally last for
+    any time at all, and so only last as long as the spell does, even when created with a
+    Ritual.
+  notes: []
+- key: Conc
+  name: Concentration
+  magnitudes: 1
+  ritual: false
+  summary: The spell lasts as long as the magus concentrates.
+  description: >-
+    The spell lasts as long as the magus concentrates. In the absence of distractions, assume
+    that a magus can concentrate for fifteen minutes per point of Concentration ability. If
+    there are distractions, see the rules in the Hermetic Magic chapter.
+  notes:
+  - Concentration and Diameter are the same level of duration.
+- key: Diam
+  name: Diameter
+  magnitudes: 1
+  ritual: false
+  summary: The spell lasts for two minutes (twenty combat rounds).
+  description: >-
+    The spell lasts for the time that the sun takes to move its diameter in the sky—almost
+    exactly two minutes (twenty combat rounds). A magus can recast a spell with Diameter,
+    Sun, Moon, or Year Duration at the end of its period, so that the effect is continuous,
+    and does not briefly disappear between the two castings. The critical period is about
+    a Diameter for Sun, Moon, or Year spells, and any distraction that interrupts the recasting
+    of the spell is enough to guarantee at least a short break for Diameter spells.
+  notes:
+  - Diameter and Concentration are the same level of duration.
+- key: Sun
+  name: Sun
+  magnitudes: 2
+  ritual: false
+  summary: The spell lasts until the sun next rises or sets.
+  description: >-
+    The spell lasts until the sun next rises or sets. A magus can recast a spell with Diameter,
+    Sun, Moon, or Year Duration at the end of its period, so that the effect is continuous,
+    and does not briefly disappear between the two castings. The magus recasting the spell
+    does not have to be the same person who cast the original spell, and it does not even
+    have to be the same spell, although for a lot of spells an overlap will not make much
+    difference. No roll is required to achieve this, but distracting events may prevent it.
+  notes: []
+- key: Ring
+  name: Ring
+  magnitudes: 2
+  ritual: false
+  summary: The spell lasts until the target or ring moves outside the drawn ring.
+  description: >-
+    The spell lasts until the target of the spell, or part of the target, moves outside a
+    ring drawn at the time of casting, or until the ring is physically broken. A ring must
+    actually be drawn while the spell is being cast. The magus may use magic to do so, but
+    that magic must not have a range greater than Touch, and the magus must physically trace
+    out the ring. The magus may not move more quickly than ten paces per round (five feet
+    per second) while doing this. The casting of a non-Ritual spell may be extended out to
+    allow the drawing of a large ring. However, the caster must make Int + Concentration rolls
+    of 6+ every round to maintain concentration on the spell, and if someone breaks the ring
+    at any point before it is completed, the spell automatically botches. Really large rings
+    are unlikely to be worth the risk. The ring may already exist, for example as a band laid
+    into the ground. In this case, the magus must trace the full circumference of the ring,
+    moving no more quickly than ten paces per round.
+  notes: []
+- key: Moon
+  name: Moon
+  magnitudes: 3
+  ritual: false
+  summary: The spell lasts until both new and full moons have set.
+  description: >-
+    The spell lasts until both the new and full moon have set. A magus can recast a spell
+    with Diameter, Sun, Moon, or Year Duration at the end of its period, so that the effect
+    is continuous, and does not briefly disappear between the two castings. The magus recasting
+    the spell does not have to be the same person who cast the original spell, and it does
+    not even have to be the same spell.
+  notes: []
+- key: Year
+  name: Year
+  magnitudes: 4
+  ritual: true
+  summary: The spell lasts until the fourth equinox or solstice after casting.
+  description: >-
+    The spell lasts until sunrise on the fourth equinox or solstice after its casting. A spell
+    with this duration must be ritual. A magus can recast a spell with Diameter, Sun, Moon,
+    or Year Duration at the end of its period, so that the effect is continuous. For Ritual
+    spells, it is easy for magi to determine when they must start casting to avoid a break,
+    as such calculations are covered by Artes Liberales and Philosophiae, but if the Ritual
+    is interrupted and must be restarted, there will not be enough time to restart that Ritual
+    and cast it before the older spell ends.
+  notes: []
+targets:
+- key: Ind
+  name: Individual
+  kind: object
+  magnitudes: 0
+  ritual: false
+  summary: The spell can affect a single discrete thing.
+  description: >-
+    The spell can affect a single discrete thing, such as one person or one object. A huge
+    boulder is a discrete object, a mountain is not (because it is joined to the ground).
+    Clothes on a person or moss on a boulder are part of the person or boulder for these purposes.
+    Individual is an object Target. A spell cast on an object Target affects the things in
+    that Target for the duration of the spell, even if they change so that they would no longer
+    qualify as a valid target for the original spell. If the caster is within range, she retains
+    control of the spell, if the spell allows such control.
+  notes: []
+- key: Circle
+  name: Circle
+  kind: container
+  magnitudes: 0
+  ritual: false
+  summary: The spell affects everything within a drawn circle.
+  description: >-
+    The spell affects everything within a circle drawn by the magus at the time of casting,
+    and ends if the circle is broken, even if that is before the duration of the spell expires.
+    The spell also ends when its duration ends. See Ring, above, for restrictions on drawing
+    the circle. One circle may serve to underwrite both Ring Duration and Circle Target. Circle
+    is a container Target. Individual and Circle are the same level of effect.
+  notes:
+  - Circles are very vulnerable, offsetting the power of Ring Duration and Circle Target.
+- key: Part
+  name: Part
+  kind: object
+  magnitudes: 1
+  ritual: false
+  summary: The spell can affect a part of a discrete thing.
+  description: >-
+    The spell can affect a part of a discrete thing, such as a person's arm or a section of
+    the ground. This target refers to spatial parts, parts that you could, at least in theory,
+    cut off and put in a bag. A person's mind is not a part of him in this sense, nor is his
+    sense of humor. His heart, however, is. Something is only a Part target while it is actually
+    a part of something else; things, like severed arms, that used to be part of something,
+    or, like bricks, which could become part of something, are Individual targets as long
+    as they are not currently part of something else. Part is harder than Individual because
+    whole things are metaphysically important. It is easier to affect a thing as a whole than
+    to affect a part of it. Part is an object Target.
+  notes: []
+- key: Group
+  name: Group
+  kind: object
+  magnitudes: 2
+  ritual: false
+  summary: The spell can affect a group of people or things.
+  description: >-
+    The spell can affect a group of people or things. The components of the group must be
+    close together in space, and the group itself must be separated from any other things
+    of the same type. Three grogs huddled together or a ring of standing stones are a group:
+    six people out of a crowd are usually not. The things in the Group when the spell is cast
+    are affected for the entire duration, even if they split up. Things that join the Group
+    during the spell duration are not affected. It is possible to target a 'Group' with a
+    single member, although an Individual target will always be lower level. Group is an object
+    Target.
+  notes: []
+- key: Room
+  name: Room
+  kind: container
+  magnitudes: 2
+  ritual: false
+  summary: The spell affects everything within a chamber.
+  description: >-
+    The spell affects everything within a chamber. The interior surfaces of the walls of the
+    room are within the Target, but their exterior surfaces are not. This room can be very
+    large (the nave of a cathedral, for instance, or a natural cave), but it must be enclosed
+    and have definite boundaries. A courtyard would often count, a valley would not. A spell
+    with Target Room is useless if there is no Room containing the targets; it cannot affect
+    a 'roughly room-sized volume' in open space. Room is a container Target. Group and Room
+    are the same level of effect.
+  notes: []
+- key: Str
+  name: Structure
+  kind: container
+  magnitudes: 3
+  ritual: false
+  summary: The spell affects everything within a single structure.
+  description: >-
+    The spell affects everything within a single structure. The structure itself counts as
+    within the structure for these purposes, as the limit is the outer edge of any walls.
+    The structure can range in size from a hut to a castle keep, but it must be a single,
+    linked complex. As a rule of thumb, if it is all covered by one roof, it is one structure,
+    but troupe discretion applies. As with Room, target Structure is no use if there is no
+    pre-existing structure bounding the target. Structure is a container Target.
+  notes: []
+- key: Bound
+  name: Boundary
+  kind: container
+  magnitudes: 4
+  ritual: true
+  summary: The spell affects everything within a well-defined boundary.
+  description: >-
+    The spell affects everything within a well-defined natural or man-made boundary. This
+    could be the wall of a city, the edge of a village, the shores of a lake, the edge of
+    a forest, or the bottom of a mountain. Since the ocean is not obviously bounded, it cannot
+    be affected in this way. As with Room and Structure, there must actually be a boundary
+    for this target to be useful. It cannot be used to simply affect a really big area. A
+    spell with this target must be a Ritual. Boundary is a container Target.
+  notes: []
+- key: Taste
+  name: Taste
+  kind: sense
+  magnitudes: 0
+  ritual: false
+  summary: Information comes through the sense of taste.
+  description: >-
+    The information comes through the sense of taste. This target is equal in level to Individual.
+    Intellego spells can grant magical senses to a person. These spells allow the recipient
+    to detect things that he could not normally sense. Each magical sense Target grants the
+    recipient information through one of his senses. This information is easily distinguished
+    from mundane information coming through the same sense, but it is subject to the same
+    limitations as the mundane sense. Magical senses must penetrate the Magic Resistance of
+    creatures sensed, as well as the Magic Resistance (if any) of the person granted the sense.
+    The mundane sense through which the magical sense grants information does not need to
+    penetrate Magic Resistance. A single spell grants a single magical sense. To gain several
+    magical senses, you must cast several spells.
+  notes: []
+- key: Touch
+  name: Touch
+  kind: sense
+  magnitudes: 1
+  ritual: false
+  summary: Information comes through the sense of touch.
+  description: >-
+    The information comes through the sense of touch. This target is equal in level to Part.
+    Intellego spells can grant magical senses to a person. These spells allow the recipient
+    to detect things that he could not normally sense. Each magical sense Target grants the
+    recipient information through one of his senses. This information is easily distinguished
+    from mundane information coming through the same sense, but it is subject to the same
+    limitations as the mundane sense. Magical senses must penetrate the Magic Resistance of
+    creatures sensed, as well as the Magic Resistance (if any) of the person granted the sense.
+    The mundane sense through which the magical sense grants information does not need to
+    penetrate Magic Resistance. A single spell grants a single magical sense.
+  notes: []
+- key: Smell
+  name: Smell
+  kind: sense
+  magnitudes: 2
+  ritual: false
+  summary: Information comes through the sense of smell.
+  description: >-
+    The information comes through the sense of smell. This target is equal in level to Group.
+    Intellego spells can grant magical senses to a person. These spells allow the recipient
+    to detect things that he could not normally sense. Each magical sense Target grants the
+    recipient information through one of his senses. This information is easily distinguished
+    from mundane information coming through the same sense, but it is subject to the same
+    limitations as the mundane sense. Thus, a magical sense that works with the sense of smell
+    is very bad at giving direction, and can be avoided by staying upwind of the sensor. Magical
+    senses must penetrate the Magic Resistance of creatures sensed, as well as the Magic Resistance
+    (if any) of the person granted the sense. A single spell grants a single magical sense.
+  notes: []
+- key: Hearing
+  name: Hearing
+  kind: sense
+  magnitudes: 3
+  ritual: false
+  summary: Information comes through the sense of hearing.
+  description: >-
+    The information comes through the sense of hearing. This target is equal in level to Structure.
+    Intellego spells can grant magical senses to a person. These spells allow the recipient
+    to detect things that he could not normally sense. Each magical sense Target grants the
+    recipient information through one of his senses. This information is easily distinguished
+    from mundane information coming through the same sense, but it is subject to the same
+    limitations as the mundane sense. Magical senses must penetrate the Magic Resistance of
+    creatures sensed, as well as the Magic Resistance (if any) of the person granted the sense.
+    A single spell grants a single magical sense.
+  notes: []
+- key: Vision
+  name: Vision
+  kind: sense
+  magnitudes: 4
+  ritual: false
+  summary: Information comes through the sense of sight.
+  description: >-
+    The information comes through the sense of sight. This target is equal in level to Boundary,
+    but, unlike Boundary, it does not require Ritual magic. Intellego spells can grant magical
+    senses to a person. These spells allow the recipient to detect things that he could not
+    normally sense. Each magical sense Target grants the recipient information through one
+    of his senses. This information is easily distinguished from mundane information coming
+    through the same sense, but it is subject to the same limitations as the mundane sense.
+    Thus, a magical sense that works with vision is no good in the dark. Magical senses must
+    penetrate the Magic Resistance of creatures sensed, as well as the Magic Resistance (if
+    any) of the person granted the sense. A single spell grants a single magical sense.
+  notes: []
+forms:
+- name: Animal
+  book: core
+  base_individual: >-
+    A basic Individual for Animal is an animal of about the same size as a pony, Size +1 or
+    lower.
+  notes:
+  - >-
+    Animal spells affect all natural living things that are not plants or humans, doing to
+    animals what Mentem and Corpus spells do to people. Animal spells may affect any animal-like
+    mind or body. They also affect things made with animal products, such as leather, bone,
+    or wool.
+  - >-
+    To tell if an Animal spell will affect the mind of a creature, determine from the animal's
+    Characteristics if it has Cunning or Intelligence. If the creature has Intelligence, a
+    Mentem spell must be used. If it has Cunning, an Animal spell must be used. When a creature
+    or person who has an Intelligence Characteristic is shapechanged, Animal spells that affect
+    the mind are not effective. Instead, Mentem spells are needed. However, the body of such
+    a being may be affected by Animal spells, including spells like The Falcon's Hood (PeAn
+    20).
+  - >-
+    If a human body has animal parts (such as bat wings), those parts can be affected by Animal
+    spells, even though the rest of the body is only affected by Corpus spells.
+  - >-
+    A Bjornaer magus in animal form is truly an animal, so his mind is affected by Animal
+    spells rather than Mentem spells, and his body by Animal spells rather than Corpus spells.
+    However, spells with continuing effects cast on one form continue to affect the other.
+    Most shapechangers do not change their essential nature, which remains human, so their
+    bodies can still be affected by Corpus spells, as well as by Animal.
+- name: Aquam
+  book: core
+  base_individual: >-
+    A base Individual for Aquam is a pool of water about five paces (fifteen feet) across,
+    and two paces deep at the center. Naturally-occurring liquids, such as fruit juice or
+    olive oil, have a base Individual one-tenth the size, about two paces across and about
+    one deep. Processed liquids, such as wine or beer, have a base Individual one hundredth
+    the size, a pool about one pace across and half a pace deep. Corrosive and otherwise dangerous
+    liquids have a base Individual ten times smaller again, a puddle about half a pace across
+    and about a fifth of a pace deep. Poisons have a base Individual of a single dose.
+  notes:
+  - >-
+    Aquam spells affect water and all other liquids. Liquids that are part of a body, particularly
+    a living body, can only be affected by spells designed specifically to do so, with appropriate
+    requisites.
+  - >-
+    The application of the target categories to Aquam magic is not as obvious as it is for
+    some other Forms, so further guidelines are given here. If the standard targets do apply,
+    they may also be used.
+  - >-
+    Individual: A stretch of water with the same composition and current. A small pond, part
+    of a stream, or a spring.
+  - 'Part: A part of an Individual. This category applies easily.'
+  - >-
+    Group: A number of Individuals. This can include a large river, where there are several
+    different currents, a number of rivers flowing together, or a lake.
+  - >-
+    Room, Structure and Boundary: work as for other Forms; the spell affects all the liquid
+    within the target area.
+- name: Auram
+  book: core
+  base_individual: >-
+    A base Individual for Auram is a weather phenomenon that affects the area within a standard
+    Boundary — an area one hundred paces across.
+  notes:
+  - >-
+    Auram spells are powerful because the element of air is ubiquitous. Their weakness is
+    that air is not usually violent, like fire, nor strong, like earth. Auram, however, includes
+    in its scope most weather phenomena such as storms, lightning, rain, mist, and falling
+    snow. Auram spells usually affect air as phenomena (winds, odors) rather than as gases.
+  - >-
+    Some target categories for Auram require some clarification. If the normal descriptions
+    apply, they can, of course, be used.
+  - 'Individual: A single phenomenon: one cloud, one wind, one bolt of lightning.'
+  - 'Group: Several related phenomena, such as the clouds, wind, and rain in a storm.'
+- name: Corpus
+  book: core
+  base_individual: A base Individual for Corpus is an adult human being, up to Size +1.
+  notes:
+  - >-
+    Corpus spells deal with human or humanlike bodies and anything that involves those bodies.
+    Many faeries have enough in common with humans to be affected by Corpus spells.
+- name: Herbam
+  book: core
+  base_individual: A base Individual for Herbam is a plant roughly one pace in each direction.
+  notes:
+  - >-
+    Herbam spells work on plants and plant matter, both living and dead. Since wood is a common
+    material in weapons, vehicles, and buildings, Herbam spells can be useful in improving
+    or destroying physical things. They can also be used to bring the plant world to your
+    aid.
+- name: Ignem
+  book: core
+  base_individual: >-
+    The base Individual for Ignem is a large campfire or the fire in the hearth of a great
+    hall.
+  notes:
+  - >-
+    As fire is volatile and dangerous, so are these spells. Magi who pursue the Art of fire
+    do so with fine regard for the dangers and powers involved, for fire is both dangerous
+    and mighty, to friend and foe alike. Storyguides should make Ignem botches particularly
+    deadly.
+  - >-
+    Light and heat also fall within the domain of this Form. It's important to remember that
+    heat also includes relative absence of heat, so spells that result in cold temperatures
+    are possible through Ignem.
+  - Fire damage is explained on page 407.
+- name: Imaginem
+  book: core
+  base_individual: >-
+    A base Individual for Imaginem is the equivalent of an adult human being, whether a visual
+    image of about that size, an auditory illusion making that much noise, or whatever.
+  notes:
+  - >-
+    Imaginem is the Form of sensations and illusion. By using Imaginem, you can alter what
+    others perceive. Imaginem, however, means "image," not "illusion." Thus, one creates,
+    transforms, perceives, destroys, and controls images, not necessarily illusions. A clairvoyance
+    spell, therefore, is Intellego Imaginem because it detects real images. By manipulating
+    sensations, however, you can create effective illusions.
+  - >-
+    The Art of Imaginem rewards the creative magus by fooling people into actions they would
+    otherwise shun: for instance, they might walk off a cliff, while their eyes tell them
+    there is a bridge over the chasm. Imaginem cannot affect light, as that is part of Ignem,
+    but it can affect the things that light allows you to see.
+  - >-
+    Stenches and perfumes, tints and stains, color and shadow, melody and cacophony, sweet
+    and sour; all these are perceptions, and so can be manipulated by the Art of Imaginem.
+    An image works on the senses, not on the mind, so an unthinking beast is as likely to
+    believe an image as an imaginative human. Similarly, everyone can sense an illusion created
+    by Imaginem magic. Nevertheless, Imaginem spells are still most effective at fouling the
+    communication on which human society depends.
+  - >-
+    Beasts are likely to be fooled by illusions, as are the simpler undead. Demons are very
+    hard to deceive, while faeries often see through illusions and manipulate them to fool
+    you in turn.
+  - >-
+    Certain members of the Church have proven remarkably adept at discerning truth from illusion,
+    though the talent is not dependable.
+  - >-
+    It is more difficult to mimic a specific object or person using an Imaginem spell than
+    it is to mimic a general image. and requires a Perception + Finesse stress roll. For example,
+    it is easier to imitate a generic gold ring than it is to reproduce the gold ring with
+    inscriptions that the baron presented to his wife on the occasion of their tenth wedding
+    anniversary. The higher the roll, the better you can fool people. You get a bonus to your
+    roll for familiarity with what you are mimicking (-3 for an unfamiliar object, +3 for
+    highly familiar objects or for having the subject available for modeling). For mimicking
+    people, a roll against an Ease Factor of 6 lets you fool acquaintances of the person,
+    an Ease Factor of 9 lets you fool friends, and an Ease Factor of 12 lets you fool close
+    friends and relatives. Use a similar scale for mimicking objects. If you botch the Finesse
+    roll, you may think the image is satisfactory, but it's immediately seen through once
+    in use.
+- name: Mentem
+  book: core
+  base_individual: >-
+    A single mind. Minds do not have a size, so size modifiers do not apply to Mentem effects
+    with Individual targets — but minds can be counted, so Groups still need a size boost
+    to reach more people.
+  notes:
+  - >-
+    Mentem spells govern thoughts, emotions, and memories. Intelligent minds are affected
+    by Mentem spells, while the minds of beasts are affected only by Animal spells and those
+    of elementals, in so far as they have them, by the appropriate elemental Form. The mental
+    Characteristics are Intelligence, Perception, Presence, and Communication, and they can
+    be affected by Mentem spells.
+  - >-
+    Since the effects of Mentem spells are not usually visible, they give you a great deal
+    of power when dealing with the common folk. Even spells requiring eye contact are relatively
+    inconspicuous when cast without voice or gestures, but only powerful magi can cast spells
+    this way in the Dominion.
+  - >-
+    Minds do not have a size, so size modifiers do not apply to Mentem effects with Individual
+    targets. However, minds can be counted, so for Groups you still need to boost the size
+    to affect more people. Similarly, Mentem spells affecting everyone in a Room, Structure,
+    or Boundary have size modifiers in the normal way.
+  - >-
+    Community Gloss: Art & Academe discusses how the Hermetic Art of Mentem fits into medieval
+    philosophy. In the description of House Jerbiton in Houses of Hermes: Societatas, the
+    application of Mentem is discussed in regards to creating emotional bias (personality
+    traits) and diminishing mental capacity.
+- name: Terram
+  book: core
+  base_individual: >-
+    The base Individual for Terram depends on the material involved. For sand, dirt, mud,
+    clay, or similar substances, it is about ten cubic paces of stuff. For stone, it is a
+    single cubic pace. For base metals, it is a cubic foot, while for precious metals it is
+    a tenth of that. For gemstones, the base individual is one cubic inch in size.
+  notes:
+  - >-
+    Terram spells, in addition to covering earth, stone, clay, metal, and glass, can sometimes
+    affect inanimate objects in general. For instance, Wielding the Invisible Sling (ReTe
+    10) throws all manner of nonliving things.
+  - >-
+    Though Terram spells affect all manner of solid objects, it is harder to affect certain
+    materials: Here, in increasing order of difficulty, are the materials Terram spells affect:
+    earth (sand, dirt, mud), clay, stone, glass, metal, gemstones. Each level of difficulty
+    does not necessarily represent an increase in one level of magnitude.
+- name: Vim
+  book: core
+  base_individual: >-
+    The Individual target for a Vim spell can refer to either an individual spell, or an individual
+    object or person, and similarly for Group.
+  notes:
+  - >-
+    Vim spells are very useful. They help you use your spells to better effect, and since
+    using spells efficiently is what being a master magus is all about, these spells are very
+    important. With imagination, you can use these spells to make wards, alarms, one-use magic
+    items, and other interesting things. Many Vim spells are meant to be cast along with other
+    spells, and modify or change their effects.
+  - >-
+    Vim magic also encompasses dealing with demons. Summoning and dealing with demons is prohibited
+    within the Order, but fighting them is allowed.
+  - >-
+    Magi often use Vim to counteract magical phenomena. Storyguides should assign spell levels
+    for all magical phenomena that those using Vim counterspells will have to match.
+  - >-
+    Most Vim spells are of General level, because the magic that Vim spells affect varies
+    widely in power. A spell to dispel a first magnitude spell needs to be much less powerful
+    than a similar spell to dispel a fifth magnitude effect. The guidelines provided for Vim
+    spells take account of this, and rather than giving an absolute level for a corresponding
+    effect, they give the relationship that the level of the Vim spell must bear to the level
+    of the target.
+  - >-
+    As usual, these guidelines refer to a spell with the basic Range, Duration and Target.
+    When changing these parameters the change in level should be taken account of before multiplying
+    or dividing the spell level to get the effect. Thus, a version of Wind of Mundane Silence
+    (PeVi) with Sight range would dispel a spell with a level of up to half (spell level -5
+    + stress die). Ten levels of the spell's power are devoted to increasing the Target to
+    Room, and 15 to increasing the Range to Sight, and only the remaining power is available
+    for the spell.
+  - >-
+    If the target is an object or person, the Vim spell will affect any suitable magic affecting
+    that person, not just one spell. Most such spells can only be cast on either other spells
+    or individuals, but, if the description suggests that they could be cast on either, then
+    they can. For example, Mirror of Opposition can only be cast on other spells, while The
+    Phantom Gift can only be cast on people.
+  - >-
+    Spells and magical effects do not have sizes, so size modifications do not apply to the
+    levels of Individual Target Vim spells. However, Vim spells affecting areas, or number
+    of spells, must be increased in level for large areas or large numbers, as normal.
+  - >-
+    The guidelines below refer mainly to spells. This is for the sake of brevity, as Vim spells
+    can affect magical effects proceeding from magical items, magical creatures, or demons.
+    However, unless specifically stated otherwise, the spells do not affect magical items,
+    only the effects that they produce. Thus, Wind of Mundane Silence could dispel a stone
+    wall produced by a magical item, but Disenchant is needed to dispel the magic of the item
+    itself.
+  - >-
+    It should be noted that Hermetic magi, and most non-Hermetic wizards, do not have Might
+    scores, and thus are not affected by wards or other spells that act against Might scores.
+art_notes:
+- technique: Creo
+  form: Animal
+  book: core
+  notes:
+  - >-
+    Most Animal spells cannot be used with Personal range, so the level of a spell must be
+    higher than the guidelines given.
+  - >-
+    To create treated animal products (like leather, jointed meat, and cloth) add one magnitude
+    to the level necessary to create the equivalent amount of dead animal. To create treated
+    and processed animal products, such as a leather jacket or a woolen tunic, add two magnitudes
+    to the level necessary to create the equivalent amount of dead animal.
+  - >-
+    In order to influence the behavior of created animals, a Rego requisite is required, and
+    as this is an additional effect it adds at least one magnitude to the spell level. Otherwise
+    they just do what comes naturally.
+  - >-
+    Creo Animal botches often produce the wrong sort of animal, or produce an animal enraged
+    with the caster.
+- technique: Intellego
+  form: Animal
+  book: core
+  notes:
+  - >-
+    When you try to get information from an animal, remember that its memories are gathered
+    through its particular senses, with their particular strengths and weaknesses. For example,
+    dogs remember much about odors of various things, but often forget details of how they
+    looked. Animals do not remember human words, but might remember tone of voice and such.
+    You may not get the exact information you are looking for.
+  - >-
+    To communicate with an animal, you must bring yourself to the animal's mental level —
+    a process that might have strange, though temporary, effects on you. For example, you
+    might have a craving for raw meat or speak very slowly for a moment after communicating
+    with a bear.
+  - >-
+    Since Animal includes aspects of both Corpus and Mentem with regard to beasts, guidelines
+    that apply to the latter two may apply to Animal. InCo and InMe may be referred to for
+    additional ideas.
+  - Botches with InAn normally result in false information.
+- technique: Muto
+  form: Animal
+  book: core
+  notes:
+  - >-
+    Animals granted new abilities, such as wings, will need a few minutes to get used to them.
+    When transforming things, you can transform things that they are carrying with appropriate
+    requisites. For example, you could transform a horse and its armor with a Terram requisite.
+  - >-
+    Animals are not infinitely mutable, and using too many of these spells for too long on
+    an animal can warp its natural constitution and even destroy it. Muto Corpus spells may
+    be examined to get additional ideas and guidelines for Muto Animal Spells. Common sigils
+    seen in Muto Animal spells involve animals being changed in some strange way. Beasts transformed
+    by Julian of Flambeau, with The Beast Remade (MuAn 25), might have bright red hair in
+    their new form, while toads created by Silva of Merinita, with Transformation of the Ravenous
+    Beast to the Torpid Toad (MuAn 30), might have a comical coloration.
+  - >-
+    MuAn botches often change the caster instead of the target, or change the target in a
+    way very different from that intended.
+- technique: Perdo
+  form: Animal
+  book: core
+  notes:
+  - >-
+    There is normally no Soak against Perdo Animal — the magic does not create something that
+    causes damage, it just causes damage. Magic Resistance is the only way to withstand it.
+  - >-
+    A common sigil among Flambeau magi, and others who cast Perdo spells, is to leave some
+    type of mark with the damage they do.
+  - When inventing new spells, you may wish to consult Perdo Corpus for guidelines and ideas.
+  - PeAn botches might affect the caster, or affect the wrong animal.
+- technique: Rego
+  form: Animal
+  book: core
+  notes:
+  - >-
+    You may further refer to Corpus for ideas and guidelines on controlling an animal's body,
+    and Rego Mentem spells for ideas and guidelines on controlling an animal's mind.
+  - Sigils typical in Rego Animal spells are those that cause beasts to act in certain ways.
+  - >-
+    ReAn botches could put the caster under the control of the animal, or make the animal
+    act in a way opposite to that intended. They could also appear to work, and then suddenly
+    reverse at an extremely inconvenient moment.
+- technique: Creo
+  form: Aquam
+  book: core
+  notes:
+  - >-
+    Water created temporarily quenches thirst but provides no lasting benefits to the drinker.
+    It can be used to wash, and the things washed stay clean. Common sigils for Creo Aquam
+    spells include water with a specific scent, color, or flavor.
+  - >-
+    CrAq botches might create far too much water (think of the Sorcerer's Apprentice), or
+    the wrong kind of liquid.
+  - >-
+    Slightly unnatural liquids are one magnitude harder than water, very unnatural liquids
+    are two magnitudes harder, and require a Muto requisite.
+  - >-
+    Poisons created at the guideline level have an Ease Factor of 3. Each magnitude added
+    to the level of the spell adds 3 to the Ease Factor.
+- technique: Intellego
+  form: Aquam
+  book: core
+  notes:
+  - >-
+    Note that Intellego Aquam spells do not normally require requisites depending on the type
+    of liquid targeted.
+  - >-
+    Most sigils manifest in Intellego Aquam spells by causing the information to be reported
+    in some slightly quirky way. For example, Chavin of Tytalus's version of Voice of the
+    Lake always makes the lake sound strong, masculine, and arrogant.
+  - Botched InAq spells generally provide false information.
+- technique: Muto
+  form: Aquam
+  book: core
+  notes:
+  - >-
+    You cannot transform liquids within someone's body unless the spell is designed that way
+    (and has a Corpus or Animal requisite).
+  - >-
+    Muto Aquam botches might change liquids inside the caster, change the wrong liquid outside
+    him, or change the liquid in the wrong way.
+  - >-
+    Poisons created at the guideline level have an Ease Factor of 3. For every magnitude added
+    to the spell, add three to the Ease Factor.
+- technique: Perdo
+  form: Aquam
+  book: core
+  notes:
+  - >-
+    As magnitudes in these spells rise, the destruction caused becomes more subtle, or more
+    pervasive. Sigils commonly seen in Perdo Aquam spells usually involve destruction in some
+    specific way. Destroying water that is part of something, such as the fluid in a human
+    being, requires a target of Part. Destroying water that is merely on someone, such as
+    the water making a person wet, only needs a target of Individual.
+  - >-
+    Perdo Aquam botches might destroy all water in the caster, as Curse of the Desert, or
+    create water instead of destroying it.
+- technique: Rego
+  form: Aquam
+  book: core
+  notes:
+  - >-
+    Rego Aquam can change water into ice or steam, because these are both states that water
+    can have naturally.
+  - >-
+    Rego Aquam botches generally involve spectacular and dangerous loss of control of the
+    water.
+  - >-
+    Add one magnitude if the controlled movement is slightly unnatural, two if it is very
+    unnatural.
+- technique: Creo
+  form: Auram
+  book: core
+  notes:
+  - >-
+    Weather phenomena are normally created at Sight range. This is because most weather phenomena
+    (clouds, rain, storms, and so on) naturally begin in the upper air, and so spells to create
+    weather must have enough Range to reach this area. It is possible to create weather phenomena
+    that start at ground level, but they are often very unnatural, and the increase in level
+    for that precisely offsets the decrease from reducing Range to Touch. A flying wizard
+    could, of course, use Touch range to create natural weather phenomena, but such spells
+    are not very popular in the Order.
+  - >-
+    Sigils in Creo Auram spells commonly give the air specific properties, such as special
+    scents or colors.
+  - >-
+    Creo Auram botches may create the wrong sort of weather, or create it targeted at the
+    caster or some other ally.
+- technique: Intellego
+  form: Auram
+  book: core
+  notes:
+  - Intellego Auram botches normally reveal false information.
+- technique: Muto
+  form: Auram
+  book: core
+  notes:
+  - Transforming only one property of air generally lowers the level by one magnitude.
+  - >-
+    Muto Auram botches could change the caster temporarily into air, or change the air in
+    an undesirable way.
+- technique: Perdo
+  form: Auram
+  book: core
+  notes:
+  - >-
+    Causing the destruction of air with great precision raises the magnitude by at least one
+    level.
+- technique: Rego
+  form: Auram
+  book: core
+  notes:
+  - >-
+    Rego Auram allows the maga to control existing weather phenomena. It is not possible to
+    create a breeze with Rego Auram, but it is possible to direct the course of a storm. This
+    includes starting and stopping the rain at the maga's command.
+  - >-
+    Controlling an amount of air with great strength or great precision raises the magnitude
+    of the spell by one level.
+- technique: Creo
+  form: Corpus
+  book: core
+  notes:
+  - >-
+    Many Creo Corpus spells are most useful as Ritual spells. Unless otherwise noted, a healing
+    spell cast other than as a Momentary Duration Ritual actually suspends the healing process
+    so that, upon the spell's expiration, wounds are as fresh as they were when the spell
+    was cast. No Hermetic spell can restore Fatigue levels.
+  - >-
+    A spell that can heal something can also heal less serious versions of the same thing.
+    Thus, a spell that can heal Medium Wounds can also heal Light Wounds. However, a spell
+    to heal wounds cannot cure diseases, no matter how high its level, and vice versa. Spells
+    that give a bonus to Recovery rolls work no matter what the character is recovering from.
+  - >-
+    The physical characteristics are Strength, Stamina, Dexterity, and Quickness, and they
+    can be affected and improved by Corpus magic.
+  - Creo Corpus botches often inflict damage instead of healing it.
+  - Creo Animal spells may be used as guidelines and examples for Creo Corpus spells.
+- technique: Intellego
+  form: Corpus
+  book: core
+  notes:
+  - >-
+    Common sigils seen in Intellego Corpus spells usually report information in some strange
+    or quirky way.
+  - Like most Intellego botches, Intellego Corpus botches normally provide false information.
+- technique: Muto
+  form: Corpus
+  book: core
+  notes:
+  - >-
+    These spells transform people. There are beneficial spells to cast on yourself and your
+    companions, and harmful spells to cast on your foes.
+  - >-
+    Transformations do not usually completely eradicate the original form; something of the
+    original remains. If you turn a fat, one-armed man into a wolf, the wolf is fat, three-legged,
+    and male.
+  - >-
+    Transformations can have subtle (or sometimes dramatic) permanent effects. Someone who
+    spends a month or more as an animal begins to act and think like that animal. Eventually,
+    weak-willed individuals might lose their human identity altogether. When transformed back
+    into a human, the target might temporarily or permanently retain some feature of the other
+    shape. Someone turned into a rabbit and back might keep a fondness for carrots or retain
+    unnaturally big ears. Transformations are tricky things.
+  - >-
+    Muto Corpus spells cannot alter a person's mind, so they leave the transformed person's
+    intelligence and knowledge intact. Magi can cast spells while in animal form, but they
+    suffer the normal -15 penalty for casting without hands or voice. The transformed person
+    gains any abilities the animal form has though it may take a day or so of experience to
+    get used to using them.
+  - >-
+    To change accouterments along with the body involves requisites. For example, you need
+    a casting requisite of Animal for leather worn, Aquam for any liquids carried, and Terram
+    for metal objects worn (including studs in armor). Accouterments are transformed only
+    if they are actually being worn, not if they are just being carried in the hand. Simply
+    put, equipment will not be transformed for one of two reasons: either because you choose
+    not to use the casting requisites or because the storyguide rules that the equipment is
+    not sufficiently part of the target's worn equipment. This untransformed equipment falls
+    to the ground.
+  - >-
+    Certain shapechanging spells allow the target to change back by concentrating. While concentrating,
+    you symbolically remove some item to break the spell, such as a wolfskin cloak or some
+    water in your hands. These foci are essential if you are to be able to break the spell
+    in this way. If you cast the spell without them, you must either dispel the magic with
+    Perdo Vim, or wait for the duration to expire.
+  - Muto Corpus botches may lead to a spell lasting indefinitely, and proving hard to dispel.
+- technique: Perdo
+  form: Corpus
+  book: core
+  notes:
+  - >-
+    These spells harm people directly, often permanently, unless outside magics are used to
+    repair the damage.
+  - >-
+    Diseases caused by magic have a base Ease Factor of 6. For every magnitude by which the
+    spell level increases, the Ease Factor increases by 1. It is not possible to reduce the
+    level by reducing the Ease Factor.
+- technique: Rego
+  form: Corpus
+  book: core
+  notes:
+  - >-
+    Rego Corpus botches often take control of the caster's body, and move it in ways he would
+    not want.
+  - >-
+    Rego Corpus can be used to perform surgery. Detailed rules for surgery can be found in
+    Art and Academe.
+- technique: Creo
+  form: Herbam
+  book: core
+  notes:
+  - >-
+    These spells create and heal plants. Any food created is nutritious only if the creation
+    is a Ritual. The guideline levels given below are generally for conjuring the leafy parts
+    of plants.
+  - >-
+    Plants may be created living or dead with equal ease. To create treated Herbam products
+    (for example, cut timber, a vegetarian meal, or linen or cotton cloth) add one magnitude
+    to the level necessary to create the equivalent amount of unworked living or dead plants.
+    To create treated and processed Herbam products (for example, clothes or furniture), add
+    two magnitudes.
+  - A single spell generally only creates a single type of plant product.
+  - >-
+    Creo Herbam botches may create plants in the wrong place, or create the wrong kind of
+    plant.
+- technique: Intellego
+  form: Herbam
+  book: core
+  notes:
+  - As with most Intellego magic, Intellego Herbam botches generally give false information.
+- technique: Muto
+  form: Herbam
+  book: core
+  notes:
+  - >-
+    These guidelines assume that when you change a plant, it's still a plant in some way.
+    Changing a plant into something else usually involves a spell one level of magnitude higher
+    than the guideline most appropriate to the action. To change plants into treated or finished
+    material (for example, wooden furniture, a vegetarian meal, linen or cotton cloth) add
+    one magnitude to the level necessary to change plants into natural, unworked plants.
+  - >-
+    Muto Herbam botches may turn the caster into a plant, or turn the target into an animated
+    plant hostile to the caster.
+- technique: Perdo
+  form: Herbam
+  book: core
+  notes:
+  - >-
+    These spells destroy plants and plant material. Since many items are made of wood, these
+    spells can be quite destructive. The guidelines given are for destroying dead wood. Destroying
+    live wood is usually a bit harder — add one magnitude.
+  - >-
+    Perdo Herbam botches normally destroy the wrong thing, possibly including some of the
+    caster's clothing.
+- technique: Rego
+  form: Herbam
+  book: core
+  notes:
+  - It is equally easy to control living and dead wood.
+  - >-
+    Rego Herbam botches normally result in the wood doing something contrary to what the caster
+    wants.
+- technique: Creo
+  form: Ignem
+  book: core
+  notes:
+  - >-
+    Spells that create fires are versatile weapons — destructive to living things, undead,
+    buildings, and morale. Those who depend on fire spells, however, risk botching. Fire is
+    an unforgiving element for those who lose control of it, and self-incineration is always
+    a possibility.
+  - >-
+    Typical sigils seen in Creo Ignem spells involve the flame being a specific color or shape,
+    or giving off an unusual smell.
+- technique: Intellego
+  form: Ignem
+  book: core
+  notes:
+  - >-
+    Intellego Ignem botches typically provide false information, although they may also render
+    the caster incapable of detecting heat or flames for a time.
+- technique: Muto
+  form: Ignem
+  book: core
+  notes:
+  - >-
+    The intensity of a fire also affects the difficulty of changing it. For every five points
+    by which the fire's damage exceeds +5, add one magnitude to the level of the spell.
+- technique: Perdo
+  form: Ignem
+  book: core
+  notes:
+  - >-
+    The intensity of a fire also affects the difficulty of destroying it. For every five points
+    by which the fire's damage exceeds +5, add one magnitude to the level of the spell.
+  - Perdo Ignem botches might create fire instead of destroying it, or freeze the caster.
+- technique: Rego
+  form: Ignem
+  book: core
+  notes:
+  - >-
+    The intensity of a fire also affects the difficulty of controlling it. For every five
+    points by which the fire's damage exceeds +5, add one magnitude to the level of the spell.
+  - Rego Ignem spells can control heat or light as well as fire.
+  - >-
+    Rego Ignem botches normally result in the fire doing exactly what the caster does not
+    want.
+- technique: Creo
+  form: Imaginem
+  book: core
+  notes:
+  - >-
+    These spells create and restore images. It is important to note that Creo Imaginem spells
+    only create the images of things, not the things themselves. An image of a bucket will
+    not hold water poured into it, nor will the image of a horse be able to carry a rider.
+    This is often the first (and most important) clue that the image is just an illusion.
+    On the other hand, the illusion of a wall may feel solid, but will present no resistance
+    if someone pushes a hand through it.
+  - >-
+    Increasing the complexity of a sensory perception, such as making a moving visual image
+    or making clear words instead of noise, adds an additional level of magnitude. Making
+    an image move or make noise at your direction as you concentrate adds two levels of magnitude.
+    In addition, very intricate images (for example, an intricately ornamented bridge) are
+    generally one level of magnitude higher as well.
+  - >-
+    Wizard's sigils can be very obvious in Creo Imaginem spells. The illusions commonly have
+    some small quirk that marks them as belonging to a certain magus. For example, illusions
+    cast by Fortunatus of Jerbiton often have some small religious icon worked into their
+    structure, due to the manner in which he invents his spells.
+  - >-
+    Creo Imaginem botches might create obvious illusions which are clearly linked to the caster,
+    thus marking him as a wizard.
+- technique: Intellego
+  form: Imaginem
+  book: core
+  notes:
+  - >-
+    Generally, these spells have the least to do with illusions of all the Imaginem spells,
+    because one detects an image without altering or controlling it. These spells improve
+    upon your senses by bringing in images (usually sounds and sights) not normally available.
+  - >-
+    Note that seeing or hearing into another room or a hundred miles away does you no good
+    if there is no light or sound there. As in CrIm spells, each additional sense you wish
+    to perceive increases the level of the spell by one magnitude.
+  - As with most Intellego magic, Intellego Imaginem botches normally give false information.
+- technique: Muto
+  form: Imaginem
+  book: core
+  notes:
+  - >-
+    These are useful and powerful illusion spells, altering the visual image, noises, smell,
+    or taste of some object or being. The image remains altered without your concentration
+    and adapts itself appropriately to the medium. The accuracy of duplication depends on
+    your knowledge of the subject. For instance, if you want to make a voice like that of
+    a specific person, you must be familiar with the voice that you want to mimic. Those more
+    familiar with the face, voice, body, or other aspect being mimicked might see through
+    an illusion by mundane means ("Duke Tybol, isn't your scar on your left cheek?").
+  - >-
+    Muto Imaginem, or indeed other Imaginem magic, cannot overcome the effects of The Cift,
+    although it might offset them a little.
+  - >-
+    Muto Imaginem botches often change the caster's appearance in dangerous or embarrassing
+    ways.
+- technique: Perdo
+  form: Imaginem
+  book: core
+  notes:
+  - >-
+    In addition to destroying created images, these spells dull the sensual properties of
+    things — making wine tasteless, sneaks silent, and magi invisible. Destroying changing
+    images is more difficult — add one level of magnitude to spells that do so.
+  - >-
+    Note that images are naturally generated constantly, so that a Perdo Imaginem spell with
+    Momentary duration merely makes an object seem to flicker for a moment. Longer durations
+    are required if the image is to stay gone.
+  - >-
+    Note also that shadows are due to the physical body blocking the light. Destroying something's
+    shadow is thus Creo Ignem, or possibly Rego Ignem, not Perdo Imaginem. Mirror images,
+    however, are caused by the species bouncing off the mirror, so a spell destroying (or
+    changing) the species also changes mirror images.
+  - Perdo Imaginem botches might make the image more intense, or destroy the wrong image.
+- technique: Rego
+  form: Imaginem
+  book: core
+  notes:
+  - >-
+    These spells make things appear to be somewhere other than where they actually are. As
+    with CrIm and PeIm, it is slightly harder to affect changing images. Add one level of
+    magnitude to spells that do so. Add a further level of magnitude if the image is to change
+    along with the object. Add one level of magnitude to the guidelines for each additional
+    sense to be affected.
+  - >-
+    Rego Imaginem botches might control the wrong image, or do something completely inappropriate
+    to the targeted image.
+- technique: Creo
+  form: Mentem
+  book: core
+  notes:
+  - >-
+    In addition to healing minds, these spells can also create thoughts, emotions, and memories
+    in another person's mind. These creations interact normally with the target's other thoughts,
+    and may be changed in the process.
+  - >-
+    Typical sigils for Creo Mentem spells involve some small quirk in what is created. A specific
+    idea may lie in the background of all memories created, for example.
+  - Creo Mentem botches might create inappropriate emotions in the caster's mind.
+- technique: Intellego
+  form: Mentem
+  book: core
+  notes:
+  - >-
+    These spells are superb for cutting through the confusion of social interaction and the
+    endless banter of the rabble. The InAn spells that deal with the mind may also be used
+    for ideas and guidelines for this section.
+  - >-
+    Note that writing does not contain any information of itself, and is generally Animal
+    and Herbam or Terram, for the materials, not Mentem. To translate writing, you need someone
+    who can read it, although you could read the translation from their mind.
+  - >-
+    In general, a momentary Mentem spell can answer a single question, although it is not
+    necessary that the answer be expressible in a brief form. A Momentary spell could, for
+    example, tell you exactly how the target felt about his father, no matter how complex
+    the feeling, but it wouldn't tell you why he felt that way. Finding out a lot of information
+    takes time.
+  - Sigils for InMe spells usually involve information being transmitted in unique ways.
+  - Intellego Mentem botches normally supply false information.
+- technique: Muto
+  form: Mentem
+  book: core
+  notes:
+  - >-
+    Muto Mentem spells give a mind properties it could not naturally acquire. These fall into
+    three main categories.
+  - >-
+    First, changing memories. While memories may decay over time, they do not naturally change
+    radically, so making them do so is Muto.
+  - >-
+    Second, emotions and thoughts that people cannot normally feel. This includes the thoughts
+    of animals and similar.
+  - Third, non-mental properties. This covers making a mind physical, and is very difficult.
+  - >-
+    Community Gloss: See Art & Academe for further discussion of what's possible, including
+    changing attention, emotional responses, perceptions of the world, and plans.
+  - >-
+    Muto Mentem botches might change the mind of the caster, thus making this magic potentially
+    very risky.
+  - >-
+    While Intellego spells can grant magical senses to a single person, granting a magical
+    sense to multiple people is a function of Muto Mentem. The base level is one magnitude
+    higher than the level of an Intellego spell to grant that sense at a Range of Personal
+    and Duration of Momentary, and the Muto Mentem spell has requisites of Intellego and the
+    appropriate Form or Forms. As for all base levels, this is for a spell with Range Personal,
+    Duration Momentary, and Target Individual.
+- technique: Perdo
+  form: Mentem
+  book: core
+  notes:
+  - >-
+    Emotions naturally reappear in a person, so spells that destroy them must have a continuing
+    duration to ensure that they do not come back. Memories do not naturally return, so Momentary
+    Duration spells remove them forever, although a person could be told what he had forgotten,
+    or reconstruct the memory from things he does remember. A continuing spell would prevent
+    a person from relearning that information, however.
+  - >-
+    Community Gloss: Art & Academe maintains that all the guidelines that affect memories
+    (rather than details from memories) can affect imagination or cognition as well, and that
+    all the guidelines that affect emotions work through the estimation, and can also affect
+    the common sense. Quelling the estimation can also cause a person to neglect appetitive
+    urges for shelter, rest, food, and drink, although the estimation must be removed entirely
+    to cause the target to suffer deprivation through this neglect. Quelling the common sense
+    leaves the target unable to correctly interpret a particular type of sensory input — he
+    might see, but be unable to understand what he is seeing.
+- technique: Rego
+  form: Mentem
+  book: core
+  notes:
+  - >-
+    The Rego Animal spells that deal with the mind may also be used as good guidelines for
+    levels of Rego Mentem spells. Many changes to the mind are Rego effects, because the mind
+    could naturally assume that state.
+  - >-
+    Rego Mentem botches can change the target's mental state in the wrong way, or change the
+    state of mind of the caster.
+  - >-
+    Community Gloss: Note that this Art should be able to affect dreams, and indeed does by
+    Art & Academe spell guidelines. See also The Mysteries: Revised Edition Chapter Twelve:
+    The Mysteries of Dreams for further discussion of dreams and related magic.
+- technique: Creo
+  form: Terram
+  book: core
+  notes:
+  - >-
+    Creating earth in an elaborate shape or, with a Muto requisite, with some unnatural property
+    is one level of magnitude higher than the listed guidelines.
+  - >-
+    Wizard's sigils commonly visible in Creo Terram spells involve the object created being
+    bizarre in some way, such as dirt being a specific color or texture.
+  - >-
+    Creo Terram botches can entomb the caster in earth or stone, as well as creating the wrong
+    sort of material, or creating it in the wrong place.
+- technique: Intellego
+  form: Terram
+  book: core
+  notes:
+  - >-
+    Intellego Terram spell levels are not affected by the material of the thing affected,
+    except as explicitly noted in the guidelines.
+  - Intellego Terram botches normally provide false information.
+- technique: Muto
+  form: Terram
+  book: core
+  notes:
+  - >-
+    The targets below are for changing dirt. To change to or from sand, mud, or clay, use
+    the same level of magnitude as for dirt. To change to or from stone or glass, add one
+    level of magnitude. To change to or from metal or gemstone, add two levels of magnitude.
+    These adjustments only apply once, so that changing metal to metal is only two magnitudes
+    higher.
+  - >-
+    The amount of material you can change is limited by the guidelines for each end. Thus,
+    you can turn a cubic pace of stone into a cubic inch of gemstone with a base Individual.
+  - >-
+    Serious Muto Terram botches have a tendency to turn the caster to stone or metal, but
+    lesser botches transform the wrong thing, or transform things in the wrong way.
+- technique: Perdo
+  form: Terram
+  book: core
+  notes:
+  - >-
+    To destroy sand, mud, or clay, use the same level of magnitude as for earth. To destroy
+    stone or glass, add one magnitude. To destroy metal or gemstone, add two magnitudes.
+  - >-
+    Perdo Terram botches, as well as destroying the wrong thing, can destroy the ground that
+    the caster is standing on, or metal objects that he is holding.
+- technique: Rego
+  form: Terram
+  book: core
+  notes:
+  - >-
+    The guidelines for controlling dirt, sand, mud, or clay are listed below. Add one magnitude
+    to control stone or glass, and two for metal or gemstones, unless the item is simply being
+    moved from one place to another (as in Unseen Arm or either Invisible Sling). Manipulating
+    objects with great precision may also be higher, depending on the level of precision.
+  - >-
+    Rego Terram botches often result in the caster being struck by large amounts of flying
+    stone.
+- technique: Creo
+  form: Vim
+  book: core
+  notes:
+  - There are few Creo Vim spells known throughout the Order.
+  - >-
+    Creo Vim botches often give the caster additional Warping Points, as the raw magic runs
+    out of control.
+- technique: Intellego
+  form: Vim
+  book: core
+  notes:
+  - >-
+    Since magic is a tricky thing to understand, spells that detect magic are at once difficult
+    and important. Although demons deal in Vim, they are made of the essence of deception
+    itself. If a demon does not wish to be detected, it cannot be (at least to the common
+    knowledge of the Order), and for this reason there are no demon-locating magics. Magic
+    items cannot be investigated with simple magic spells. Investigation requires that you
+    spend at least one season in the laboratory to discover what magic an enchanted item contains
+    (see the Laboratory chapter). A spell will suffice to tell you that an item is magical,
+    however, and may give you some idea of its powers. Spells will never tell you how to use
+    an item.
+  - >-
+    The base level of a spell to detect magic also gives a fairly good idea of the strength
+    of the magic (within a magnitude). The addition of one magnitude will say whether the
+    effect is Hermetic, and a magus familiar with other types of magic will be able to identify
+    them as well. The addition of two magnitudes will give information about Technique and
+    Form, or nearest equivalent for other types of magic. The addition of three magnitudes
+    gives the rough details of the effect and the sigil of the caster, and reveals whether
+    a Hermetic effect was created by a spell or invested device. A magus with extensive experience
+    of a particular kind of non-Hermetic magic can do the same for that, the spell reveals
+    the information, but the caster may not be able to interpret it. Further increases in
+    level yield further information, depending on the design of the specific spell.
+  - Different spells may be invented to detect Faerie, Divine, or Infernal effects.
+  - >-
+    Different spells may be invented to detect Faerie, Divine, or Infernal effects. Each spell
+    only affects one realm, and storyguides may wish to disallow spells to detect the Divine
+    or Infernal.
+  - >-
+    As a general rule, residues of magic decline as follows. As soon as the magic finishes,
+    the magnitude halves. It then drops by one for every duration of the spell that passes.
+    Once this reaches zero, the residues decline more slowly. Residues of non-Ritual Momentary,
+    Concentration, and Diameter Duration drop by one every month, while residues of other
+    effects drop by one every year. A 'negative magnitude' of 10 indicates that the residue
+    has disappeared completely, and no longer exists to be detected.
+  - >-
+    Magical items have an effective residue magnitude equal to the number of pawns of vis
+    used to open the enchantment (or the total pawns used for lesser enchanted devices). Magnitudes
+    of non-Hermetic items must be set by the storyguide. A spell to detect items will not
+    also detect effects or creatures, and vice-versa. Variants will detect items enchanted
+    by different Realms, as above.
+  - >-
+    Magical creatures can also be detected. Treat their Might as the level of the effect;
+    for Hermetic magi, use their highest Art. Divide Might or highest Art by five (rounding
+    up) to get the effective residue magnitude. Again, this requires a dedicated spell, and
+    variants may detect Faerie and possibly Divine creatures. Demons may not be detected.
+    Troupes may, at their option, allow spells that detect other Infernal creatures, such
+    as diabolists and undead.
+  - >-
+    Raw vis will show up as magical, simply as raw vis, under any magical detection. The level
+    of the detecting spell is irrelevant, as is the realm of power that it was designed to
+    detect. However, only specially designed spells will yield any information other than
+    that it is raw vis.
+  - Intellego Vim botches generally give false information.
+- technique: Muto
+  form: Vim
+  book: core
+  notes:
+  - These spells let you change other spells.
+  - >-
+    These meta-magical spells have certain special restrictions, which apply to all Muto Vim
+    spells invented according to Hermetic theory. First of all, they cannot be cast on Spontaneous
+    spells. Such magic is being manipulated at whim-any attempt to alter it further would
+    make the caster lose control. (This is necessary for game balance.)
+  - >-
+    Second, you must make an Intelligence + Concentration roll against an Ease Factor of 9
+    if you are casting both spells (that is, the MuVi spell and the spell it is affecting).
+    If this fails, the spells do not go off. If it botches, they botch. (This is slightly
+    easier than normal.)
+  - >-
+    If you wish to cast one of these spells on a spell being cast by another magus, you must
+    either be co-operating, or you must fast cast the MuVi spell. There is no other way to
+    get the timing right. In addition, your Penetration total for the Muto Vim spell must
+    beat the other magus's Penetration total for the spell to be changed, unless you are co-operating.
+  - >-
+    Touch range is sufficient to affect your own spells, but Voice range, at least, is needed
+    to affect another magus's casting. You cannot touch the spell itself.
+  - >-
+    These spells can only be used on Hermetic magic, as they depend on a good understanding
+    of the processes involved.
+  - >-
+    You may only put a Muto Vim effect into a magical item if it is to work with another effect
+    in that item. All Muto Vim spells require some tailoring to the specific use, and a magical
+    item effect cannot be so tailored.
+  - >-
+    Note that a spell invented according to one of the guidelines below will change another
+    spell in a specific way: it is not possible to invent a single spell which changes another
+    spell however the caster wants. See the example spells for ideas on how specific this
+    should be.
+  - >-
+    It is not possible, for reasons that Hermetic theorists do not well understand, to use
+    Muto Vim to affect another spell after it has been cast.
+  - >-
+    If the parameters of an effect after it has been changed by a Muto Vim spell would normally
+    require a Ritual, then at least one of the original spell and the Muto Vim spell must
+    be a Ritual. For example, a Formulaic or Spontaneous Muto Vim effect on a Formulaic spell
+    cannot produce an effect that would normally require a Ritual.
+  - >-
+    Muto Vim botches can have any conceivable effect, as they alter the other spell in unpredictable
+    ways.
+  - >-
+    Muto Vim spells work by altering the magical energies that create the spell as it is being
+    cast. The spell is the result of the combination of the base casting and the Muto Vim
+    effect, and has its effect once both the casting and the Muto Vim effect have finished.
+    This means that a Muto Vim spell must have a duration at least as long as the casting
+    of the target spell, but need not last for as long as the spell itself. For normally-cast
+    formulaic spells, a Momentary Duration is sufficient, but if the casting time is longer
+    for any reason, the Muto Vim spell must also have a longer Duration; Sun is sufficient
+    for any practical Ritual.
+  - >-
+    An increase in power or parameters may not raise the level of the target spell above the
+    level of the Muto Vim spell.
+- technique: Perdo
+  form: Vim
+  book: core
+  notes:
+  - >-
+    Most Perdo Vim spells are specific to one of the four Supernatural Realms. If you want
+    to cast a Perdo Vim spell on a character who has Magic Resistance, you must overcome the
+    Magic Resistance.
+- technique: Rego
+  form: Vim
+  book: core
+  notes:
+  - >-
+    Rego Vim spells repel demons and other supernatural creatures. Theoretically, it is possible
+    to conjure and control demons through Rego Vim spells, but this knowledge and its use
+    are forbidden by the Hermetic Code. Any who find and dare to use this knowledge face dangers
+    from both the beings they deal with and those in the Order of Hermes who strongly object
+    to such practices.
+  - >-
+    Rego Vim would also be the combination of Arts that granted Magic Resistance, but not
+    even Bonisagus was able to turn Parma Magica into a spell. Aegis of the Hearth is the
+    best that has been managed, and that spell is not fully integrated into Hermetic theory.
+  - >-
+    Community Gloss: Note that this Art should be able to affect dreams, and indeed does by
+    Art & Academe spell guidelines. See also The Mysteries: Revised Edition Chapter Twelve:
+    The Mysteries of Dreams for further discussion of dreams and related magic.
+level_rules:
+- title: Changing Ranges, Durations, and Targets
+  text: >-
+    To calculate the level for a spell that does not use the base Range, Duration, and Target,
+    add one magnitude (five levels) to the level of the spell for every step by which the
+    parameter is raised. It is also possible to calculate levels based on an existing spell,
+    with different Range, Duration, and Target. In that case, increasing them works in the
+    same way, and for every step by which one is lowered, subtract one magnitude (five levels).
+    Below level 5, adding a magnitude only adds one level, and subtracting a magnitude only
+    subtracts one level. Thus, one magnitude lower than level 5 is level 4, and one magnitude
+    higher than level 2 is level 3.
+size_rules:
+- title: Increasing size
+  text: >-
+    Adding one magnitude (five levels) to the spell multiplies the maximum size of its target
+    by ten. This depends on the mass or volume of the target, so a five level boost to a Corpus
+    spell would allow the magus to affect a giant up to fifteen feet tall, not sixty feet
+    tall. A spell designed to affect a certain size of target can affect any target up to
+    that size. However, it is not possible to invent lower level spells that affect smaller
+    targets; the level of the spell to affect the base target is an absolute lower limit.
+- title: Base size rules
+  text: >-
+    BASE INDIVIDUAL: Determined by Form. BASE PART: Same as Individual. BASE GROUP: Mass of
+    ten standard Individuals. BASE ROOM: Large enough for 100 standard Individuals. BASE STRUCTURE:
+    Ten base Rooms. BASE BOUNDARY: An area 100 paces in diameter.
+- title: Part sizing
+  text: >-
+    A Part targeted by a spell can be up to the size of the base Individual. Again, every
+    magnitude added increases the size that can be affected by a factor of ten. Note that
+    a spell to affect an Individual is five levels lower than a spell to affect a Part of
+    the same size.
+- title: Group sizing
+  text: >-
+    A base Group contains about as much mass or volume as ten standard Individuals of the
+    Form. This can be split up in any way desired, so it could be two Individuals, each of
+    five times standard size, or ten Individuals of standard size, or ten thousand individuals,
+    each one thousandth of standard size. Every five levels added multiplies the size affected
+    by a factor of ten. Note that a spell to affect a large Individual is five levels lower
+    than a spell to affect a Group of the same total mass.
+- title: Room sizing
+  text: >-
+    A base Room is large enough to fit a hundred standard Individuals with some squashing.
+    For Corpus, this means that a base room is about four hundred square feet in area. Because
+    the Room already exists to create a boundary, this is easier than affecting a Group, and
+    a spell to affect a number of Individuals within a Room can be lower level than a spell
+    to affect an Individual of similar size. Note also that, because a Room cannot be internally
+    divided without becoming two Rooms, the height of the ceiling does not normally matter.
+    For every five levels added to the spell level, the area of the Room is multiplied by
+    ten.
+- title: Structure sizing
+  text: >-
+    A base Structure contains ten base Rooms, spread over one or more floors. For every five
+    levels added the size of the Structure is increased by a factor of ten.
+- title: Boundary sizing
+  text: >-
+    A base Boundary is the same for all Forms, and is one hundred paces (three hundred feet)
+    in diameter. As for Rooms, every five levels added multiplies the area by ten, or the
+    diameter by a little over three.
+- title: Intellego exception
+  text: Intellego spells are not affected by Target size.
