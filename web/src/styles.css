@@ -405,3 +405,128 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
 .char-row .nm .artname { display: inline-flex; align-items: center; gap: .35rem; color: var(--tech, inherit); font-weight: 600; }
 .char-row .nm .artname svg { color: var(--tech, var(--muted)); }
 .taken-chip { padding-left: .35rem; }
+
+/* ── guideline reference ─────────────────────────────────
+   Magnitude is an ordinal quantity, so it gets a sequential ramp (one hue, getting
+   deeper) rather than the categorical hues the Techniques use — the two languages
+   never share a control, and confusing "costs more" with "is Perdo" would be worse
+   than no colour at all. */
+:root {
+  --mag-0: #8a8175;
+  --mag-1: #a97f3d;
+  --mag-2: #b06334;
+  --mag-3: #9c4029;
+  --mag-4: #7a2e1d;
+}
+
+.ladder-intro { margin: 0 0 .7rem; }
+.ladder-intro b { color: var(--ink); font-weight: 600; }
+
+/* The grid is the one thing allowed to be wider than the page; it gets its own
+   scroller rather than making the whole document scroll sideways. */
+.ladder-scroll { overflow-x: auto; margin: 0 -1rem; padding: 0 1rem .2rem; }
+@media (max-width: 560px) { .ladder-scroll { margin: 0 -.7rem; padding: 0 .7rem .2rem; } }
+
+.ladder { border-collapse: collapse; width: 100%; min-width: 560px; font-size: .85rem; }
+.ladder th, .ladder td {
+  border: 1px solid var(--line-soft); padding: .3rem .35rem; text-align: left; vertical-align: top;
+}
+/* Deliberately NOT sticky: the head cells would slide down by --topbar-h and cover
+   the +0 row, and a five-row table has nothing to gain from a floating header. */
+.ladder thead th {
+  background: var(--chip); color: var(--muted); font-size: .74rem; font-weight: 600;
+  letter-spacing: .04em; text-transform: uppercase; white-space: nowrap;
+}
+.ladder thead th .sub {
+  display: block; font-size: .64rem; font-style: normal; font-weight: 400;
+  letter-spacing: .02em; text-transform: none; color: var(--faint);
+}
+.ladder .magcol { width: 1%; white-space: nowrap; background: var(--card); }
+.ladder tbody .magcol { text-align: center; }
+.ladder .magcol .lvl { display: block; font-size: .64rem; font-style: normal; color: var(--faint); }
+.ladder .sr-head { font-size: .64rem; letter-spacing: .03em; }
+.ladder .none { color: var(--faint); padding-left: .2rem; }
+
+.mag {
+  display: inline-block; min-width: 2.1rem; text-align: center;
+  background: var(--mag); color: #fff; font-weight: 600; font-size: .78rem;
+  border-radius: 999px; padding: .05rem .4rem; font-variant-numeric: tabular-nums;
+}
+
+/* A rung reads as a plain label until you hover it — the grid should look like a
+   table, not like forty buttons. */
+.rung {
+  display: block; width: 100%; text-align: left; border: none; background: none;
+  padding: .15rem .25rem; margin: 0; border-radius: 6px; min-height: 0;
+  font: inherit; color: var(--ink); cursor: pointer;
+}
+.rung:hover { background: color-mix(in srgb, var(--mag) 12%, transparent); }
+.rung.on { background: var(--mag); color: #fff; }
+.rung .ritual {
+  font-style: normal; font-size: .6rem; font-weight: 700; margin-left: .3rem;
+  border: 1px solid currentColor; border-radius: 3px; padding: 0 .15rem; opacity: .75;
+}
+
+.ladder-legend {
+  display: flex; flex-direction: column; gap: .15rem; margin: .6rem 0 .2rem;
+  padding: .5rem .7rem; background: var(--card); border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+}
+.ladder-legend b { color: var(--ink); }
+.ladder-legend .ritual-key { border: 1px solid var(--muted); border-radius: 3px; padding: 0 .2rem; font-size: .7rem; }
+
+.param-detail {
+  margin: .6rem 0 .2rem; padding: .7rem .85rem; background: var(--card);
+  border: 1px solid var(--line); border-left: 4px solid var(--mag); border-radius: var(--radius);
+}
+.param-head { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem; }
+.param-head h3 { margin: 0; font-size: 1.05rem; color: var(--accent); display: flex; align-items: center; gap: .5rem; }
+/* `capitalize` would shout every word ('Adds 10 Levels'); only the lead word is a
+   sentence start, and that is what ::first-letter reaches. */
+.param-detail .kindline { margin: .1rem 0 .5rem; }
+.param-detail .kindline::first-letter { text-transform: uppercase; }
+.param-desc { margin: 0; font-size: .88rem; }
+.param-note {
+  display: flex; gap: .35rem; align-items: flex-start; margin: .45rem 0 0;
+  font-size: .82rem; color: var(--muted);
+}
+.param-note svg { flex: 0 0 auto; margin-top: .22rem; color: var(--warn); }
+
+.rulesblock { margin-top: .6rem; }
+.rules-toggle {
+  display: flex; align-items: center; gap: .45rem; width: 100%;
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: .5rem .7rem; font: inherit; font-size: .88rem; color: var(--accent);
+  text-align: left; cursor: pointer; min-height: var(--tap);
+}
+.rules-toggle .n {
+  margin-left: auto; font-size: .7rem; color: var(--muted);
+  background: var(--chip); border-radius: 999px; padding: 0 .45rem;
+}
+.rules-body {
+  border: 1px solid var(--line); border-top: none; border-radius: 0 0 var(--radius) var(--radius);
+  padding: .2rem .85rem .7rem; background: var(--card);
+}
+.rules-body h4 { margin: .7rem 0 .2rem; font-size: .85rem; color: var(--ink); display: flex; align-items: center; gap: .35rem; }
+.rules-body h4 svg { color: var(--muted); }
+.rules-body p { margin: 0; font-size: .84rem; color: var(--muted); }
+.formsizes > div + div { border-top: 1px solid var(--line-soft); margin-top: .5rem; }
+
+/* The notes that belong above a guideline table, folded into its group heading. */
+.art-notes { list-style: none; padding: .1rem 0 .3rem; border-bottom: 1px solid var(--line-soft); }
+.art-notes-toggle {
+  display: inline-flex; align-items: center; gap: .35rem; background: none; border: none;
+  padding: .2rem .2rem; font: inherit; font-size: .76rem; color: var(--tech, var(--muted));
+  cursor: pointer; min-height: 30px;
+}
+.art-notes-toggle .n { font-size: .68rem; color: var(--muted); background: var(--chip); border-radius: 999px; padding: 0 .4rem; }
+.art-notes-body {
+  border-left: 3px solid color-mix(in srgb, var(--tech) 40%, var(--line));
+  padding: .1rem 0 .2rem .6rem; margin: .15rem 0 .3rem .2rem;
+}
+.art-notes-body p { margin: 0 0 .4rem; font-size: .82rem; color: var(--muted); }
+.art-notes-body .basesize b { color: var(--ink); }
+.art-notes-body .gloss {
+  display: flex; gap: .35rem; align-items: flex-start; font-style: italic; color: var(--faint);
+}
+.art-notes-body .gloss svg { flex: 0 0 auto; margin-top: .25rem; }

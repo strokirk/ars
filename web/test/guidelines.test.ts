@@ -3,7 +3,7 @@ import {
   BOOKS, RANGE_LADDER, DURATION_LADDER, TARGET_LADDER, GUIDELINES, ART_NOTES, FORM_INFO,
   LEVEL_RULES, SIZE_RULES, TARGET_KINDS,
   levelRung, rungLevel, addMagnitudes, magnitudeOf, designSpell, findParam,
-  queryGuidelines, groupByArt, artNotesFor, formInfo, paramsOf,
+  queryGuidelines, groupByArt, groupGuidelines, artNotesFor, formInfo, paramsOf,
 } from "../src/lib/guidelines.ts";
 
 const TECHNIQUES = ["Creo", "Intellego", "Muto", "Perdo", "Rego"];
@@ -279,5 +279,39 @@ describe("designSpell", () => {
   it("counts size and extra magnitudes into the level", () => {
     expect(build({ base: 10, size: 1 }).level).toBe(15);
     expect(build({ base: 10, size: 1, extra: 2 }).level).toBe(25);
+  });
+});
+
+describe("grouping follows the sort", () => {
+  it("groups by Art when sorted by Art", () => {
+    const rows = queryGuidelines(GUIDELINES, { form: "Ignem", sort: "art" });
+    const groups = groupGuidelines(rows, "art");
+    expect(groups.map((g) => g.label)).toEqual(TECHNIQUES.map((t) => `${t} Ignem`));
+    expect(groups.every((g) => g.technique && g.form)).toBe(true);
+  });
+
+  it("groups by level when sorted by level, so a heading covers adjacent rows", () => {
+    const rows = queryGuidelines(GUIDELINES, { form: "Ignem", sort: "level" });
+    const groups = groupGuidelines(rows, "level");
+    // Every group holds a contiguous run — grouping by Art here would split the list
+    // into a heading per row.
+    expect(groups.length).toBeLessThan(rows.length / 2);
+    expect(groups.every((g) => g.technique === undefined)).toBe(true);
+    expect(groups.at(-1)!.label).toBe("General");
+    const levels = groups.filter((g) => g.label !== "General").map((g) => Number(g.label.split(" ")[1]));
+    expect(levels).toEqual([...levels].sort((a, b) => a - b));
+  });
+
+  it("drops headings entirely for an alphabetical sort", () => {
+    const groups = groupGuidelines(queryGuidelines(GUIDELINES, { sort: "effect" }), "effect");
+    expect(groups).toHaveLength(1);
+    expect(groups[0]!.label).toBe("");
+  });
+
+  it("never splits a sorted list into more groups than it has rows", () => {
+    for (const sort of ["art", "level", "level-desc", "effect"] as const) {
+      const rows = queryGuidelines(GUIDELINES, { technique: "Rego", sort });
+      expect(groupGuidelines(rows, sort).flatMap((g) => g.rows)).toHaveLength(rows.length);
+    }
   });
 });

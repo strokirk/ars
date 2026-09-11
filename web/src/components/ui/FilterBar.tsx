@@ -118,6 +118,7 @@ export function FilterBar<S extends string>({
           {active.map((f) => (
             <Button
               key={f.label}
+              class="active-chip"
               size={"small"}
               appearance="plain"
               variant="brand"

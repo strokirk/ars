@@ -8,6 +8,8 @@ import { TraitBrowser } from "../src/components/TraitBrowser.tsx";
 import { CopyBox } from "../src/components/ui/CopyBox.tsx";
 import { ArtBadge, FormIcon } from "../src/components/ui/ArtBadge.tsx";
 import { Library } from "../src/pages/Library.tsx";
+import { GuidelineBrowser } from "../src/components/GuidelineBrowser.tsx";
+import { GuidelineLadder } from "../src/components/GuidelineLadder.tsx";
 
 let host: HTMLElement;
 
@@ -38,6 +40,14 @@ const artChip = (el: HTMLElement, art: string) =>
 const group = (el: HTMLElement) => [...el.querySelectorAll(".group-head")].map((n) => n.textContent!.trim());
 /** The filter controls live behind a dismissible panel — open it before reaching in. */
 const openFilters = async (el: HTMLElement) => { chip(el, "Filters").click(); await flush(); };
+/** The same button closes it again; its label carries the active count once filtered. */
+const closeFilters = async (el: HTMLElement) => {
+  buttons(el).find((b) => /^Filters( \(\d+\))?$/.test(b.textContent!.replace(/\s+/g, " ").trim()))!.click();
+  await flush();
+};
+/** The active tab is the one Web Awesome fills in — there is no `.tab.on` any more. */
+const activeTab = (el: HTMLElement) =>
+  el.querySelector('wa-button[appearance="accent"]')!.textContent!.trim();
 /**
  * The dropdowns are <wa-select> custom elements. Their definitions are registered
  * by the app entry, not by the components, so under test they stay inert DOM —
@@ -111,8 +121,7 @@ describe("SpellBrowser", () => {
     expect(count(el)).toBeLessThan(before);
     expect(el.textContent).toContain("Filters (1)");
     // Dismissing the panel keeps the filter, and says so where it can't be missed.
-    chip(el, "Done").click();
-    await flush();
+    await closeFilters(el);
     expect(el.querySelector('wa-select[aria-label="Range"]')).toBeNull();
     expect(el.querySelector(".active-chip")!.textContent).toContain("Touch");
   });
@@ -123,10 +132,9 @@ describe("SpellBrowser", () => {
     await openFilters(el);
     artChip(el, "Perdo").click();
     await flush();
-    chip(el, "Done").click();
-    await flush();
+    await closeFilters(el);
     expect(count(el)).toBeLessThan(all);
-    el.querySelector<HTMLButtonElement>(".active-chip")!.click();
+    el.querySelector<HTMLElement>(".active-chip")!.click();
     await flush();
     expect(count(el)).toBe(all);
   });
@@ -302,16 +310,16 @@ describe("Library", () => {
   test("defaults to the spells tab and falls back for an unknown tab", () => {
     for (const tab of [undefined, "nonsense"]) {
       const el = mount(<Library tab={tab} />);
-      expect(el.querySelector(".tab.on")!.textContent!.trim()).toBe("Spells");
+      expect(activeTab(el)).toBe("Spells");
       render(null, host); host.remove();
     }
     const el = mount(<Library tab="virtues" />);
-    expect(el.querySelector(".tab.on")!.textContent!.trim()).toBe("Virtues");
+    expect(activeTab(el)).toBe("Virtues");
   });
 
   test("gives Flaws a tab of their own rather than a switch nested in one", () => {
     const el = mount(<Library tab="flaws" />);
-    expect(el.querySelector(".tab.on")!.textContent!.trim()).toBe("Flaws");
+    expect(activeTab(el)).toBe("Flaws");
     expect(el.textContent).toMatch(/\d+ flaws/);
     expect(el.querySelector(".kindswitch")).toBeNull();
   });
@@ -359,5 +367,92 @@ describe("CopyBox", () => {
   test("offers a file save only when given a filename", () => {
     const el = mount(<CopyBox text="x" label="JSON" filename="otto.json" />);
     expect(el.textContent).toContain("Save file");
+  });
+});
+
+describe("GuidelineBrowser", () => {
+  test("lists guidelines grouped by Technique and Form", () => {
+    const el = mount(<GuidelineBrowser />);
+    expect(rows(el).length).toBeGreaterThan(0);
+    expect(group(el).length).toBeGreaterThan(0);
+    expect(group(el)[0]).toMatch(/^(Creo|Intellego|Muto|Perdo|Rego) \w+/);
+  });
+
+  test("an Art chip narrows the list", async () => {
+    const el = mount(<GuidelineBrowser />);
+    const all = count(el);
+    await openFilters(el);
+    artChip(el, "Perdo").click();
+    await flush();
+    expect(count(el)).toBeLessThan(all);
+    expect(group(el).every((g) => g.startsWith("Perdo"))).toBe(true);
+  });
+
+  test("searching filters on the effect text", async () => {
+    const el = mount(<GuidelineBrowser />);
+    const input = el.querySelector("input")!;
+    input.value = "wound";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    await flush();
+    expect(rows(el).length).toBeGreaterThan(0);
+    expect(rows(el).every((r) => /wound/i.test(r))).toBe(true);
+  });
+
+  test("each group can unfold the rules notes that qualify its table", async () => {
+    const el = mount(<GuidelineBrowser />);
+    const toggle = el.querySelector<HTMLElement>(".art-notes-toggle")!;
+    expect(el.querySelector(".art-notes-body")).toBeNull();
+    toggle.click();
+    await flush();
+    const body = el.querySelector(".art-notes-body")!;
+    expect(body.textContent).toContain("Base Individual");
+  });
+
+  test("rows become actionable when the designer hands them an action", () => {
+    const el = mount(<GuidelineBrowser onPick={() => {}} />);
+    expect(el.querySelectorAll(".option button, .option wa-button").length).toBeGreaterThan(0);
+  });
+});
+
+describe("GuidelineLadder", () => {
+  test("prints a row per magnitude and a column per ladder", () => {
+    const el = mount(<GuidelineLadder />);
+    const heads = [...el.querySelectorAll("thead th")].map((n) => n.textContent!.trim());
+    expect(heads.slice(1)).toEqual(["Range", "Duration", "ObjectTarget", "ContainerTarget", "SenseTarget"]);
+    // Magnitudes 0 through 4.
+    expect(el.querySelectorAll("tbody tr")).toHaveLength(5);
+  });
+
+  test("puts each rung in its magnitude's row", () => {
+    const el = mount(<GuidelineLadder />);
+    const row = (n: number) =>
+      [...el.querySelectorAll("tbody tr")[n]!.querySelectorAll(".rung")].map((b) => b.textContent!.trim());
+    expect(row(0)).toEqual(["Personal", "Momentary", "Individual", "Circle", "Taste"]);
+    expect(row(2)).toEqual(["Voice", "Sun", "Ring", "Group", "Room", "Smell"]);
+    // Only Year and Boundary force a Ritual, and they say so on the rung.
+    expect(row(4).join(" ")).toContain("YearR");
+    expect(row(4).join(" ")).toContain("BoundaryR");
+  });
+
+  test("a rung opens its full rules text, and closes again", async () => {
+    const el = mount(<GuidelineLadder />);
+    expect(el.querySelector(".param-detail")).toBeNull();
+    const voice = [...el.querySelectorAll<HTMLElement>(".rung")].find((b) => b.textContent!.trim() === "Voice")!;
+    voice.click();
+    await flush();
+    const detail = el.querySelector(".param-detail")!;
+    expect(detail.textContent).toContain("Voice");
+    expect(detail.textContent).toContain("adds 10 levels");
+    el.querySelector<HTMLElement>(".param-head .linkish")!.click();
+    await flush();
+    expect(el.querySelector(".param-detail")).toBeNull();
+  });
+
+  test("the level and size rules unfold on demand", async () => {
+    const el = mount(<GuidelineLadder />);
+    expect(el.querySelector(".rules-body")).toBeNull();
+    el.querySelector<HTMLElement>(".rules-toggle")!.click();
+    await flush();
+    expect(el.querySelector(".rules-body")!.textContent!.length).toBeGreaterThan(80);
   });
 });

@@ -434,8 +434,11 @@ export function queryGuidelines(
 
 export interface GuidelineGroup {
   key: string;
-  technique: string;
-  form: string;
+  /** Heading text; "" renders no heading. */
+  label: string;
+  /** Set only for Art groups, so the heading can take the Technique's colour. */
+  technique?: string;
+  form?: string;
   rows: Guideline[];
 }
 
@@ -445,12 +448,40 @@ export function groupByArt(rows: readonly Guideline[]): GuidelineGroup[] {
   for (const g of rows) {
     const key = `${g.technique} ${g.form}`;
     let group = groups.get(key);
-    if (!group) { group = { key, technique: g.technique, form: g.form, rows: [] }; groups.set(key, group); }
+    if (!group) {
+      group = { key, label: key, technique: g.technique, form: g.form, rows: [] };
+      groups.set(key, group);
+    }
     group.rows.push(g);
   }
   return [...groups.values()].sort(
     (a, b) =>
-      (TECH_ORDER.indexOf(a.technique) + 1 || 99) - (TECH_ORDER.indexOf(b.technique) + 1 || 99) ||
-      (FORM_ORDER.indexOf(a.form) + 1 || 99) - (FORM_ORDER.indexOf(b.form) + 1 || 99),
+      (TECH_ORDER.indexOf(a.technique!) + 1 || 99) - (TECH_ORDER.indexOf(b.technique!) + 1 || 99) ||
+      (FORM_ORDER.indexOf(a.form!) + 1 || 99) - (FORM_ORDER.indexOf(b.form!) + 1 || 99),
   );
+}
+
+/** Split guidelines by level, General last. Ordered by level, not first appearance. */
+export function groupByLevel(rows: readonly Guideline[]): GuidelineGroup[] {
+  const groups = new Map<string, GuidelineGroup & { order: number }>();
+  for (const g of rows) {
+    const key = g.level === null ? "General" : `Level ${g.level}`;
+    let group = groups.get(key);
+    if (!group) {
+      group = { key, label: key, order: g.level ?? Number.POSITIVE_INFINITY, rows: [] };
+      groups.set(key, group);
+    }
+    group.rows.push(g);
+  }
+  return [...groups.values()].sort((a, b) => a.order - b.order);
+}
+
+/**
+ * Group the way the current sort orders, so a heading always covers a run of adjacent
+ * rows. Grouping by Art under a level sort is what produces a heading per row.
+ */
+export function groupGuidelines(rows: readonly Guideline[], sort: GuidelineSort): GuidelineGroup[] {
+  if (sort === "art") return groupByArt(rows);
+  if (sort === "effect") return [{ key: "all", label: "", rows: rows.slice() }];
+  return groupByLevel(rows);
 }
