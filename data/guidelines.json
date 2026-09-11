@@ -1206,6 +1206,60 @@
     "source_line": 220
   },
   {
+    "technique": "Perdo",
+    "form": "Aquam",
+    "level": null,
+    "is_general": true,
+    "effect": "Destroy sufficient matter to reduce a water elemental's Might Score by the level of the spell +2 magnitudes",
+    "source_file": "05-aquam-spells.md",
+    "source_line": 296
+  },
+  {
+    "technique": "Perdo",
+    "form": "Aquam",
+    "level": 4,
+    "is_general": false,
+    "effect": "Completely dry something (up to the size of a small house) that is wet",
+    "source_file": "05-aquam-spells.md",
+    "source_line": 296
+  },
+  {
+    "technique": "Perdo",
+    "form": "Aquam",
+    "level": 5,
+    "is_general": false,
+    "effect": "Greatly reduce the amount of a liquid without destroying it completely",
+    "source_file": "05-aquam-spells.md",
+    "source_line": 296
+  },
+  {
+    "technique": "Perdo",
+    "form": "Aquam",
+    "level": 10,
+    "is_general": false,
+    "effect": "Destroy a liquid (requisites may be required)",
+    "source_file": "05-aquam-spells.md",
+    "source_line": 296
+  },
+  {
+    "technique": "Perdo",
+    "form": "Aquam",
+    "level": 15,
+    "is_general": false,
+    "effect": "Destroy one property of a liquid (like alcohol's ability to intoxicate or sea water's saltiness)",
+    "source_file": "05-aquam-spells.md",
+    "source_line": 296
+  },
+  {
+    "technique": "Perdo",
+    "form": "Aquam",
+    "level": 20,
+    "is_general": false,
+    "effect": "Destroy a small spring, so that it never flows again",
+    "source_file": "05-aquam-spells.md",
+    "source_line": 296
+  },
+  {
     "technique": "Rego",
     "form": "Aquam",
     "level": null,
@@ -2754,6 +2808,123 @@
     "source_line": 19
   },
   {
+    "technique": "Intellego",
+    "form": "Herbam",
+    "level": 1,
+    "is_general": false,
+    "effect": "Gain an intuitive knowledge of a plant (for example, know whether a given action would harm a plant)",
+    "source_file": "08-herbam-spells.md",
+    "source_line": 131
+  },
+  {
+    "technique": "Intellego",
+    "form": "Herbam",
+    "level": 2,
+    "is_general": false,
+    "effect": "Locate a plant",
+    "source_file": "08-herbam-spells.md",
+    "source_line": 131
+  },
+  {
+    "technique": "Intellego",
+    "form": "Herbam",
+    "level": 3,
+    "is_general": false,
+    "effect": "Learn general information, or a single specific fact about a plant or an item made from plant products",
+    "source_file": "08-herbam-spells.md",
+    "source_line": 131
+  },
+  {
+    "technique": "Intellego",
+    "form": "Herbam",
+    "level": 4,
+    "is_general": false,
+    "effect": "Learn all mundane properties of a plant or an item made from plant products",
+    "source_file": "08-herbam-spells.md",
+    "source_line": 131
+  },
+  {
+    "technique": "Intellego",
+    "form": "Herbam",
+    "level": 15,
+    "is_general": false,
+    "effect": "Speak with a plant",
+    "source_file": "08-herbam-spells.md",
+    "source_line": 131
+  },
+  {
+    "technique": "Muto",
+    "form": "Herbam",
+    "level": 3,
+    "is_general": false,
+    "effect": "Change a plant or item made from plant products",
+    "source_file": "09-muto-herbam-guidelines.md",
+    "source_line": 9
+  },
+  {
+    "technique": "Muto",
+    "form": "Herbam",
+    "level": 4,
+    "is_general": false,
+    "effect": "Change a plant or item made from plant products into metal or stone (Terram requisite)",
+    "source_file": "09-muto-herbam-guidelines.md",
+    "source_line": 9
+  },
+  {
+    "technique": "Muto",
+    "form": "Herbam",
+    "level": 4,
+    "is_general": false,
+    "effect": "Awaken the consciousness of a plant (Mentem requisite)",
+    "source_file": "09-muto-herbam-guidelines.md",
+    "source_line": 9
+  },
+  {
+    "technique": "Muto",
+    "form": "Herbam",
+    "level": 5,
+    "is_general": false,
+    "effect": "Cause a plant to bend or twist rapidly in place",
+    "source_file": "09-muto-herbam-guidelines.md",
+    "source_line": 9
+  },
+  {
+    "technique": "Perdo",
+    "form": "Herbam",
+    "level": 2,
+    "is_general": false,
+    "effect": "Cause the leaves to fall off a plant",
+    "source_file": "09-muto-herbam-guidelines.md",
+    "source_line": 98
+  },
+  {
+    "technique": "Perdo",
+    "form": "Herbam",
+    "level": 3,
+    "is_general": false,
+    "effect": "Spoil an amount of food",
+    "source_file": "09-muto-herbam-guidelines.md",
+    "source_line": 98
+  },
+  {
+    "technique": "Perdo",
+    "form": "Herbam",
+    "level": 4,
+    "is_general": false,
+    "effect": "Destroy an amount of dead wood",
+    "source_file": "09-muto-herbam-guidelines.md",
+    "source_line": 98
+  },
+  {
+    "technique": "Perdo",
+    "form": "Herbam",
+    "level": 5,
+    "is_general": false,
+    "effect": "Destroy a plant",
+    "source_file": "09-muto-herbam-guidelines.md",
+    "source_line": 98
+  },
+  {
     "technique": "Rego",
     "form": "Herbam",
     "level": null,
@@ -3240,6 +3411,69 @@
     "source_line": 166
   },
   {
+    "technique": "Muto",
+    "form": "Ignem",
+    "level": null,
+    "is_general": true,
+    "effect": "Convert part of a fire elemental's body into another type of fire (clear to sooty flame, etc.), reducing the elemental's Might pool by the level of the spell +2 magnitudes. If the elemental is not destroyed by this effect, when the duration ends it can restore this Might by re-absorbing the matter",
+    "source_file": "10-ignem-spells.md",
+    "source_line": 250
+  },
+  {
+    "technique": "Muto",
+    "form": "Ignem",
+    "level": 1,
+    "is_general": false,
+    "effect": "Change one characteristic of a fire within the target area (for example, make a fire burn more brightly, or produce more smoke)",
+    "source_file": "10-ignem-spells.md",
+    "source_line": 250
+  },
+  {
+    "technique": "Muto",
+    "form": "Ignem",
+    "level": 2,
+    "is_general": false,
+    "effect": "Totally change a fire into another natural fire (changing any or all of its characteristics)",
+    "source_file": "10-ignem-spells.md",
+    "source_line": 250
+  },
+  {
+    "technique": "Muto",
+    "form": "Ignem",
+    "level": 3,
+    "is_general": false,
+    "effect": "Change a fire so that it is slightly unnatural (for example, make the flames colored, or make the smoke smell of roses); may require requisites",
+    "source_file": "10-ignem-spells.md",
+    "source_line": 250
+  },
+  {
+    "technique": "Muto",
+    "form": "Ignem",
+    "level": 4,
+    "is_general": false,
+    "effect": "Change a fire so that it is completely unnatural (for example, multicolored flames that form images while the popping of the fire plays music); often requires requisites",
+    "source_file": "10-ignem-spells.md",
+    "source_line": 250
+  },
+  {
+    "technique": "Muto",
+    "form": "Ignem",
+    "level": 5,
+    "is_general": false,
+    "effect": "Change a fire into a natural example of another element, with an appropriate requisite",
+    "source_file": "10-ignem-spells.md",
+    "source_line": 250
+  },
+  {
+    "technique": "Muto",
+    "form": "Ignem",
+    "level": 10,
+    "is_general": false,
+    "effect": "Change a fire into an unnatural example of another element, with an appropriate requisite",
+    "source_file": "10-ignem-spells.md",
+    "source_line": 250
+  },
+  {
     "technique": "Perdo",
     "form": "Ignem",
     "level": null,
@@ -3472,6 +3706,51 @@
     "effect": "Ward against fire doing up to +30 damage (Touch, Ring, Circle)",
     "source_file": "10-ignem-spells.md",
     "source_line": 419
+  },
+  {
+    "technique": "Creo",
+    "form": "Imaginem",
+    "level": 1,
+    "is_general": false,
+    "effect": "Create an image that affects a single sense",
+    "source_file": "12-creo-imaginem-guidelines.md",
+    "source_line": 13
+  },
+  {
+    "technique": "Creo",
+    "form": "Imaginem",
+    "level": 2,
+    "is_general": false,
+    "effect": "Create an image that affects two senses",
+    "source_file": "12-creo-imaginem-guidelines.md",
+    "source_line": 13
+  },
+  {
+    "technique": "Creo",
+    "form": "Imaginem",
+    "level": 3,
+    "is_general": false,
+    "effect": "Create an image that affects three senses",
+    "source_file": "12-creo-imaginem-guidelines.md",
+    "source_line": 13
+  },
+  {
+    "technique": "Creo",
+    "form": "Imaginem",
+    "level": 4,
+    "is_general": false,
+    "effect": "Create an image that affects four senses",
+    "source_file": "12-creo-imaginem-guidelines.md",
+    "source_line": 13
+  },
+  {
+    "technique": "Creo",
+    "form": "Imaginem",
+    "level": 5,
+    "is_general": false,
+    "effect": "Create an image that affects five senses",
+    "source_file": "12-creo-imaginem-guidelines.md",
+    "source_line": 13
   },
   {
     "technique": "Intellego",
@@ -4588,6 +4867,42 @@
     "effect": "Change dirt into a highly unnatural liquid or gas (with requisites)",
     "source_file": "15-terram-spells.md",
     "source_line": 219
+  },
+  {
+    "technique": "Perdo",
+    "form": "Terram",
+    "level": null,
+    "is_general": true,
+    "effect": "Destroy sufficient matter to reduce an earth elemental's Might Score by the level of the spell +2 magnitudes",
+    "source_file": "15-terram-spells.md",
+    "source_line": 322
+  },
+  {
+    "technique": "Perdo",
+    "form": "Terram",
+    "level": 2,
+    "is_general": false,
+    "effect": "Weaken dirt",
+    "source_file": "15-terram-spells.md",
+    "source_line": 322
+  },
+  {
+    "technique": "Perdo",
+    "form": "Terram",
+    "level": 3,
+    "is_general": false,
+    "effect": "Destroy dirt",
+    "source_file": "15-terram-spells.md",
+    "source_line": 322
+  },
+  {
+    "technique": "Perdo",
+    "form": "Terram",
+    "level": 5,
+    "is_general": false,
+    "effect": "Destroy one aspect of dirt, such as its weight or its cohesiveness",
+    "source_file": "15-terram-spells.md",
+    "source_line": 322
   },
   {
     "technique": "Rego",

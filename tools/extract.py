@@ -26,7 +26,7 @@ FORMS = {
 }
 
 SECTION_RE = re.compile(
-    r"^###\s+(%s)\s+(%s)\s+(Spells|Guidelines)\s*$"
+    r"^#{2,4}\s+(%s)\s+(%s)\s+(Spells|Guidelines)\s*$"
     % ("|".join(TECHNIQUES), "|".join(FORMS))
 )
 LEVEL_RE = re.compile(r"^####\s+(?:LEVEL\s+(\d+)|GENERAL)\s*$", re.IGNORECASE)
@@ -80,8 +80,12 @@ class TableParser(HTMLParser):
 def parse_guideline_table(block, technique, form, source_file, base_line):
     parser = TableParser()
     parser.feed(block)
+    return _guideline_rows(parser.rows, technique, form, source_file, base_line)
+
+
+def _guideline_rows(rows, technique, form, source_file, base_line):
     out = []
-    for row in parser.rows:
+    for row in rows:
         if len(row) < 2:
             continue
         lvl_raw, effect_raw = row[0].strip(), row[1]
@@ -101,6 +105,24 @@ def parse_guideline_table(block, technique, form, source_file, base_line):
                 "source_file": source_file, "source_line": base_line,
             })
     return out
+
+
+def parse_pipe_guideline_table(block, technique, form, source_file, base_line):
+    """Same rows as the HTML tables, written as Markdown pipes.
+
+    Cells hold several bullet-separated effects on ONE line (no <br>), so the
+    split is on the bullet rather than the newline.
+    """
+    rows = []
+    for raw in block:
+        cells = [c.strip() for c in raw.strip().strip("|").split("|")]
+        if len(cells) < 2:
+            continue
+        # the `| --- | --- |` separator, and the empty leading row pandoc emits
+        if all(set(c) <= set("-: ") for c in cells):
+            continue
+        rows.append([cells[0], cells[1].replace("•", "\n•")])
+    return _guideline_rows(rows, technique, form, source_file, base_line)
 
 
 def parse_spell(name, body_lines, ctx, source_file, source_line, report):
@@ -195,7 +217,19 @@ def parse_file(path, spells, guidelines, report):
                 level, is_general_level = None, True
             i += 1
             continue
-        # guideline table inside a Guidelines section
+        # guideline table inside a Guidelines section — pipe-Markdown flavour
+        if section_type == "Guidelines" and ctx and line.lstrip().startswith("|"):
+            block = []
+            j = i
+            while j < n and lines[j].lstrip().startswith("|"):
+                block.append(lines[j]); j += 1
+            guidelines.extend(
+                parse_pipe_guideline_table(block, ctx[0], ctx[1], rel, i + 1)
+            )
+            i = j
+            continue
+
+        # guideline table inside a Guidelines section — HTML flavour
         if section_type == "Guidelines" and ctx and line.lstrip().startswith("<table"):
             block = [line]
             j = i + 1
