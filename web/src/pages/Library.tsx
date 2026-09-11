@@ -4,11 +4,12 @@ import { navigate } from "../router.ts";
 import { SpellBrowser } from "../components/SpellBrowser.tsx";
 import { TraitBrowser } from "../components/TraitBrowser.tsx";
 import { rules } from "../engine.ts";
-import { Sparkles, Plus, Minus, ScrollText, Ruler, Library as LibraryIcon } from "lucide-preact";
+import { Sparkles, Plus, Minus, ScrollText, Ruler, Wand2, Library as LibraryIcon } from "lucide-preact";
 import { TECHNIQUES, TECHNIQUE_LEGEND } from "../lib/legend.ts";
 import { Button } from "../components/ui/Button.tsx";
 import { GuidelineBrowser } from "../components/GuidelineBrowser.tsx";
 import { GuidelineLadder } from "../components/GuidelineLadder.tsx";
+import { SpellDesigner } from "../components/SpellDesigner.tsx";
 import { GUIDELINES } from "../lib/guidelines.ts";
 
 // Virtues and Flaws get a tab each rather than a switch nested inside a tab.
@@ -16,6 +17,7 @@ const TABS = [
   { key: "spells", label: "Spells", Icon: Sparkles },
   { key: "guidelines", label: "Guidelines", Icon: ScrollText },
   { key: "parameters", label: "R / D / T", Icon: Ruler },
+  { key: "design", label: "Design", Icon: Wand2 },
   { key: "virtues", label: "Virtues", Icon: Plus },
   { key: "flaws", label: "Flaws", Icon: Minus },
 ] as const;
@@ -51,7 +53,7 @@ export function Library({ tab }: { tab?: string }) {
         ))}
       </div>
 
-      {(active === "spells" || active === "guidelines") && (
+      {(active === "spells" || active === "guidelines" || active === "design") && (
         <div class="legend" aria-label="Technique colours">
           {TECHNIQUES.map((t) => (
             <span
@@ -69,6 +71,7 @@ export function Library({ tab }: { tab?: string }) {
       {active === "spells" && <SpellBrowser />}
       {active === "guidelines" && <GuidelineBrowser />}
       {active === "parameters" && <GuidelineLadder />}
+      {active === "design" && <SpellDesigner />}
       {(active === "virtues" || active === "flaws") && (
         <TraitBrowser kind={active === "flaws" ? "Flaw" : "Virtue"} />
       )}

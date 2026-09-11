@@ -10,6 +10,9 @@ import { ArtBadge, FormIcon } from "../src/components/ui/ArtBadge.tsx";
 import { Library } from "../src/pages/Library.tsx";
 import { GuidelineBrowser } from "../src/components/GuidelineBrowser.tsx";
 import { GuidelineLadder } from "../src/components/GuidelineLadder.tsx";
+import { SpellDesigner } from "../src/components/SpellDesigner.tsx";
+import { design, BLANK, pickGuideline } from "../src/lib/design-store.ts";
+import { GUIDELINES } from "../src/lib/guidelines.ts";
 
 let host: HTMLElement;
 
@@ -454,5 +457,124 @@ describe("GuidelineLadder", () => {
     el.querySelector<HTMLElement>(".rules-toggle")!.click();
     await flush();
     expect(el.querySelector(".rules-body")!.textContent!.length).toBeGreaterThan(80);
+  });
+});
+
+describe("SpellDesigner", () => {
+  // The design lives in a module-level signal so it survives a tab switch; reset it
+  // between tests or each one inherits the last one's spell.
+  const reset = () => { design.value = { ...BLANK }; };
+
+  test("opens on the effect picker, because there is nothing else to do yet", () => {
+    reset();
+    const el = mount(<SpellDesigner />);
+    expect(el.textContent).toContain("Choose the effect");
+    expect(el.querySelector(".total")).toBeNull();
+    expect(el.querySelectorAll(".option").length).toBeGreaterThan(0);
+  });
+
+  test("picking an effect shows the total and every ladder", async () => {
+    reset();
+    const el = mount(<SpellDesigner />);
+    buttons(el).find((b) => b.textContent!.trim() === "Use")!.click();
+    await flush();
+    expect(el.querySelector(".total-num b")!.textContent).toMatch(/^\d+$/);
+    expect(el.textContent).toContain("R: Personal, D: Momentary, T: Individual");
+    // Range, Duration and the three Target lanes.
+    expect(el.querySelectorAll(".rungs")).toHaveLength(5);
+  });
+
+  test("a ladder rung changes the total, and can be changed back", async () => {
+    reset();
+    design.value = pickGuideline({ ...BLANK }, GUIDELINES.find((g) => g.level === 10)!);
+    const el = mount(<SpellDesigner />);
+    const level = () => Number(el.querySelector(".total-num b")!.textContent);
+    expect(level()).toBe(10);
+
+    const rung = (name: string) =>
+      [...el.querySelectorAll<HTMLElement>(".rung-chip")].find((b) => b.textContent!.startsWith(name))!;
+    rung("Voice").click();
+    await flush();
+    expect(level()).toBe(20);          // +2 magnitudes
+    rung("Sun").click();
+    await flush();
+    expect(level()).toBe(30);          // +2 more
+    rung("Personal").click();
+    await flush();
+    expect(level()).toBe(20);          // Range back to +0, Duration still Sun
+    expect(el.textContent).toContain("R: Personal, D: Sun, T: Individual");
+  });
+
+  test("the base effect itself can be boosted and lowered", async () => {
+    reset();
+    design.value = pickGuideline({ ...BLANK }, GUIDELINES.find((g) => g.level === 10)!);
+    const el = mount(<SpellDesigner />);
+    const level = () => Number(el.querySelector(".total-num b")!.textContent);
+    const step = (dir: "increase" | "decrease") =>
+      el.querySelector<HTMLElement>(`[aria-label="${dir} base level"]`)!;
+    step("increase").click();
+    await flush();
+    expect(level()).toBe(15);
+    // One press per render, as a real user produces them — the stepper reads its
+    // position from the value it was rendered with.
+    step("decrease").click();
+    await flush();
+    step("decrease").click();
+    await flush();
+    expect(level()).toBe(5);
+    // Below 5 a magnitude is worth one level, not five.
+    step("decrease").click();
+    await flush();
+    expect(level()).toBe(4);
+  });
+
+  test("a Ritual-forcing rung says so and floors the spell at 20", async () => {
+    reset();
+    design.value = pickGuideline({ ...BLANK }, GUIDELINES.find((g) => g.level === 1)!);
+    const el = mount(<SpellDesigner />);
+    [...el.querySelectorAll<HTMLElement>(".rung-chip")].find((b) => b.textContent!.startsWith("Year"))!.click();
+    await flush();
+    expect(el.querySelector(".total-flag.ritual")!.textContent).toMatch(/Must be a Ritual/);
+    expect(el.querySelector(".total-num b")!.textContent).toBe("20");
+  });
+
+  test("the arithmetic unfolds, step by step", async () => {
+    reset();
+    design.value = pickGuideline({ ...BLANK }, GUIDELINES.find((g) => g.level === 10)!);
+    const el = mount(<SpellDesigner />);
+    [...el.querySelectorAll<HTMLElement>(".rung-chip")].find((b) => b.textContent!.startsWith("Voice"))!.click();
+    await flush();
+    expect(el.querySelector(".breakdown")).toBeNull();
+    el.querySelector<HTMLElement>(".total-toggle")!.click();
+    await flush();
+    const rows = [...el.querySelectorAll(".breakdown li")].map((n) => n.textContent);
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toContain("Base guideline");
+    expect(rows[1]).toContain("Range: Voice");
+    expect(rows[1]).toContain("+2 mag");
+  });
+
+  test("changing the effect keeps the parameters already paid for", async () => {
+    reset();
+    design.value = {
+      ...pickGuideline({ ...BLANK }, GUIDELINES.find((g) => g.level === 10)!),
+      rangeKey: "Voice",
+    };
+    const el = mount(<SpellDesigner />);
+    chip(el, "Change").click();
+    await flush();
+    buttons(el).find((b) => b.textContent!.trim() === "Use")!.click();
+    await flush();
+    expect(el.textContent).toContain("R: Voice,");
+  });
+
+  test("Start over empties the design", async () => {
+    reset();
+    design.value = pickGuideline({ ...BLANK }, GUIDELINES.find((g) => g.level === 10)!);
+    const el = mount(<SpellDesigner />);
+    chip(el, "Start over").click();
+    await flush();
+    expect(design.value.guidelineId).toBeNull();
+    expect(el.textContent).toContain("Choose the effect");
   });
 });

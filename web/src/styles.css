@@ -530,3 +530,115 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
   display: flex; gap: .35rem; align-items: flex-start; font-style: italic; color: var(--faint);
 }
 .art-notes-body .gloss svg { flex: 0 0 auto; margin-top: .25rem; }
+
+/* ── spell designer ──────────────────────────────────────
+   Same magnitude ramp as the R/D/T reference: a rung costs what it costs wherever
+   you meet it. */
+.designer-lead { margin: .2rem 0 .6rem; }
+.designer-lead h2 { display: flex; align-items: center; gap: .45rem; font-size: 1.1rem; color: var(--accent); margin: 0 0 .2rem; }
+.designer-lead .note { margin: 0 0 .4rem; }
+
+/* The total follows you down the page — every control below it changes this number,
+   so it must never be the thing that scrolled away. */
+.total {
+  position: sticky; top: var(--topbar-h); z-index: 20;
+  background: var(--card); border: 1px solid var(--line);
+  border-left: 5px solid var(--tech, var(--accent));
+  border-radius: var(--radius); padding: .6rem .8rem; margin-bottom: .8rem;
+  box-shadow: var(--shadow);
+}
+.total-main { display: flex; align-items: center; gap: .9rem; }
+.total-num { display: flex; flex-direction: column; align-items: center; line-height: 1; flex: 0 0 auto; }
+.total-num i { font-style: normal; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.total-num b { font-size: 2.3rem; color: var(--tech, var(--accent)); font-variant-numeric: tabular-nums; }
+.total-side { min-width: 0; }
+.total-side .statline { margin: 0; font-size: .92rem; font-weight: 600; }
+.total-side .note { margin: .1rem 0 0; }
+
+.total-flag {
+  display: flex; gap: .4rem; align-items: flex-start;
+  margin: .5rem 0 0; padding: .35rem .5rem; border-radius: 6px; font-size: .8rem;
+}
+.total-flag svg { flex: 0 0 auto; margin-top: .18rem; }
+.total-flag.ritual { background: #f2ecdc; color: #6a5512; }
+.total-flag.warn { background: #f7e7e2; color: #722; }
+
+.total-toggle {
+  display: inline-flex; align-items: center; gap: .3rem; margin-top: .45rem;
+  background: none; border: none; padding: .1rem 0; min-height: 30px;
+  font: inherit; font-size: .78rem; color: var(--muted); cursor: pointer;
+}
+.total-toggle svg { transition: transform .15s; }
+.total-toggle svg.flip { transform: rotate(180deg); }
+
+.breakdown { list-style: none; margin: .3rem 0 0; padding: 0; border-top: 1px solid var(--line-soft); }
+.breakdown li {
+  display: grid; grid-template-columns: 1fr auto 3.2rem; gap: .5rem; align-items: baseline;
+  padding: .25rem 0; font-size: .82rem; border-bottom: 1px solid var(--line-soft);
+}
+.breakdown li:last-child { border-bottom: none; font-weight: 600; }
+.breakdown .b-mag { color: var(--muted); font-size: .74rem; font-variant-numeric: tabular-nums; }
+.breakdown .b-run { text-align: right; font-variant-numeric: tabular-nums; }
+
+.design-block {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: .6rem .8rem .7rem; margin-bottom: .7rem;
+}
+.design-block h3 {
+  margin: 0 0 .45rem; font-size: .74rem; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--muted);
+}
+
+.chosen { display: flex; align-items: flex-start; gap: .6rem; padding-left: .55rem; border-left: 3px solid var(--tech); }
+.chosen-txt { flex: 1; min-width: 0; }
+.chosen-txt b { font-size: .95rem; display: block; }
+.chosen-meta { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; margin-top: .3rem; }
+.chosen-meta .note { font-style: normal; }
+
+.design-row {
+  display: flex; align-items: center; justify-content: space-between; gap: .8rem;
+  padding: .4rem 0; border-top: 1px solid var(--line-soft);
+}
+.design-block > .design-row:first-of-type { border-top: none; }
+.design-row label { font-size: .88rem; }
+.design-row .hint, .design-row .drift { display: block; font-style: normal; font-size: .74rem; color: var(--faint); }
+.design-row .drift { color: var(--warn); }
+.design-ctl { display: flex; align-items: center; gap: .4rem; flex: 0 0 auto; }
+
+/* Jump-anywhere rungs: every step of a ladder is one tap, not n taps through the
+   rungs between. The "+N" is the price, always on the chip. */
+.rungs { display: flex; flex-wrap: wrap; gap: .35rem; }
+.rung-chip {
+  display: inline-flex; align-items: center; gap: .35rem;
+  border: 1px solid color-mix(in srgb, var(--mag) 35%, var(--line));
+  background: var(--card); color: var(--ink);
+  border-radius: 999px; padding: .2rem .6rem; min-height: 36px;
+  font: inherit; font-size: .85rem; cursor: pointer;
+}
+.rung-chip:hover { background: color-mix(in srgb, var(--mag) 10%, var(--card)); }
+.rung-chip.on { background: var(--mag); border-color: var(--mag); color: #fff; }
+.rung-chip .m {
+  font-style: normal; font-size: .7rem; font-weight: 600; color: var(--mag);
+  background: color-mix(in srgb, var(--mag) 14%, var(--card));
+  border-radius: 999px; padding: 0 .35rem; font-variant-numeric: tabular-nums;
+}
+.rung-chip.on .m { background: rgba(255, 255, 255, .22); color: #fff; }
+.rung-chip .ritual {
+  font-style: normal; font-size: .6rem; font-weight: 700;
+  border: 1px solid currentColor; border-radius: 3px; padding: 0 .15rem; opacity: .75;
+}
+.rung-say { margin: .45rem 0 0; font-size: .8rem; color: var(--muted); }
+
+.target-lane { margin-bottom: .45rem; }
+.target-lane h4 {
+  margin: 0 0 .25rem; font-size: .7rem; font-weight: 600; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--faint); cursor: help;
+}
+
+.design-foot { display: flex; justify-content: center; margin: .2rem 0 1rem; }
+
+@media (max-width: 560px) {
+  .total-num b { font-size: 1.9rem; }
+  .design-row { flex-direction: column; align-items: stretch; gap: .35rem; }
+  .design-ctl { justify-content: flex-start; }
+}
