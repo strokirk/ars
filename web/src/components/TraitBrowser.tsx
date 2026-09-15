@@ -14,12 +14,7 @@ import {
   type SortOption,
 } from "./ui/FilterBar.tsx";
 import { ChipGroup } from "./ui/ChipGroup.tsx";
-import {
-  OptionList,
-  OptionRow,
-  MoreRows,
-  useVisibleCount,
-} from "./ui/OptionList.tsx";
+import { OptionList, OptionRow } from "./ui/OptionList.tsx";
 import { TraitBadge, CategoryIcon } from "./ui/TraitBadge.tsx";
 import { Button } from "./ui/Button.tsx";
 
@@ -46,13 +41,11 @@ const newSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
 export function TraitBrowser({
   filter,
   action,
-  pageSize = 60,
   kind: kindProp,
   initialKind = "Virtue",
 }: {
   filter?: (r: VirtueFlawRow) => boolean;
   action?: (r: VirtueFlawRow) => ComponentChildren;
-  pageSize?: number;
   kind?: "Virtue" | "Flaw";
   initialKind?: "Virtue" | "Flaw";
 }) {
@@ -83,11 +76,6 @@ export function TraitBrowser({
       }),
     [pool, category, size, search, sort, seed],
   );
-  const { visible, hidden, showMore, showAll } = useVisibleCount(
-    matches,
-    pageSize,
-  );
-
   const active: ActiveFilter[] = [
     category && { label: category, clear: () => setCategory("") },
     size && { label: size, clear: () => setSize("") },
@@ -144,14 +132,13 @@ export function TraitBrowser({
           <>
             {matches.length} {noun}
             {matches.length === 1 ? "" : "s"}
-            {hidden > 0 && ` · showing ${visible.length}`}
           </>
         }
       >
         <div class="artfilter" role="group" aria-label="Filter by category">
           <Button
             onClick={() => setCategory("")}
-            size={"small"}
+            size="small"
             appearance={category === "" ? "accent" : "outlined"}
             variant="brand"
           >
@@ -159,7 +146,7 @@ export function TraitBrowser({
           </Button>
           {categories.map((c) => (
             <Button
-              size={"small"}
+              size="small"
               appearance={category === c ? "accent" : "outlined"}
               variant="brand"
               key={c}
@@ -178,7 +165,7 @@ export function TraitBrowser({
       </FilterBar>
 
       <OptionList empty={`No ${noun}s match these filters.`}>
-        {visible.map((r) => (
+        {matches.map((r) => (
           <OptionRow
             key={r.name}
             title={r.name}
@@ -194,12 +181,6 @@ export function TraitBrowser({
           />
         ))}
       </OptionList>
-      <MoreRows
-        hidden={hidden}
-        pageSize={pageSize}
-        onMore={showMore}
-        onAll={showAll}
-      />
     </div>
   );
 }

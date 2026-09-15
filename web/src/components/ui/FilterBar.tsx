@@ -129,7 +129,7 @@ export function FilterBar<S extends string>({
             </Button>
           ))}
           {(active.length > 0 || search) && onClear && (
-            <Button size={"small"} onClick={onClear}>
+            <Button size="small" onClick={onClear}>
               Clear all
             </Button>
           )}

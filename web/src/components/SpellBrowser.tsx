@@ -30,12 +30,7 @@ import {
   type SortOption,
 } from "./ui/FilterBar.tsx";
 import { Select } from "./ui/Select.tsx";
-import {
-  OptionList,
-  OptionRow,
-  MoreRows,
-  useVisibleCount,
-} from "./ui/OptionList.tsx";
+import { OptionList, OptionRow } from "./ui/OptionList.tsx";
 import { ArtBadge, FormIcon } from "./ui/ArtBadge.tsx";
 import { Button } from "./ui/Button.tsx";
 
@@ -67,12 +62,9 @@ const newSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
 export function SpellBrowser({
   labTotalOf,
   action,
-  pageSize = 60,
 }: {
   labTotalOf?: (s: SpellRow) => number;
   action?: (s: SpellRow) => ComponentChildren;
-  /** How many rows to reveal at a time; the rest are a click away, never cut off. */
-  pageSize?: number;
 }) {
   const [search, setSearch] = useState("");
   const [technique, setTechnique] = useState("");
@@ -123,13 +115,9 @@ export function SpellBrowser({
       labTotalOf,
     ],
   );
-  const { visible, hidden, showMore, showAll } = useVisibleCount(
-    matches,
-    pageSize,
-  );
   const groups = useMemo(
-    () => groupSpells(visible, groupBy),
-    [visible, groupBy],
+    () => groupSpells(matches, groupBy),
+    [matches, groupBy],
   );
 
   const active: ActiveFilter[] = [
@@ -185,7 +173,6 @@ export function SpellBrowser({
         summary={
           <>
             {matches.length} spell{matches.length === 1 ? "" : "s"}
-            {hidden > 0 && ` · showing ${visible.length}`}
           </>
         }
       >
@@ -339,12 +326,6 @@ export function SpellBrowser({
           )),
         ])}
       </OptionList>
-      <MoreRows
-        hidden={hidden}
-        pageSize={pageSize}
-        onMore={showMore}
-        onAll={showAll}
-      />
     </div>
   );
 }

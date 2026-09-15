@@ -9,11 +9,11 @@ import { TECHNIQUE_COLOR } from "../lib/arts.ts";
 import { TECHNIQUES, FORMS, ART_ABBR, type Technique } from "../../../chargen/src/domain/glossary.ts";
 import { FilterBar, type ActiveFilter, type SortOption } from "./ui/FilterBar.tsx";
 import { Select } from "./ui/Select.tsx";
-import { OptionList, OptionRow, MoreRows, useVisibleCount } from "./ui/OptionList.tsx";
+import { OptionList, OptionRow } from "./ui/OptionList.tsx";
 import { ArtBadge, FormIcon } from "./ui/ArtBadge.tsx";
 import { Button } from "./ui/Button.tsx";
 
-const MAX_LEVELS = [5, 10, 15, 20, 25, 30, 40, 50];
+const MAX_LEVELS = [5, 10, 15, 20, 25, 30, 35, 40, 50];
 const SORTS: SortOption<GuidelineSort>[] = [
   { value: "art", label: "Sort: Arts" },
   { value: "level", label: "Sort: Level ↑" },
@@ -32,10 +32,9 @@ const SORTS: SortOption<GuidelineSort>[] = [
  * `action` makes rows actionable — the designer passes a "Use this" button.
  */
 export function GuidelineBrowser({
-  action, pageSize = 80, onPick,
+  action, onPick,
 }: {
   action?: (g: Guideline) => ComponentChildren;
-  pageSize?: number;
   /** Called when a row itself is activated, for the designer's tap-to-load. */
   onPick?: (g: Guideline) => void;
 }) {
@@ -54,8 +53,7 @@ export function GuidelineBrowser({
     }),
     [search, technique, form, book, maxLevel, includeGeneral, sort],
   );
-  const { visible, hidden, showMore, showAll } = useVisibleCount(matches, pageSize);
-  const groups = useMemo(() => groupGuidelines(visible, sort), [visible, sort]);
+  const groups = useMemo(() => groupGuidelines(matches, sort), [matches, sort]);
 
   const active: ActiveFilter[] = [
     technique && { label: technique, clear: () => setTechnique("") },
@@ -84,7 +82,6 @@ export function GuidelineBrowser({
         summary={
           <>
             {matches.length} guideline{matches.length === 1 ? "" : "s"}
-            {hidden > 0 && ` · showing ${visible.length}`}
           </>
         }
       >
@@ -147,6 +144,8 @@ export function GuidelineBrowser({
               onChange={setBook}
             />
           )}
+        </div>
+        <div class="chips">
           <Button
             size="small"
             appearance={!includeGeneral ? "accent" : "outlined"}
@@ -190,16 +189,15 @@ export function GuidelineBrowser({
               action={
                 action?.(row) ??
                 (onPick ? (
-                  <button type="button" class="btn btn-sm" onClick={() => onPick(row)}>
+                  <Button size="small" variant="brand" appearance="accent" onClick={() => onPick(row)}>
                     Use
-                  </button>
+                  </Button>
                 ) : undefined)
               }
             />
           )),
         ])}
       </OptionList>
-      <MoreRows hidden={hidden} pageSize={pageSize} onMore={showMore} onAll={showAll} />
     </div>
   );
 }

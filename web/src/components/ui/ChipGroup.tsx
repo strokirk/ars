@@ -23,7 +23,7 @@ export function ChipGroup<T extends string>({
         <Button
           onClick={() => onChange("")}
           variant="brand"
-          size={"small"}
+          size="small"
           appearance={value === "" ? "accent" : "outlined"}
         >
           {allLabel}
@@ -32,7 +32,7 @@ export function ChipGroup<T extends string>({
       {options.map((o) => (
         <Button
           variant="brand"
-          size={"small"}
+          size="small"
           appearance={value === o ? "accent" : "outlined"}
           key={o}
           onClick={() => onChange(value === o ? "" : o)}

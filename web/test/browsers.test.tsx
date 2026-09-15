@@ -182,31 +182,11 @@ describe("SpellBrowser", () => {
     expect(count(withChar)).toBeLessThan(before);
   });
 
-  test("reveals the whole list a page at a time instead of truncating it", async () => {
-    const el = mount(<SpellBrowser pageSize={20} />);
+  test("renders the whole list at once rather than truncating it", () => {
+    const el = mount(<SpellBrowser />);
     const total = count(el);
     expect(total).toBeGreaterThan(300);
-    expect(rows(el)).toHaveLength(20);
-
-    chip(el, "Show 20 more").click();
-    await flush();
-    expect(rows(el)).toHaveLength(40);
-
-    buttons(el).find((b) => b.textContent!.startsWith("Show all"))!.click();
-    await flush();
     expect(rows(el)).toHaveLength(total);
-    expect(el.querySelector(".more")).toBeNull();
-  });
-
-  test("a new filter starts the page count over", async () => {
-    const el = mount(<SpellBrowser pageSize={20} />);
-    chip(el, "Show 20 more").click();
-    await flush();
-    expect(rows(el)).toHaveLength(40);
-    await openFilters(el);
-    artChip(el, "Perdo").click();
-    await flush();
-    expect(rows(el)).toHaveLength(20);
   });
 
   test("sorts by level, and by a random order that only reshuffles on demand", async () => {
@@ -292,13 +272,10 @@ describe("TraitBrowser", () => {
     expect(rows(el)).toEqual(rows(el));
   });
 
-  test("pages through the whole list rather than stopping at the first screenful", async () => {
-    const el = mount(<TraitBrowser pageSize={20} />);
+  test("renders the whole list at once rather than stopping at the first screenful", () => {
+    const el = mount(<TraitBrowser />);
     const total = count(el);
     expect(total).toBeGreaterThan(20);
-    expect(rows(el)).toHaveLength(20);
-    buttons(el).find((b) => b.textContent!.startsWith("Show all"))!.click();
-    await flush();
     expect(rows(el)).toHaveLength(total);
   });
 

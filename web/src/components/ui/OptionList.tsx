@@ -1,6 +1,5 @@
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
-import { Button } from "./Button.tsx";
 
 /** Result list. Scrolls with the page — a nested scroll box hides the results. */
 export function OptionList({ children, empty = "No matches." }: { children: ComponentChildren; empty?: string }) {
@@ -52,41 +51,5 @@ export function OptionRow({
       </div>
       {action}
     </li>
-  );
-}
-
-/**
- * Reveal a long result list a page at a time. `rows` doubles as the reset key —
- * a new filter or sort produces a new array, which starts the count over. The
- * key is stored *with* the count rather than reset from an effect: preact runs
- * effects after paint, so an effect-based reset can land on top of a click that
- * happened first and silently undo it.
- */
-export function useVisibleCount<T>(rows: readonly T[], pageSize: number) {
-  const [state, setState] = useState<{ key: readonly T[]; n: number }>({ key: rows, n: pageSize });
-  const n = state.key === rows ? state.n : pageSize;
-  return {
-    visible: rows.slice(0, n),
-    hidden: Math.max(0, rows.length - n),
-    showMore: () => setState({ key: rows, n: n + pageSize }),
-    showAll: () => setState({ key: rows, n: rows.length }),
-  };
-}
-
-/** The footer that goes with `useVisibleCount` — nothing renders once all rows are out. */
-export function MoreRows({
-  hidden, pageSize, onMore, onAll,
-}: {
-  hidden: number;
-  pageSize: number;
-  onMore: () => void;
-  onAll: () => void;
-}) {
-  if (hidden === 0) return null;
-  return (
-    <div class="more">
-      <Button size="small" onClick={onMore}>Show {Math.min(pageSize, hidden)} more</Button>
-      <Button size="small" appearance="plain" onClick={onAll}>Show all {hidden} remaining</Button>
-    </div>
   );
 }
