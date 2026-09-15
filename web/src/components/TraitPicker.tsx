@@ -68,8 +68,8 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
   return (
     <div>
       <div class="chips" style="margin-bottom:.7rem;">
-        <button class={`chip-toggle ${mode === "Virtue" ? "on" : ""}`} onClick={() => { setMode("Virtue"); setCat(""); setActive(null); }}>Virtues</button>
-        <button class={`chip-toggle ${mode === "Flaw" ? "on" : ""}`} onClick={() => { setMode("Flaw"); setCat(""); setActive(null); }}>Flaws</button>
+        <Button size="small" appearance={mode === "Virtue" ? "accent" : "outlined"} color="var(--ok)" onClick={() => { setMode("Virtue"); setCat(""); setActive(null); }}>Virtues</Button>
+        <Button size="small" appearance={mode === "Flaw" ? "accent" : "outlined"} color="var(--err)" onClick={() => { setMode("Flaw"); setCat(""); setActive(null); }}>Flaws</Button>
       </div>
 
       {taken.filter((t) => !t.free).length > 0 && (
@@ -109,8 +109,8 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
             <div class="field">
               <label>Size</label>
               <div class="chips">
-                <button class={`chip-toggle ${size === "Minor" ? "on" : ""}`} onClick={() => setSize("Minor")}>Minor (1 pt)</button>
-                <button class={`chip-toggle ${size === "Major" ? "on" : ""}`} onClick={() => setSize("Major")}>Major (3 pts)</button>
+                <Button size="small" appearance={size === "Minor" ? "accent" : "outlined"} onClick={() => setSize("Minor")}>Minor (1 pt)</Button>
+                <Button size="small" appearance={size === "Major" ? "accent" : "outlined"} onClick={() => setSize("Major")}>Major (3 pts)</Button>
               </div>
             </div>
           )}

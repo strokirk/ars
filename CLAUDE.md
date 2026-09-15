@@ -78,9 +78,13 @@ point tokens at the parchment palette rather than writing per-component CSS. The
 wrapper never imports the custom elements, so under test the tags stay inert DOM that
 still carries `value` and emits `change`; drive them in vitest with
 `wa-select[aria-label="…"]`, not `<select>`. Buttons go through `ui/Button`
-(`<wa-button>`, `appearance` for hierarchy) the same way — but the **filter chips stay
-plain `<button class="chip-toggle">`**: they are toggles carrying Technique colours,
-which no button variant expresses. Test helpers must query `"button, wa-button"`.
+(`<wa-button>`, `appearance` for hierarchy) the same way — **including the filter
+chips**: `Button`'s `color` prop overrides the WA brand tokens (`--wa-color-brand-*`)
+on that one instance, so a Technique- or Virtue/Flaw-coloured chip still gets real
+`wa-button` focus/disabled/sizing behaviour instead of a hand-rolled `.chip-toggle`.
+A handful of non-filter toggles (`AbilityPicker`'s `+` chip, the spell designer's
+Yes/No) are still plain `<button class="chip-toggle">` — fine for a one-off, not a
+pattern to spread. Test helpers must query `"button, wa-button"`.
 
 ```sh
 cd web && pnpm install && pnpm dev       # local dev server

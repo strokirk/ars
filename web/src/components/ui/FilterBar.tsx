@@ -102,7 +102,7 @@ export function FilterBar<S extends string>({
             <Button
               class={`${open || active.length ? "on" : ""}`}
               aria-expanded={open}
-              size={"small"}
+              size="small"
               appearance={open || active.length ? "accent" : "outlined"}
               variant="brand"
               onClick={() => setOpen(!open)}
@@ -119,7 +119,7 @@ export function FilterBar<S extends string>({
             <Button
               key={f.label}
               class="active-chip"
-              size={"small"}
+              size="small"
               appearance="plain"
               variant="brand"
               title={`Remove filter: ${f.label}`}
@@ -136,11 +136,7 @@ export function FilterBar<S extends string>({
         </div>
       </div>
 
-      {open && children && (
-        <div class="filterpanel">
-          {children}
-        </div>
-      )}
+      {open && children && <div class="filterpanel">{children}</div>}
     </div>
   );
 }

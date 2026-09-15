@@ -1,16 +1,43 @@
 import type { ComponentChildren } from "preact";
 import { useMemo, useState } from "preact/hooks";
 import { rules } from "../engine.ts";
-import { querySpells, groupSpells, type SpellQuery, type SpellSort, type SpellGroupBy } from "../lib/queries.ts";
 import {
-  RANGES, DURATIONS, TARGETS, RANGE_NAME, DURATION_NAME, TARGET_NAME, TECHNIQUE_COLOR,
+  querySpells,
+  groupSpells,
+  type SpellQuery,
+  type SpellSort,
+  type SpellGroupBy,
+} from "../lib/queries.ts";
+import {
+  RANGES,
+  DURATIONS,
+  TARGETS,
+  RANGE_NAME,
+  DURATION_NAME,
+  TARGET_NAME,
+  TECHNIQUE_COLOR,
 } from "../lib/arts.ts";
-import { TECHNIQUES, FORMS, ART_ABBR, type Technique } from "../../../chargen/src/domain/glossary.ts";
+import {
+  TECHNIQUES,
+  FORMS,
+  ART_ABBR,
+  type Technique,
+} from "../../../chargen/src/domain/glossary.ts";
 import type { SpellRow } from "../../../chargen/src/data/types.ts";
-import { FilterBar, type ActiveFilter, type SortOption } from "./ui/FilterBar.tsx";
+import {
+  FilterBar,
+  type ActiveFilter,
+  type SortOption,
+} from "./ui/FilterBar.tsx";
 import { Select } from "./ui/Select.tsx";
-import { OptionList, OptionRow, MoreRows, useVisibleCount } from "./ui/OptionList.tsx";
+import {
+  OptionList,
+  OptionRow,
+  MoreRows,
+  useVisibleCount,
+} from "./ui/OptionList.tsx";
 import { ArtBadge, FormIcon } from "./ui/ArtBadge.tsx";
+import { Button } from "./ui/Button.tsx";
 
 const MAX_LEVELS = [5, 10, 15, 20, 25, 30, 35, 40, 50];
 const SORTS: SortOption<SpellSort>[] = [
@@ -38,7 +65,9 @@ const newSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
  * `action` renders the Learn button) and standalone in the reference library.
  */
 export function SpellBrowser({
-  labTotalOf, action, pageSize = 60,
+  labTotalOf,
+  action,
+  pageSize = 60,
 }: {
   labTotalOf?: (s: SpellRow) => number;
   action?: (s: SpellRow) => ComponentChildren;
@@ -52,50 +81,107 @@ export function SpellBrowser({
   const [duration, setDuration] = useState("");
   const [target, setTarget] = useState("");
   const [maxLevel, setMaxLevel] = useState<number | "">("");
-  const [ritual, setRitual] = useState<NonNullable<SpellQuery["ritual"]>>("any");
+  const [ritual, setRitual] =
+    useState<NonNullable<SpellQuery["ritual"]>>("any");
   const [onlyReachable, setOnlyReachable] = useState(false);
   const [sort, setSort] = useState<SpellSort>("name");
   const [groupBy, setGroupBy] = useState<SpellGroupBy>("none");
   const [seed, setSeed] = useState(newSeed);
 
   const matches = useMemo(
-    () => querySpells(
-      rules.spells,
-      {
-        search, technique, form, range, duration, target, ritual, sort, seed, includeGeneral: true,
-        maxLevel: maxLevel === "" ? undefined : maxLevel,
-        onlyReachable: onlyReachable && Boolean(labTotalOf),
-      },
+    () =>
+      querySpells(
+        rules.spells,
+        {
+          search,
+          technique,
+          form,
+          range,
+          duration,
+          target,
+          ritual,
+          sort,
+          seed,
+          includeGeneral: true,
+          maxLevel: maxLevel === "" ? undefined : maxLevel,
+          onlyReachable: onlyReachable && Boolean(labTotalOf),
+        },
+        labTotalOf,
+      ),
+    [
+      search,
+      technique,
+      form,
+      range,
+      duration,
+      target,
+      maxLevel,
+      ritual,
+      onlyReachable,
+      sort,
+      seed,
       labTotalOf,
-    ),
-    [search, technique, form, range, duration, target, maxLevel, ritual, onlyReachable, sort, seed, labTotalOf],
+    ],
   );
-  const { visible, hidden, showMore, showAll } = useVisibleCount(matches, pageSize);
-  const groups = useMemo(() => groupSpells(visible, groupBy), [visible, groupBy]);
+  const { visible, hidden, showMore, showAll } = useVisibleCount(
+    matches,
+    pageSize,
+  );
+  const groups = useMemo(
+    () => groupSpells(visible, groupBy),
+    [visible, groupBy],
+  );
 
   const active: ActiveFilter[] = [
     technique && { label: technique, clear: () => setTechnique("") },
     form && { label: form, clear: () => setForm("") },
     range && { label: RANGE_NAME[range] ?? range, clear: () => setRange("") },
-    duration && { label: DURATION_NAME[duration] ?? duration, clear: () => setDuration("") },
-    target && { label: TARGET_NAME[target] ?? target, clear: () => setTarget("") },
-    maxLevel !== "" && { label: `Level ≤ ${maxLevel}`, clear: () => setMaxLevel("") },
-    ritual !== "any" && { label: ritual === "only" ? "Rituals only" : "Formulaic only", clear: () => setRitual("any") },
-    onlyReachable && { label: "Within my Lab Total", clear: () => setOnlyReachable(false) },
+    duration && {
+      label: DURATION_NAME[duration] ?? duration,
+      clear: () => setDuration(""),
+    },
+    target && {
+      label: TARGET_NAME[target] ?? target,
+      clear: () => setTarget(""),
+    },
+    maxLevel !== "" && {
+      label: `Level ≤ ${maxLevel}`,
+      clear: () => setMaxLevel(""),
+    },
+    ritual !== "any" && {
+      label: ritual === "only" ? "Rituals only" : "Formulaic only",
+      clear: () => setRitual("any"),
+    },
+    onlyReachable && {
+      label: "Within my Lab Total",
+      clear: () => setOnlyReachable(false),
+    },
   ].filter(Boolean) as ActiveFilter[];
 
   const clearAll = () => {
-    setSearch(""); setTechnique(""); setForm(""); setRange(""); setDuration(""); setTarget("");
-    setMaxLevel(""); setRitual("any"); setOnlyReachable(false);
+    setSearch("");
+    setTechnique("");
+    setForm("");
+    setRange("");
+    setDuration("");
+    setTarget("");
+    setMaxLevel("");
+    setRitual("any");
+    setOnlyReachable(false);
   };
 
   return (
     <div class="browser">
       <FilterBar
-        search={search} onSearch={setSearch} placeholder="Search spells by name or effect…"
-        sort={sort} sorts={SORTS} onSort={setSort}
+        search={search}
+        onSearch={setSearch}
+        placeholder="Search spells by name or effect…"
+        sort={sort}
+        sorts={SORTS}
+        onSort={setSort}
         onShuffle={sort === "random" ? () => setSeed(newSeed()) : undefined}
-        active={active} onClear={clearAll}
+        active={active}
+        onClear={clearAll}
         summary={
           <>
             {matches.length} spell{matches.length === 1 ? "" : "s"}
@@ -105,48 +191,115 @@ export function SpellBrowser({
       >
         {/* Techniques carry the colour, Forms the icon — the same language as the rows. */}
         <div class="artfilter" role="group" aria-label="Filter by Technique">
-          <button class={`chip-toggle ${technique === "" ? "on" : ""}`} onClick={() => setTechnique("")}>All Techniques</button>
+          <Button
+            size="small"
+            appearance={technique === "" ? "accent" : "outlined"}
+            onClick={() => setTechnique("")}
+          >
+            All Techniques
+          </Button>
           {TECHNIQUES.map((t) => (
-            <button
+            <Button
               key={t}
-              class={`chip-toggle tech ${technique === t ? "on" : ""}`}
-              style={`--tech:${TECHNIQUE_COLOR[t as Technique]}`}
+              size="small"
+              appearance={technique === t ? "accent" : "outlined"}
+              color={TECHNIQUE_COLOR[t as Technique]}
               title={t}
               onClick={() => setTechnique(technique === t ? "" : t)}
             >
-              <span class="ab">{ART_ABBR[t]}</span> {t}
-            </button>
+              {ART_ABBR[t]} {t}
+            </Button>
           ))}
         </div>
         <div class="artfilter" role="group" aria-label="Filter by Form">
-          <button class={`chip-toggle ${form === "" ? "on" : ""}`} onClick={() => setForm("")}>All Forms</button>
+          <Button
+            size="small"
+            appearance={form === "" ? "accent" : "outlined"}
+            onClick={() => setForm("")}
+          >
+            All Forms
+          </Button>
           {FORMS.map((f) => (
-            <button key={f} class={`chip-toggle ${form === f ? "on" : ""}`} title={f} onClick={() => setForm(form === f ? "" : f)}>
+            <Button
+              key={f}
+              size="small"
+              appearance={form === f ? "accent" : "outlined"}
+              title={f}
+              onClick={() => setForm(form === f ? "" : f)}
+            >
               <FormIcon form={f} size={14} /> {f}
-            </button>
+            </Button>
           ))}
         </div>
         <div class="chips">
-          <Picker label="Range" value={range} onChange={setRange} options={RANGES} names={RANGE_NAME} />
-          <Picker label="Duration" value={duration} onChange={setDuration} options={DURATIONS} names={DURATION_NAME} />
-          <Picker label="Target" value={target} onChange={setTarget} options={TARGETS} names={TARGET_NAME} />
+          <Picker
+            label="Range"
+            value={range}
+            onChange={setRange}
+            options={RANGES}
+            names={RANGE_NAME}
+          />
+          <Picker
+            label="Duration"
+            value={duration}
+            onChange={setDuration}
+            options={DURATIONS}
+            names={DURATION_NAME}
+          />
+          <Picker
+            label="Target"
+            value={target}
+            onChange={setTarget}
+            options={TARGETS}
+            names={TARGET_NAME}
+          />
           <Select
-            label="Maximum level" pill active={maxLevel !== ""} value={String(maxLevel)}
-            options={[{ value: "", label: "Any level" }, ...MAX_LEVELS.map((l) => ({ value: String(l), label: `Level ≤ ${l}` }))]}
+            label="Maximum level"
+            pill
+            active={maxLevel !== ""}
+            value={String(maxLevel)}
+            options={[
+              { value: "", label: "Any level" },
+              ...MAX_LEVELS.map((l) => ({
+                value: String(l),
+                label: `Level ≤ ${l}`,
+              })),
+            ]}
             onChange={(v) => setMaxLevel(v === "" ? "" : Number(v))}
           />
           <Select
-            label="Group spells" pill active={groupBy !== "none"} value={groupBy} options={GROUPS}
+            label="Group spells"
+            pill
+            active={groupBy !== "none"}
+            value={groupBy}
+            options={GROUPS}
             onChange={(v) => setGroupBy(v as SpellGroupBy)}
           />
         </div>
         <div class="chips">
-          <button class={`chip-toggle ${ritual === "exclude" ? "on" : ""}`} onClick={() => setRitual(ritual === "exclude" ? "any" : "exclude")}>Formulaic only</button>
-          <button class={`chip-toggle ${ritual === "only" ? "on" : ""}`} onClick={() => setRitual(ritual === "only" ? "any" : "only")}>Rituals only</button>
+          <Button
+            size="small"
+            appearance={ritual === "exclude" ? "accent" : "outlined"}
+            onClick={() => setRitual(ritual === "exclude" ? "any" : "exclude")}
+          >
+            Formulaic only
+          </Button>
+          <Button
+            size="small"
+            appearance={ritual === "only" ? "accent" : "outlined"}
+            onClick={() => setRitual(ritual === "only" ? "any" : "only")}
+          >
+            Rituals only
+          </Button>
           {labTotalOf && (
-            <button class={`chip-toggle ${onlyReachable ? "on" : ""}`} onClick={() => setOnlyReachable(!onlyReachable)} title="Hide spells whose level exceeds your Lab Total">
+            <Button
+              size="small"
+              appearance={onlyReachable ? "accent" : "outlined"}
+              onClick={() => setOnlyReachable(!onlyReachable)}
+              title="Hide spells whose level exceeds your Lab Total"
+            >
               Within my Lab Total
-            </button>
+            </Button>
           )}
         </div>
       </FilterBar>
@@ -154,7 +307,15 @@ export function SpellBrowser({
       <OptionList empty="No spells match these filters.">
         {groups.flatMap((g) => [
           g.label ? (
-            <li class="group-head" key={`h-${g.key}`} style={groupColor(g.label) ? `--tech:${groupColor(g.label)}` : undefined}>
+            <li
+              class="group-head"
+              key={`h-${g.key}`}
+              style={
+                groupColor(g.label)
+                  ? `--tech:${groupColor(g.label)}`
+                  : undefined
+              }
+            >
               {groupColor(g.label) && <i class="swatch" />}
               {g.label} <span class="n">{g.rows.length}</span>
             </li>
@@ -164,7 +325,13 @@ export function SpellBrowser({
               key={s.name}
               title={s.name}
               accent={TECHNIQUE_COLOR[s.technique as Technique]}
-              badge={<ArtBadge technique={s.technique} form={s.form} level={s.is_general ? "Gen" : s.level} />}
+              badge={
+                <ArtBadge
+                  technique={s.technique}
+                  form={s.form}
+                  level={s.is_general ? "Gen" : s.level}
+                />
+              }
               meta={spellMeta(s, labTotalOf)}
               description={s.description}
               action={action?.(s)}
@@ -172,7 +339,12 @@ export function SpellBrowser({
           )),
         ])}
       </OptionList>
-      <MoreRows hidden={hidden} pageSize={pageSize} onMore={showMore} onAll={showAll} />
+      <MoreRows
+        hidden={hidden}
+        pageSize={pageSize}
+        onMore={showMore}
+        onAll={showAll}
+      />
     </div>
   );
 }
@@ -183,7 +355,11 @@ function groupColor(label: string): string | undefined {
 }
 
 function Picker({
-  label, value, onChange, options, names,
+  label,
+  value,
+  onChange,
+  options,
+  names,
 }: {
   label: string;
   value: string;
@@ -193,7 +369,11 @@ function Picker({
 }) {
   return (
     <Select
-      label={label} pill active={Boolean(value)} value={value} onChange={onChange}
+      label={label}
+      pill
+      active={Boolean(value)}
+      value={value}
+      onChange={onChange}
       options={[
         { value: "", label: `Any ${label.toLowerCase()}` },
         ...options.map((o) => ({ value: o, label: names[o] ?? o })),
@@ -203,9 +383,15 @@ function Picker({
 }
 
 /** The non-Art half of a row's meta line: "Voice/Diam/Ind · ritual · +10 dmg". */
-export function spellMeta(s: SpellRow, labTotalOf?: (s: SpellRow) => number): string {
+export function spellMeta(
+  s: SpellRow,
+  labTotalOf?: (s: SpellRow) => number,
+): string {
   const parts = [[s.range, s.duration, s.target].filter(Boolean).join("/")];
-  if (s.requisites.length) parts.push(`req ${s.requisites.map((r) => ART_ABBR[r as never] ?? r).join(", ")}`);
+  if (s.requisites.length)
+    parts.push(
+      `req ${s.requisites.map((r) => ART_ABBR[r as never] ?? r).join(", ")}`,
+    );
   if (s.is_ritual) parts.push("ritual");
   if (s.damage !== null) parts.push(`+${s.damage} damage`);
   if (labTotalOf) parts.push(`Lab Total ${labTotalOf(s)}`);

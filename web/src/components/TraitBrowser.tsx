@@ -115,24 +115,28 @@ export function TraitBrowser({
         lead={
           kindProp ? undefined : (
             <span class="chips kindswitch">
-              <button
-                class={`chip-toggle virtue ${kind === "Virtue" ? "on" : ""}`}
+              <Button
+                size="small"
+                appearance={kind === "Virtue" ? "accent" : "outlined"}
+                color={ACCENT.Virtue}
                 onClick={() => {
                   setOwnKind("Virtue");
                   setCategory("");
                 }}
               >
                 Virtues
-              </button>
-              <button
-                class={`chip-toggle flaw ${kind === "Flaw" ? "on" : ""}`}
+              </Button>
+              <Button
+                size="small"
+                appearance={kind === "Flaw" ? "accent" : "outlined"}
+                color={ACCENT.Flaw}
                 onClick={() => {
                   setOwnKind("Flaw");
                   setCategory("");
                 }}
               >
                 Flaws
-              </button>
+              </Button>
             </span>
           )
         }

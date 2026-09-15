@@ -11,6 +11,7 @@ import { FilterBar, type ActiveFilter, type SortOption } from "./ui/FilterBar.ts
 import { Select } from "./ui/Select.tsx";
 import { OptionList, OptionRow, MoreRows, useVisibleCount } from "./ui/OptionList.tsx";
 import { ArtBadge, FormIcon } from "./ui/ArtBadge.tsx";
+import { Button } from "./ui/Button.tsx";
 
 const MAX_LEVELS = [5, 10, 15, 20, 25, 30, 40, 50];
 const SORTS: SortOption<GuidelineSort>[] = [
@@ -88,34 +89,36 @@ export function GuidelineBrowser({
         }
       >
         <div class="artfilter" role="group" aria-label="Filter by Technique">
-          <button class={`chip-toggle ${technique === "" ? "on" : ""}`} onClick={() => setTechnique("")}>
+          <Button size="small" appearance={technique === "" ? "accent" : "outlined"} onClick={() => setTechnique("")}>
             All Techniques
-          </button>
+          </Button>
           {TECHNIQUES.map((t) => (
-            <button
+            <Button
               key={t}
-              class={`chip-toggle tech ${technique === t ? "on" : ""}`}
-              style={`--tech:${TECHNIQUE_COLOR[t as Technique]}`}
+              size="small"
+              appearance={technique === t ? "accent" : "outlined"}
+              color={TECHNIQUE_COLOR[t as Technique]}
               title={t}
               onClick={() => setTechnique(technique === t ? "" : t)}
             >
-              <span class="ab">{ART_ABBR[t]}</span> {t}
-            </button>
+              {ART_ABBR[t]} {t}
+            </Button>
           ))}
         </div>
         <div class="artfilter" role="group" aria-label="Filter by Form">
-          <button class={`chip-toggle ${form === "" ? "on" : ""}`} onClick={() => setForm("")}>
+          <Button size="small" appearance={form === "" ? "accent" : "outlined"} onClick={() => setForm("")}>
             All Forms
-          </button>
+          </Button>
           {FORMS.map((f) => (
-            <button
+            <Button
               key={f}
-              class={`chip-toggle ${form === f ? "on" : ""}`}
+              size="small"
+              appearance={form === f ? "accent" : "outlined"}
               title={f}
               onClick={() => setForm(form === f ? "" : f)}
             >
               <FormIcon form={f} size={14} /> {f}
-            </button>
+            </Button>
           ))}
         </div>
         <div class="chips">
@@ -144,13 +147,14 @@ export function GuidelineBrowser({
               onChange={setBook}
             />
           )}
-          <button
-            class={`chip-toggle ${!includeGeneral ? "on" : ""}`}
+          <Button
+            size="small"
+            appearance={!includeGeneral ? "accent" : "outlined"}
             title="General guidelines scale with the level of the spell"
             onClick={() => setIncludeGeneral(!includeGeneral)}
           >
             Hide General
-          </button>
+          </Button>
         </div>
       </FilterBar>
 

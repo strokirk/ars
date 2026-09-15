@@ -44,6 +44,7 @@ export function Library({ tab }: { tab?: string }) {
         {TABS.map((t) => (
           <Button
             variant="brand"
+            size="small"
             appearance={active === t.key ? "accent" : "outlined"}
             key={t.key}
             onClick={() => navigate(`/library/${t.key}`)}

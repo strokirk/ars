@@ -349,13 +349,6 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
 }
 
 .artfilter { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.35rem; }
-.artfilter .chip-toggle { display: inline-flex; align-items: center; gap: 0.3rem; }
-.artfilter .chip-toggle svg { color: var(--muted); }
-.artfilter .chip-toggle.on svg { color: #fff; }
-.chip-toggle.tech .ab { font-weight: 700; color: var(--tech); }
-.chip-toggle.tech { border-color: color-mix(in srgb, var(--tech) 35%, var(--line)); }
-.chip-toggle.tech.on { background: var(--tech); border-color: var(--tech); color: #fff; }
-.chip-toggle.tech.on .ab { color: #fff; }
 
 .pill-select {
   width: auto; font-size: 0.8rem; min-height: 34px; padding: 0.2rem 0.5rem;
@@ -389,8 +382,6 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
 .legend .swatch { width: .55rem; height: .55rem; border-radius: 50%; background: var(--tech); display: inline-block; }
 
 .kindswitch { gap: .3rem; }
-.kindswitch .chip-toggle.virtue.on { background: var(--ok); border-color: var(--ok); color: #fff; }
-.kindswitch .chip-toggle.flaw.on { background: var(--err); border-color: var(--err); color: #fff; }
 
 .traitbadge {
   display: inline-flex; align-items: center; gap: .25rem; flex: 0 0 auto;
