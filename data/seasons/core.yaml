@@ -70,6 +70,14 @@ totals:
     name: Age
     terms:
       - {kind: input, label: "Age", default: 25}
+  - key: lab-texts-rate
+    name: Writing rate
+    terms:
+      - {kind: ability, of: Latin, multiplier: 20}
+  - key: copy-lab-texts-rate
+    name: Copying rate
+    terms:
+      - {kind: ability, of: "Profession: Scribe", multiplier: 60}
 
 activities:
   # ── Laboratory (md/08-laboratory) ──────────────────────────────────────
@@ -85,7 +93,9 @@ activities:
       Your Lab Total must exceed the spell's level. For every point it does, you
       accumulate one point per season; when your points equal the spell's level, it's
       invented. (+1 per 5 levels of a similar known spell — add that as an
-      adjustment.)
+      adjustment.) You may Experiment: add a rolled 0–9 (plus an optional +1 to
+      +3 risk modifier) to your Lab Total as an adjustment, then roll on the
+      Extraordinary Results Chart at the table — not modelled here.
   - key: extract-vis
     name: Extract vis from the aura
     category: lab
@@ -107,7 +117,7 @@ activities:
     detail: >-
       One season, no vis cost. For every 5 points (or part) by which your Lab Total
       exceeds the effect's level you get one charge; exactly meeting the level still
-      gets one.
+      gets one. Experimentation applies here too (see Invent a spell).
   - key: invest-effect
     name: Open & invest in a device
     category: lab
@@ -122,7 +132,10 @@ activities:
       your total. Once open, instilling an effect works exactly like inventing a
       spell: Lab Total must exceed the effect's level, and you accumulate the excess
       each season. Costs one pawn of vis (Technique or Form of the effect) per ten
-      levels of the effect, taken in the first season.
+      levels of the effect, taken in the first season. A Shape & Material bonus, if
+      the item's form or material matches this effect, is also an adjustment —
+      capped at your Magic Theory. Experimentation applies too (see Invent a spell);
+      a flawed experimental effect still fills up the device's capacity.
   - key: longevity-ritual
     name: Longevity Ritual
     category: lab
@@ -134,6 +147,8 @@ activities:
     detail: >-
       Vis cost is one pawn (Creo, Corpus or Vim) per five years of age, rounded up.
       For someone other than a Hermetic magus, the bonus is halved (1 per 10 points).
+      Experimentation applies too (see Invent a spell): if the result is flawed, a
+      second ritual overriding it takes one further season.
   - key: attune-talisman
     name: Attune a talisman
     category: lab
@@ -151,6 +166,54 @@ activities:
     detail: >-
       Makes an active Arcane Connection permanent. Must be performed in a
       laboratory, but doesn't use a Lab Total at all.
+  - key: reproduce-lab-text
+    name: Reproduce from a Laboratory Text
+    category: lab
+    total: lab
+    work: {kind: fixed}
+    needsGoal: true
+    goalLabel: "Effect level (or total, for several of the same Technique/Form)"
+    summary: One season if your Lab Total meets the level — far faster than inventing it fresh.
+    detail: >-
+      Most spells a magus knows were learned this way. You may reproduce several
+      effects at once if they share a Technique and Form and their levels sum to
+      no more than your Lab Total. A Lab Text for a charged item instead yields a
+      fifth of your Lab Total in charges, rounded up; for a Longevity Ritual it
+      skips the season entirely. You can't experiment while working from a text.
+  - key: write-lab-text
+    name: Write Laboratory Texts for others
+    category: lab
+    total: lab-texts-rate
+    work: {kind: accumulate, unit: "points"}
+    needsGoal: true
+    goalLabel: "Levels of your texts to make generally readable"
+    summary: Latin × 20 levels/season, turning your own shorthand into something others can use.
+    detail: >-
+      Every effect you create already leaves you a Laboratory Text in your own
+      abbreviations — this is the separate work of rewriting it so anyone
+      literate can follow it. A Casting Tablet (for a spell you've Mastered) is
+      written from the same pool, one season each regardless of level.
+  - key: copy-lab-text
+    name: Copy Laboratory Texts
+    category: lab
+    total: copy-lab-texts-rate
+    work: {kind: accumulate, unit: "points"}
+    needsGoal: true
+    goalLabel: "Levels of already-legible texts to copy"
+    summary: Profession (Scribe) × 60 levels/season.
+    detail: Only for texts already rewritten to be generally readable — copying is a different skill from writing from scratch.
+  - key: translate-lab-text
+    name: Translate another magus's Laboratory Texts
+    category: lab
+    total: lab
+    work: {kind: accumulate, unit: "points"}
+    needsGoal: true
+    goalLabel: "Level of the text"
+    summary: Points/season = your Lab Total in the text's own Technique and Form.
+    detail: >-
+      Requires a laboratory — this is a form of experimentation. Once you've
+      decoded one of a magus's texts, every other text of his up to that level is
+      a simple Latin × 20/season rewrite instead (use "Write Laboratory Texts").
 
   # ── Writing & copying (md/10-long-term-events/03-advancement.md) ───────
   - key: write-tractatus

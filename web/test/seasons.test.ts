@@ -89,3 +89,23 @@ describe("Teaching Total", () => {
     expect(computeTotal(totalOf("teaching")!, ctx, 0).value).toBe(9);
   });
 });
+
+describe("Laboratory Texts — the book's own worked example (Carolus, p.263)", () => {
+  it("a Lab Text is usable at Lab Total 27 for a level-25 effect (equal-or-exceeds, not strictly exceeds)", () => {
+    const o = computeOutcome(activity("reproduce-lab-text"), 27, 25);
+    expect(o.blocked).toBeUndefined();
+    expect(o.seasons).toBe(1);
+  });
+
+  it("meeting the level exactly still works; falling short is blocked", () => {
+    expect(computeOutcome(activity("reproduce-lab-text"), 25, 25).blocked).toBeUndefined();
+    expect(computeOutcome(activity("reproduce-lab-text"), 24, 25).blocked).toBe(true);
+  });
+
+  it("writing rate is Latin x 20, not Latin + 20", () => {
+    const ctx = { subject: BLANK_SUBJECT, overrides: { "ability:Latin": 5 } };
+    const r = computeTotal(totalOf("lab-texts-rate")!, ctx, 0);
+    expect(r.value).toBe(100);
+    expect(r.lines[0]).toMatchObject({ value: 5, multiplier: 20 });
+  });
+});

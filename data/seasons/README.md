@@ -25,6 +25,7 @@ totals:               # a named sum — Lab Total, Teaching Total, a book's Qual
       - {kind: aura}
       - {kind: fixed, value: 3}         # a flat constant
       - {kind: input, label: "...", default: 0}  # the player types a number
+      - {kind: ability, of: Latin, multiplier: 20}  # score x 20, e.g. "Latin x 20"
 
 activities:
   - key: invent-spell
@@ -60,12 +61,27 @@ code change, not a config language.
 ## What's deliberately not modelled
 
 A few real formulas need a number this engine has no way to derive on its
-own (the Shape & Material bonus of a specific item, the level-drop Quality
-bonus on a summa, how many tractatus you've already written this lifetime).
-Rather than guess, the affected activity's `detail` says so and points at
-the browser's ad-hoc "+ Add adjustment" row instead. Extend the engine (a
-new term/work kind) only when a second real activity needs the same shape —
-see `docs/DOWNTIME-PLAN.todo.md`.
+own (a summa's level-drop Quality bonus, how many tractatus you've already
+written this lifetime). Rather than guess, the affected activity's `detail`
+says so and points at the browser's ad-hoc "+ Add adjustment" row instead.
+Extend the engine (a new term/work kind) only when a second real activity
+needs the same shape — see `docs/DOWNTIME-PLAN.todo.md`.
+
+Two bigger ones are deliberate, not oversights:
+
+- **Shape & Material bonuses** (`md/08-laboratory/14-arcane-discovery.md`) are
+  a ~300-entry table mapping a material or shape to a *free-text* effect it
+  helps with ("Amber: +3 controlling movement, +3 Corpus") — matching your
+  effect against that text is a judgment call even in the book (and capped
+  at your Magic Theory), not a lookup this engine can make for you. Use an
+  adjustment for the bonus once you've found it in the table.
+- **Arcane Experimentation** (`md/08-laboratory/13-arcane-experimentation.md`)
+  adds a rolled simple die (0–9, plus an optional +1 to +3 risk modifier you
+  choose) to the Lab Total when inventing a spell, enchanting, investigating
+  an item, or performing a Longevity Ritual — then sends you to the
+  Extraordinary Results Chart, whose outcomes need a storyguide's judgment.
+  The die is a manual adjustment once rolled; the chart isn't modelled at
+  all — this is a planner, not a resolution engine.
 
 ## Editing
 

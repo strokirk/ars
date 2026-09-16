@@ -133,7 +133,7 @@ function BrowseMode({ subject, cat, setCat }: {
             <div class="total-side">
               <p class="statline">
                 {focusedResult?.result
-                  ? focusedResult.result.lines.map((l) => `${l.label} ${l.value >= 0 ? "+" : ""}${l.value}`).join(" ").replace(/^\+/, "")
+                  ? focusedResult.result.lines.map((l) => `${l.label} ${l.value >= 0 ? "+" : ""}${l.value}${l.multiplier ? ` ×${l.multiplier}` : ""}`).join(" ").replace(/^\+/, "")
                   : focused.summary}
               </p>
               <p class="note">{focusedResult?.outcome.text}</p>
@@ -255,7 +255,7 @@ const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 function exportText(subject: Subject, a: ActivityDef, r?: { result?: TotalResult; outcome: Outcome }): string {
   const lines = [
     `${subject.name} — ${a.name}`,
-    r?.result ? `${totalOf(a.total ?? "")?.name ?? "Total"}: ${r.result.value} (${r.result.lines.map((l) => `${l.label} ${l.value}`).join(", ")})` : a.summary,
+    r?.result ? `${totalOf(a.total ?? "")?.name ?? "Total"}: ${r.result.value} (${r.result.lines.map((l) => `${l.label} ${l.value}${l.multiplier ? ` ×${l.multiplier}` : ""}`).join(", ")})` : a.summary,
     r?.outcome.text ?? "",
   ];
   return lines.filter(Boolean).join("\n");

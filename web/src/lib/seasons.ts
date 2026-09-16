@@ -17,6 +17,8 @@ export interface Term {
   value?: number;                      // fixed kind
   label?: string;                      // input kind
   default?: number;                    // input kind
+  /** characteristic/ability/art kinds: multiply the score (e.g. "Latin x 20" for Lab Texts). */
+  multiplier?: number;
 }
 
 export interface TotalDef {
@@ -62,6 +64,7 @@ function readTerm(row: Record<string, unknown>): Term {
     value: typeof row.value === "number" ? row.value : undefined,
     label: str(row.label) || undefined,
     default: typeof row.default === "number" ? row.default : undefined,
+    multiplier: typeof row.multiplier === "number" ? row.multiplier : undefined,
   };
 }
 
@@ -149,7 +152,7 @@ export interface TotalContext {
   arts?: { technique: Technique; form: Form };
 }
 
-export interface TotalLine { label: string; value: number; id?: string; editable: boolean }
+export interface TotalLine { label: string; value: number; id?: string; editable: boolean; multiplier?: number }
 export interface TotalResult { value: number; lines: TotalLine[] }
 
 /** Seed a term's starting value from the Subject — the override map takes over once the player edits it. */
@@ -182,8 +185,11 @@ export function computeTotal(total: TotalDef, ctx: TotalContext, adjustments: nu
       : "aura";
     const fallback = term.kind === "input" ? term.default ?? 0 : subjectValue(term, ctx);
     const v = ctx.overrides[id] ?? fallback;
-    value += v;
-    lines.push({ label, value: v, id, editable: true });
+    const mult = term.multiplier ?? 1;
+    value += v * mult;
+    // The Stepper edits the raw score (e.g. Latin 5); the header shows the ×20 that
+    // turns it into the season's rate, same distinction the book itself draws.
+    lines.push({ label, value: v, id, editable: true, multiplier: mult !== 1 ? mult : undefined });
   });
   if (adjustments) {
     value += adjustments;
@@ -208,8 +214,14 @@ export function computeOutcome(activity: ActivityDef, totalValue: number, goal: 
     }
     case "xp":
       return { text: `+${Math.max(0, totalValue)} xp this season` };
-    case "fixed":
+    case "fixed": {
+      // A goal on a `fixed` activity is a pass/fail gate (reproducing from a
+      // Laboratory Text), not something to accumulate toward.
+      if (activity.needsGoal && goal !== undefined && totalValue < goal) {
+        return { text: `blocked — needs ${goal}, you have ${totalValue}`, blocked: true };
+      }
       return { text: "one season", seasons: 1 };
+    }
     case "charges": {
       if (goal === undefined) return { text: `choose ${(activity.goalLabel ?? "a level").toLowerCase()}` };
       if (totalValue < goal) return { text: `blocked — needs ${goal}, you have ${totalValue}`, blocked: true };

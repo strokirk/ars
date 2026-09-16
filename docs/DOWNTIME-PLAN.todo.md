@@ -297,8 +297,25 @@ copying) lives in `data/seasons/README.md` and inline in `core.yaml`.
 - [x] `data/seasons/core.yaml` activities across all four categories +
       `work.kind`: `repeatable`, `accumulate`, `charges`, `fixed`, `xp` —
       ActivityBrowser outcomes are live, checked against the rulebook's own
-      worked examples (Tillitus's spell invention, Mari's charged wand) in
-      `web/test/seasons.test.ts`.
+      worked examples (Tillitus's spell invention, Mari's charged wand,
+      Carolus's Laboratory Text) in `web/test/seasons.test.ts`.
+- [x] Laboratory Texts + Casting Tablets (`md/08-laboratory/07-laboratory-texts.md`)
+      — reproducing from a text (fast, gated by Lab Total >= level, not
+      strictly exceeds), writing/copying texts (Latin ×20, Profession: Scribe
+      ×60 — added a `multiplier` field to ability/characteristic/art terms
+      for this, the engine's first extension past the original plan),
+      translating another magus's texts. A Casting Tablet reuses the same
+      writing pool; its *in-play casting* mechanic (as opposed to authoring
+      one) is deliberately out of scope — that happens at the table, not in
+      a season.
+- [x] Looked up Arcane Experimentation and Shape & Material bonuses
+      (`md/08-laboratory/13-arcane-experimentation.md`,
+      `.../14-arcane-discovery.md`) — both real, both **deliberately not
+      modelled as formulas**: Experimentation is a rolled die + a GM-adjudicated
+      results chart, and Shape & Material is a ~300-entry table matched
+      against free-text effect descriptions by judgment, not lookup. Both
+      documented as "use an adjustment" in the affected activities' `detail`
+      and in `data/seasons/README.md`, rather than built into the engine.
 - [ ] Project model + `seasonsNeeded()` reworked as a first-class thing (today
       `accumulate`'s season count is computed per-activity, not yet turned
       into an assignable, interruptible Project) — multi-season lab work
