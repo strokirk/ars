@@ -1,3 +1,4 @@
+import { Hourglass, FlaskConical } from "lucide-preact";
 import { navigate } from "../router.ts";
 import { Button } from "../components/ui/Button.tsx";
 import { drafts, deleteDraft, newId, saveDraft } from "../store.ts";
@@ -33,6 +34,20 @@ export function Home() {
             </Button>
           </div>
         ))}
+      </div>
+
+      <h2 class="section-title">Plan a season</h2>
+      <div class="grid">
+        <div class="card create-tile">
+          <h3><FlaskConical size={17} aria-hidden="true" /> The Laboratory</h3>
+          <p>Lab Totals, vis extraction, charged &amp; invested devices — what a season in the lab can buy.</p>
+          <Button variant="brand" appearance="accent" block onClick={() => navigate("/lab")}>Open the Lab</Button>
+        </div>
+        <div class="card create-tile">
+          <h3><Hourglass size={17} aria-hidden="true" /> Downtime</h3>
+          <p>Every seasonal activity — writing, study, teaching, covenant service — and how many seasons it takes.</p>
+          <Button variant="brand" appearance="accent" block onClick={() => navigate("/downtime")}>Plan downtime</Button>
+        </div>
       </div>
 
       {drafts.value.length > 0 && (

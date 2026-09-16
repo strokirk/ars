@@ -153,7 +153,7 @@ a.card:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-co
   border-radius: 999px; padding: 0.12rem 0.6rem;
 }
 .create-tile { text-align: left; align-items: stretch; }
-.create-tile h3 { margin: 0.1rem 0 0.3rem; color: var(--accent); font-size: 1.25rem; }
+.create-tile h3 { margin: 0.1rem 0 0.3rem; color: var(--accent); font-size: 1.25rem; display: flex; align-items: center; gap: 0.4rem; }
 .create-tile p { color: var(--muted); font-size: 0.9rem; margin: 0 0 0.9rem; flex: 1; }
 
 /* ── wizard ─────────────────────────────────────────────── */
@@ -623,4 +623,75 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
   .total-num b { font-size: 1.9rem; }
   .design-row { flex-direction: column; align-items: stretch; gap: .35rem; }
   .design-ctl { justify-content: flex-start; }
+}
+
+/* ── downtime / lab planner ───────────────────────────────
+   Reuses .total, .design-block, .design-row and .option-list wholesale (see
+   the designer above) — only what's genuinely new to this page lives here. */
+.downtime-head {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: .6rem; margin: 0 0 .9rem;
+}
+.mode-toggle { display: inline-flex; gap: .35rem; }
+
+.downtime-preview-note { font-style: italic; }
+.downtime-total .downtime-preview-note { margin: .5rem 0 0; padding-top: .5rem; border-top: 1px dashed var(--line-soft); }
+
+.adjustment-row .adj-value { font-weight: 600; font-variant-numeric: tabular-nums; }
+.row-remove {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line);
+  background: var(--card); color: var(--muted); padding: 0; cursor: pointer;
+}
+.row-remove:hover { border-color: var(--err); color: var(--err); }
+
+.cat-chips { display: flex; flex-wrap: wrap; gap: .35rem; margin: 0 0 .6rem; }
+
+.badge-tag {
+  display: inline-block; font-size: .68rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .04em; color: var(--row, var(--accent));
+  border: 1px solid var(--row, var(--line)); border-radius: 999px; padding: .05rem .5rem;
+}
+.locked-note { color: var(--faint); font-style: italic; }
+.book-tag { color: var(--faint); font-size: .74rem; margin-left: .5rem; }
+.activity-ttl svg { vertical-align: -2px; margin-right: .1rem; }
+
+/* ── plan mode: season grid ──────────────────────────────── */
+.season-grid-wrap { overflow-x: auto; margin: 0 -0.2rem; }
+.season-grid { border-collapse: collapse; width: 100%; min-width: 560px; font-size: .82rem; }
+.season-grid th, .season-grid td { padding: .4rem .5rem; text-align: left; vertical-align: top; }
+.season-grid thead th {
+  font-weight: 600; font-size: .74rem; text-transform: uppercase; letter-spacing: .03em;
+  color: var(--faint); border-bottom: 1px solid var(--line);
+}
+.season-grid thead th .year { text-transform: none; font-weight: 400; }
+.season-grid .subject-col { font-weight: 600; color: var(--accent); white-space: nowrap; }
+.season-cell { border: 1px solid var(--line-soft); border-radius: 8px; background: var(--card); }
+.season-cell.empty { color: var(--faint); font-style: italic; text-align: center; }
+.season-cell.project {
+  background: color-mix(in srgb, var(--row) 14%, var(--card));
+  border-color: color-mix(in srgb, var(--row) 45%, var(--line));
+}
+.season-cell.project.done { opacity: .65; }
+.season-cell .cell-name { display: block; font-weight: 600; color: var(--ink); }
+.season-cell .cell-note { display: block; font-size: .74rem; color: var(--muted); }
+
+.project-list { list-style: none; margin: 0 0 .7rem; padding: 0; display: flex; flex-direction: column; gap: .6rem; }
+.project-row { padding-left: .55rem; border-left: 3px solid var(--row, var(--accent)); }
+.project-head { display: flex; justify-content: space-between; gap: .6rem; font-size: .9rem; }
+.project-head .project-name { font-weight: 600; }
+.project-head .project-goal { color: var(--muted); font-size: .8rem; }
+.project-bar-track { height: 8px; border-radius: 999px; background: var(--line-soft); overflow: hidden; margin-top: .3rem; }
+.project-bar-fill { height: 100%; border-radius: 999px; }
+
+.gains-list { margin: 0 0 .6rem; }
+.gains-row { display: flex; gap: .6rem; padding: .3rem 0; border-bottom: 1px solid var(--line-soft); }
+.gains-row:last-child { border-bottom: none; }
+.gains-row dt { flex: 0 0 7rem; font-weight: 600; color: var(--muted); font-size: .82rem; }
+.gains-row dd { margin: 0; flex: 1; }
+
+@media (max-width: 560px) {
+  .downtime-head { flex-direction: column; align-items: stretch; }
+  .gains-row { flex-direction: column; gap: .1rem; }
+  .gains-row dt { flex: none; }
 }
