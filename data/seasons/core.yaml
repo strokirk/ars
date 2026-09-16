@@ -117,7 +117,10 @@ activities:
     detail: >-
       One season, no vis cost. For every 5 points (or part) by which your Lab Total
       exceeds the effect's level you get one charge; exactly meeting the level still
-      gets one. Experimentation applies here too (see Invent a spell).
+      gets one. Experimentation applies here too (see Invent a spell). A Shape &
+      Material bonus, if the item's form or material matches this effect, is also an
+      adjustment — capped at your Magic Theory; see the Library's Shape & Material
+      reference.
   - key: invest-effect
     name: Open & invest in a device
     category: lab
@@ -134,8 +137,9 @@ activities:
       each season. Costs one pawn of vis (Technique or Form of the effect) per ten
       levels of the effect, taken in the first season. A Shape & Material bonus, if
       the item's form or material matches this effect, is also an adjustment —
-      capped at your Magic Theory. Experimentation applies too (see Invent a spell);
-      a flawed experimental effect still fills up the device's capacity.
+      capped at your Magic Theory; see the Library's Shape & Material reference.
+      Experimentation applies too (see Invent a spell); a flawed experimental effect
+      still fills up the device's capacity.
   - key: longevity-ritual
     name: Longevity Ritual
     category: lab

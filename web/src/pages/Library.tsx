@@ -3,14 +3,16 @@
 import { navigate } from "../router.ts";
 import { SpellBrowser } from "../components/SpellBrowser.tsx";
 import { TraitBrowser } from "../components/TraitBrowser.tsx";
+import { ShapeMaterialBrowser } from "../components/ShapeMaterialBrowser.tsx";
 import { rules } from "../engine.ts";
-import { Sparkles, Plus, Minus, ScrollText, Ruler, Wand2, Library as LibraryIcon } from "lucide-preact";
+import { Sparkles, Plus, Minus, ScrollText, Ruler, Wand2, Gem, Library as LibraryIcon } from "lucide-preact";
 import { TECHNIQUES, TECHNIQUE_LEGEND } from "../lib/legend.ts";
 import { Button } from "../components/ui/Button.tsx";
 import { GuidelineBrowser } from "../components/GuidelineBrowser.tsx";
 import { GuidelineLadder } from "../components/GuidelineLadder.tsx";
 import { SpellDesigner } from "../components/SpellDesigner.tsx";
 import { GUIDELINES } from "../lib/guidelines.ts";
+import { SHAPE_MATERIAL } from "../lib/shapeMaterial.ts";
 
 // Virtues and Flaws get a tab each rather than a switch nested inside a tab.
 const TABS = [
@@ -20,6 +22,7 @@ const TABS = [
   { key: "design", label: "Design", Icon: Wand2 },
   { key: "virtues", label: "Virtues", Icon: Plus },
   { key: "flaws", label: "Flaws", Icon: Minus },
+  { key: "shape-material", label: "Shape & Material", Icon: Gem },
 ] as const;
 
 export type LibraryTab = (typeof TABS)[number]["key"];
@@ -36,7 +39,8 @@ export function Library({ tab }: { tab?: string }) {
         </h1>
         <p class="note">
           {rules.spells.length} spells · {GUIDELINES.length} guidelines ·{" "}
-          {rules.virtuesFlaws.length} Virtues &amp; Flaws — Ars Magica, Definitive Edition
+          {rules.virtuesFlaws.length} Virtues &amp; Flaws ·{" "}
+          {SHAPE_MATERIAL.length} Shape &amp; Material entries — Ars Magica, Definitive Edition
         </p>
       </div>
 
@@ -76,6 +80,7 @@ export function Library({ tab }: { tab?: string }) {
       {(active === "virtues" || active === "flaws") && (
         <TraitBrowser kind={active === "flaws" ? "Flaw" : "Virtue"} />
       )}
+      {active === "shape-material" && <ShapeMaterialBrowser />}
     </div>
   );
 }
