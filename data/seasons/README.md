@@ -73,8 +73,9 @@ Two bigger ones are deliberate, not oversights:
   a ~300-entry table mapping a material or shape to a *free-text* effect it
   helps with ("Amber: +3 controlling movement, +3 Corpus") — matching your
   effect against that text is a judgment call even in the book (and capped
-  at your Magic Theory), not a lookup this engine can make for you. Use an
-  adjustment for the bonus once you've found it in the table.
+  at your Magic Theory), not a lookup this engine can make for you. Browse
+  the table in the Library's Shape & Material tab (`#/library/shape-material`)
+  and use an adjustment for the bonus once you've found it there.
 - **Arcane Experimentation** (`md/08-laboratory/13-arcane-experimentation.md`)
   adds a rolled simple die (0–9, plus an optional +1 to +3 risk modifier you
   choose) to the Lab Total when inventing a spell, enchanting, investigating

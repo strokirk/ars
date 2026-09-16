@@ -5,6 +5,7 @@ import { afterEach, describe, expect, test } from "vitest";
 import { render } from "preact";
 import { SpellBrowser } from "../src/components/SpellBrowser.tsx";
 import { TraitBrowser } from "../src/components/TraitBrowser.tsx";
+import { ShapeMaterialBrowser } from "../src/components/ShapeMaterialBrowser.tsx";
 import { CopyBox } from "../src/components/ui/CopyBox.tsx";
 import { ArtBadge, FormIcon } from "../src/components/ui/ArtBadge.tsx";
 import { Library } from "../src/pages/Library.tsx";
@@ -304,6 +305,12 @@ describe("Library", () => {
     expect(el.querySelector(".kindswitch")).toBeNull();
   });
 
+  test("the Shape & Material tab renders the reference table", () => {
+    const el = mount(<Library tab="shape-material" />);
+    expect(activeTab(el)).toBe("Shape & Material");
+    expect(rows(el).length).toBeGreaterThan(200);
+  });
+
   test("puts the browser straight on the page, not inside another panel", () => {
     const el = mount(<Library />);
     expect(el.querySelector(".panel")).toBeNull();
@@ -391,6 +398,33 @@ describe("GuidelineBrowser", () => {
   test("rows become actionable when the designer hands them an action", () => {
     const el = mount(<GuidelineBrowser onPick={() => {}} />);
     expect(el.querySelectorAll(".option button, .option wa-button").length).toBeGreaterThan(0);
+  });
+});
+
+describe("ShapeMaterialBrowser", () => {
+  test("lists rows on first render, with no search typed", () => {
+    const el = mount(<ShapeMaterialBrowser />);
+    expect(rows(el).length).toBeGreaterThan(200);
+    expect(count(el)).toBe(rows(el).length);
+  });
+
+  test("searching filters by item name or bonus effect text", async () => {
+    const el = mount(<ShapeMaterialBrowser />);
+    const input = el.querySelector("input")!;
+    input.value = "amber";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    await flush();
+    expect(rows(el)).toEqual(["Amber"]);
+    expect(el.textContent).toContain("controlling movement");
+  });
+
+  test("reports an empty result rather than a blank list", async () => {
+    const el = mount(<ShapeMaterialBrowser />);
+    const input = el.querySelector("input")!;
+    input.value = "zzzz-no-such-material";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    await flush();
+    expect(el.textContent).toContain("No materials or shapes match that search.");
   });
 });
 
