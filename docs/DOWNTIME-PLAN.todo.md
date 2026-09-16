@@ -250,29 +250,67 @@ Clicking a grid cell drops into browse mode scoped to that season.
 reach" filtering), `roster.ts`, `store.ts` drafts, the guidelines YAML-glob
 pattern verbatim.
 
+## Corrections from reading the actual rulebook (md/08-laboratory,
+md/10-long-term-events/03-advancement.md)
+
+The plan above was drafted from memory before checking the book; these are
+the load-bearing corrections that came out of actually reading it — several
+change the `work` shape, not just the numbers:
+
+- **Inventing a spell is `accumulate`, not `gated`.** Lab Total must *exceed*
+  (not just meet) the level; you bank the excess each season until it sums
+  to the level. A level equal to your Lab Total can never be invented.
+- **Vis extraction rounds UP**, not down (one pawn per ten points *or part*).
+- **"Extract vis" always means Creo Vim** — not "whichever Art pair you're
+  in" as the mockup implied.
+- **Teaching's formula is Com + Teaching + 3**, not a flat "Teaching Total";
+  a single student adds +6, two add +3 — modelled as a manual adjustment
+  rather than a student-count field, since the planner has no second Subject
+  to check the student's own Gain Limit against yet.
+- **Exposure (Source Quality 2), Practice (usually 4), Worship (= Divine
+  aura) and Vis Study (stress die + aura bonus) are real, distinct
+  activities** the first pass missed entirely — added under `study`.
+- **The invented "Covenant service" activity and the "Craft a Verditius
+  rune" locked example were fabricated**, not sourced from any book —
+  dropped. HoH:MC content (Verditius runes, Mystery scripts) stays a real
+  supplement to write once that book is actually read.
+- Categories collapsed from the guessed five (`lab / study / write / teach /
+  service`) to the four the rules actually separate: `lab / write / study /
+  teach`.
+
+Full attribution + what's deliberately simplified (Shape & Material bonuses,
+a summa's level-drop Quality bonus, per-lifetime tractatus limits, quick
+copying) lives in `data/seasons/README.md` and inline in `core.yaml`.
+
 ## Phasing / checklist
 
 - [x] Plan written up (this file)
-- [ ] **UI scaffold, non-functional** — routes, page shell, mode toggle,
-      subject picker (real roster + manual), sticky total header (static),
-      input rows, category chips, activity list (demo data), plan-mode grid
-      (demo data), CopyBox summary. *Ship this first for polish review.*
-- [ ] `Subject` type + `fromCharacter()` adapter (`web/src/lib/`)
-- [ ] Totals engine: term kinds, `data/seasons/core.yaml` totals section,
-      `totalFor(subject, totalKey, overrides): {value, breakdown}`
-- [ ] Wire the sticky header + input rows to the totals engine (still
-      single-activity, no project/duration yet) — `#/lab` becomes a real
-      Lab Total calculator with house-rule adjustments
-- [ ] `data/seasons/core.yaml` activities (lab category) + `work.kind`:
-      `gated`, `repeatable` — ActivityBrowser outcomes go live
-- [ ] Project model + `seasonsNeeded()` + `accumulate` work kind — multi-season
-      lab work (invented items) plans correctly
-- [ ] Second category: write/study/teach activities, `fixed` work kind,
-      `Gains` typed output — proves the totals registry isn't lab-only
-- [ ] Second book file (`covenants.yaml`) — proves the glob needs no code
-      change; do this early, before more depends on the seam
-- [ ] Plan-mode grid wired to real projects/seasons (from demo → live)
+- [x] **UI scaffold, non-functional** — routes, page shell, mode toggle,
+      subject picker, category chips, plan-mode grid (demo data), CopyBox
+      summary.
+- [x] `Subject` type + `fromCharacter()` adapter (`web/src/lib/subject.ts`)
+- [x] Totals engine: term kinds, `data/seasons/core.yaml` totals section,
+      `computeTotal()` (`web/src/lib/seasons.ts`)
+- [x] Wire the header + input rows to the totals engine — `#/lab` is a real
+      Lab Total calculator with ad-hoc adjustments. Manual entry is the
+      default subject; the header is a normal (non-sticky) card, not pinned.
+- [x] `data/seasons/core.yaml` activities across all four categories +
+      `work.kind`: `repeatable`, `accumulate`, `charges`, `fixed`, `xp` —
+      ActivityBrowser outcomes are live, checked against the rulebook's own
+      worked examples (Tillitus's spell invention, Mari's charged wand) in
+      `web/test/seasons.test.ts`.
+- [ ] Project model + `seasonsNeeded()` reworked as a first-class thing (today
+      `accumulate`'s season count is computed per-activity, not yet turned
+      into an assignable, interruptible Project) — multi-season lab work
+      plans across a real season grid
+- [ ] Ad-hoc adjustment scope beyond "this activity" (category / everything),
+      and persisting adjustments/overrides per subject
+- [ ] Plan-mode grid wired to real projects/seasons (from demo → live);
+      clicking a season cell drops into Browse mode scoped to it
+- [ ] Second book file (e.g. `covenants.yaml` or `hoh-mc.yaml`) — proves the
+      glob needs no code change once that book is actually read for content
 - [ ] Library "Seasons & Advancement" tab, rendering `data/seasons/*.yaml`
       reference prose
 - [ ] `docs/FUTURE.md`: covenant-wide multi-subject planning, aging/Twilight
-      flags, Original Research, advancement tool itself
+      flags, Original Research, advancement tool itself, Shape & Material
+      bonuses and the other named simplifications in `data/seasons/README.md`

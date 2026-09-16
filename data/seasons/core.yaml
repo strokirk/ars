@@ -1,0 +1,271 @@
+# Downtime — totals + activities for the core rulebook. Loaded by
+# web/src/lib/seasons.ts, which globs this directory the same way
+# web/src/lib/guidelines.ts globs data/guidelines/ — see data/seasons/README.md.
+#
+# Sourced from md/08-laboratory/*.md and md/10-long-term-events/03-advancement.md.
+# A few real rules are deliberately NOT modelled (see README) — where a formula
+# needs a number the engine can't derive, the activity asks for it as a manual
+# "adjustment" or an `input` term instead of guessing.
+
+book:
+  key: core
+  name: Ars Magica — Definitive Edition
+  abbr: Core
+
+totals:
+  - key: lab
+    name: Lab Total
+    terms:
+      - {kind: art, role: technique}
+      - {kind: art, role: form}
+      - {kind: characteristic, of: Int}
+      - {kind: ability, of: Magic Theory}
+      - {kind: aura}
+  - key: teaching
+    name: Teaching Total
+    terms:
+      - {kind: ability, of: Communication}
+      - {kind: ability, of: Teaching}
+      - {kind: fixed, value: 3}
+  - key: book-quality
+    name: Book Quality
+    terms:
+      - {kind: ability, of: Communication}
+      - {kind: fixed, value: 6}
+  - key: book-writing-rate
+    name: Writing rate
+    terms:
+      - {kind: ability, of: Communication}
+      - {kind: ability, of: Language}
+  - key: copying-rate
+    name: Copying rate
+    terms:
+      - {kind: ability, of: "Profession: Scribe"}
+      - {kind: fixed, value: 6}
+  - key: practice
+    name: Practice Source Quality
+    terms:
+      - {kind: fixed, value: 4}
+  - key: exposure
+    name: Exposure Source Quality
+    terms:
+      - {kind: fixed, value: 2}
+  - key: worship
+    name: Worship Source Quality
+    terms:
+      - {kind: aura}
+  - key: adventure
+    name: Adventure Source Quality
+    terms:
+      - {kind: input, label: "Source Quality (troupe sets, usually 5–10)", default: 6}
+  - key: vis-study
+    name: Vis Study Source Quality
+    terms:
+      - {kind: input, label: "Stress die + aura bonus (roll at the table)", default: 0}
+  - key: read-quality
+    name: Source Quality
+    terms:
+      - {kind: input, label: "The book's stated Quality", default: 10}
+  - key: age
+    name: Age
+    terms:
+      - {kind: input, label: "Age", default: 25}
+
+activities:
+  # ── Laboratory (md/08-laboratory) ──────────────────────────────────────
+  - key: invent-spell
+    name: Invent a spell
+    category: lab
+    total: lab
+    work: {kind: accumulate, unit: "points", subtractGoal: true}
+    needsGoal: true
+    goalLabel: "Spell level"
+    summary: One season or more; Lab Total must exceed the spell's level.
+    detail: >-
+      Your Lab Total must exceed the spell's level. For every point it does, you
+      accumulate one point per season; when your points equal the spell's level, it's
+      invented. (+1 per 5 levels of a similar known spell — add that as an
+      adjustment.)
+  - key: extract-vis
+    name: Extract vis from the aura
+    category: lab
+    total: lab
+    fixedArts: {technique: Creo, form: Vim}
+    work: {kind: repeatable, unit: "pawns of Vim vis", divisor: 10, roundUp: true}
+    summary: One tenth (round up) of your Creo Vim Lab Total, in pawns, every season.
+    detail: >-
+      Requires a Magical aura. For each season spent extracting, one pawn of Vim vis
+      per ten points (or part) of your Creo Vim Lab Total.
+  - key: charged-item
+    name: Make a charged item
+    category: lab
+    total: lab
+    work: {kind: charges}
+    needsGoal: true
+    goalLabel: "Effect level"
+    summary: One season; Lab Total must meet the effect's level.
+    detail: >-
+      One season, no vis cost. For every 5 points (or part) by which your Lab Total
+      exceeds the effect's level you get one charge; exactly meeting the level still
+      gets one.
+  - key: invest-effect
+    name: Open & invest in a device
+    category: lab
+    total: lab
+    work: {kind: accumulate, unit: "points", subtractGoal: true}
+    needsGoal: true
+    goalLabel: "Effect level"
+    summary: Opening is one season; instilling accumulates like inventing a spell.
+    detail: >-
+      Opening a device for enchantment (Vim vis = the Size/Material table) is a
+      separate season, not modelled here — enter it as an adjustment if it affects
+      your total. Once open, instilling an effect works exactly like inventing a
+      spell: Lab Total must exceed the effect's level, and you accumulate the excess
+      each season. Costs one pawn of vis (Technique or Form of the effect) per ten
+      levels of the effect, taken in the first season.
+  - key: longevity-ritual
+    name: Longevity Ritual
+    category: lab
+    total: lab
+    fixedArts: {technique: Creo, form: Corpus}
+    work: {kind: fixed}
+    sideTotals: [{key: age, label: "Vis cost"}]
+    summary: One season; +1 to aging rolls per 5 points of Creo Corpus Lab Total.
+    detail: >-
+      Vis cost is one pawn (Creo, Corpus or Vim) per five years of age, rounded up.
+      For someone other than a Hermetic magus, the bonus is halved (1 per 10 points).
+  - key: attune-talisman
+    name: Attune a talisman
+    category: lab
+    work: {kind: fixed}
+    summary: One season, whatever your Lab Total — the item must be one you opened yourself.
+    detail: >-
+      Attuning an item as your talisman takes one season and always succeeds. You
+      must have prepared the item for enchantment yourself, and can only have one
+      talisman at a time.
+  - key: fix-arcane-connection
+    name: Fix an Arcane Connection
+    category: lab
+    work: {kind: fixed}
+    summary: One season + one pawn of Vim vis, no Lab Total needed.
+    detail: >-
+      Makes an active Arcane Connection permanent. Must be performed in a
+      laboratory, but doesn't use a Lab Total at all.
+
+  # ── Writing & copying (md/10-long-term-events/03-advancement.md) ───────
+  - key: write-tractatus
+    name: Write a tractatus
+    category: write
+    total: book-quality
+    work: {kind: fixed}
+    summary: One season. Quality is your Communication + 6.
+    detail: >-
+      You may write at most half your score in an Ability (rounded up), or a fifth
+      of your score in an Art (rounded up), in tractatus over your lifetime — this
+      tool doesn't track that count for you.
+  - key: write-summa
+    name: Write a summa
+    category: write
+    total: book-writing-rate
+    work: {kind: accumulate, unit: "points"}
+    needsGoal: true
+    goalLabel: "Summa level (an Ability summa needs 5× its level in points)"
+    sideTotals: [{key: book-quality, label: "Quality"}]
+    summary: Points/season = Communication + Language, until they reach the level.
+    detail: >-
+      The level may be set up to half your score in the Art or Ability (dropping it
+      lower raises Quality — not modelled here, add it as an adjustment). Once
+      chosen the level can't change. Quality is Communication + 6.
+  - key: copy-tractatus
+    name: Copy a tractatus
+    category: write
+    work: {kind: fixed}
+    summary: One season, careful copying — same Quality as the original.
+    detail: Copying quickly makes three copies a season instead, each one Quality lower.
+  - key: copy-summa
+    name: Copy a summa
+    category: write
+    total: copying-rate
+    work: {kind: accumulate, unit: "points"}
+    needsGoal: true
+    goalLabel: "Original's level (an Ability summa needs 5× its level in points)"
+    summary: Points/season = 6 + Profession (Scribe), copying carefully.
+    detail: >-
+      Copying quickly triples the rate but the copy's Quality is one lower than the
+      original.
+
+  # ── Study & experience (md/10-long-term-events/03-advancement.md) ──────
+  - key: read-summa
+    name: Read a summa
+    category: study
+    total: read-quality
+    work: {kind: xp}
+    summary: xp = the book's Quality, while your score is below the book's Level.
+    detail: You may keep studying the same summa across seasons as long as your score stays below its Level.
+  - key: read-tractatus
+    name: Read a tractatus
+    category: study
+    total: read-quality
+    work: {kind: xp}
+    summary: xp = the tractatus's Quality — once only, and never one you wrote yourself.
+    detail: A given tractatus can only be studied once, with benefit, by a given reader.
+  - key: practice
+    name: Practice an Ability
+    category: study
+    total: practice
+    work: {kind: xp}
+    summary: Source Quality 4 (higher for a few special cases — see the detail).
+    detail: >-
+      Usually 4. Raised to 5–8 for practicing a native-community language, Area
+      Lore by travel, a trade with hands-on feedback, or a spell cast repeatedly for
+      Mastery. Hermetic Arts can't be raised by practice.
+  - key: exposure
+    name: Exposure
+    category: study
+    total: exposure
+    work: {kind: xp}
+    summary: Source Quality 2, split across up to two Arts/Abilities used that season.
+    detail: >-
+      What you get for simply doing something — including lab work, which grants
+      Exposure to Magic Theory and the Arts used, on top of whatever else that
+      season produces.
+  - key: worship
+    name: Worship
+    category: study
+    total: worship
+    work: {kind: xp}
+    summary: Source Quality = the Divine aura where you worship.
+    detail: >-
+      Available to Christian characters with access to a chapel or church; xp goes to
+      Church Lore, Concentration, Music, or a Divine-aligned Supernatural Ability or
+      Art you already have a score in.
+  - key: vis-study
+    name: Study raw vis
+    category: study
+    total: vis-study
+    work: {kind: xp}
+    summary: Source Quality = a stress die + the aura's bonus — roll at the table.
+    detail: >-
+      Costs one pawn of vis (of the Art studied) per five levels you have in it,
+      minimum one, all consumed. A double botch risks Wizard's Twilight.
+  - key: adventure
+    name: Adventure
+    category: study
+    total: adventure
+    work: {kind: xp}
+    summary: Source Quality set by the troupe, usually 5–10.
+    detail: >-
+      A whole season even if the adventure itself was shorter. Up to 5 points of the
+      Source Quality can go to any one Ability or Art involved.
+
+  # ── Teaching (md/10-long-term-events/03-advancement.md) ────────────────
+  - key: teach
+    name: Teach a student
+    category: teach
+    total: teaching
+    work: {kind: xp}
+    summary: xp to the student = your Communication + Teaching + 3.
+    detail: >-
+      +6 with a single student, +3 with two (add as an adjustment). Capped by your
+      own score in what's taught. You need Teaching 2+ (Ability) or a score of 5+
+      (Art) to teach at all, and can only gain Exposure yourself that season.
