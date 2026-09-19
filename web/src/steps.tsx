@@ -3,7 +3,7 @@
 // and companion share all of these; the magus adds House fields here and an Arts &
 // Spells step (see ArtsSpellsStep).
 import { useState } from "preact/hooks";
-import { charKind, type Character, type Op } from "./engine.ts";
+import { budgetsOf, charKind, type Character, type Op } from "./engine.ts";
 import { CharacteristicsAllocator } from "./components/CharacteristicsAllocator.tsx";
 import { TraitPicker } from "./components/TraitPicker.tsx";
 import { AbilityPicker } from "./components/AbilityPicker.tsx";
@@ -120,29 +120,61 @@ export function VirtuesStep({ ch, update }: StepProps) {
 
 export function AbilitiesStep({ ch, update }: StepProps) {
   const magus = charKind(ch) === "magus";
+  const b = budgetsOf(ch);
+  const mods = deriveModifiers(ch);
+  const granted = ch.abilities.filter((a) => a.stage === "free");
+  const min = b.apprenticeship.minimums;
   return (
     <div>
       <div class="field">
-        <label>Native Language (spoken vernacular — score 5, 75 xp)</label>
+        <label>Native Language (spoken vernacular — free, score 5)</label>
         <input type="text" value={ch.nativeLanguage ?? ""} placeholder="e.g. German, French, Italian" onInput={(e) => update([{ op: "native-language", value: (e.target as HTMLInputElement).value }])} />
+        <p class="note">Worth 75 xp, but granted outright — it doesn't touch the childhood pool.</p>
       </div>
-      <h3 style="font-size:1rem; margin:1rem 0 .4rem;">Early childhood (45 xp)</h3>
-      <p class="note" style="margin:0 0 .6rem;">Mundane skills picked up as a child. Tap to add, then adjust the score.</p>
-      <AbilityPicker ch={ch} update={update} stage="childhood" suggestions={CHILDHOOD_ABILITIES} />
+
+      {granted.length > 0 && (
+        <p class="note">Already granted (free): {granted.map((a) => `${a.name} ${a.score}`).join(", ")}.</p>
+      )}
+
+      <AbilityPicker
+        ch={ch} update={update} stage="childhood" budget={b.childhood}
+        title="Early childhood"
+        hint="Mundane skills picked up as a child — General Abilities only. Tap to add, then adjust the score."
+        suggestions={CHILDHOOD_ABILITIES}
+      />
       <hr class="soft" />
-      <h3 style="font-size:1rem; margin:1rem 0 .4rem;">Later life ({ch.laterLifeYears} yrs × {deriveModifiers(ch).laterLifeXpPerYear} xp)</h3>
-      <p class="note" style="margin:0 0 .6rem;">Any Abilities the character can learn. {magus ? "Before apprenticeship this is General Abilities only." : "Academic/Arcane/Martial/Supernatural need an enabling Virtue."}</p>
-      <AbilityPicker ch={ch} update={update} stage="later-life" />
+      <AbilityPicker
+        ch={ch} update={update} stage="later-life" budget={b.laterLife}
+        title={`Later life (${ch.laterLifeYears} yrs × ${mods.laterLifeXpPerYear} xp)`}
+        hint={magus
+          ? "The years before apprenticeship — General Abilities only."
+          : "Academic, Martial and Supernatural Abilities open up here only if a Virtue enables them."}
+      />
       {magus && (
         <>
           <hr class="soft" />
-          <h3 style="font-size:1rem; margin:1rem 0 .4rem;">Apprenticeship Abilities <span class="note">(shares the 240-xp pool with Arts)</span></h3>
-          <p class="note" style="margin:0 0 .6rem;">Mandatory: Magic Theory, Latin, Parma Magica (each ≥1). Also consider Artes Liberales, Concentration, Finesse, Penetration, Code of Hermes.</p>
-          <AbilityPicker ch={ch} update={update} stage="apprenticeship" suggestions={APPRENTICE_ABILITIES} searchable />
+          <AbilityPicker
+            ch={ch} update={update} stage="apprenticeship" budget={b.apprenticeship}
+            title="Apprenticeship Abilities"
+            hint={
+              <>
+                Shares the 240-xp pool with Arts, so the meter counts both. Mandatory:{" "}
+                <Mandatory ok={min.magicTheory} label="Magic Theory" />{" "}
+                <Mandatory ok={min.latin} label="Latin" />{" "}
+                <Mandatory ok={min.parmaMagica} label="Parma Magica" />
+              </>
+            }
+            suggestions={APPRENTICE_ABILITIES}
+          />
         </>
       )}
     </div>
   );
+}
+
+/** One mandatory-Ability tick in the apprenticeship blurb. */
+function Mandatory({ ok, label }: { ok: boolean; label: string }) {
+  return <span style={`color:var(--${ok ? "ok" : "err"});`}>{ok ? "\u2713" : "\u2717"} {label}</span>;
 }
 
 export function PersonalityStep({ ch, update }: StepProps) {
