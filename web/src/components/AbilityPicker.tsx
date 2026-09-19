@@ -40,7 +40,9 @@ const BLOCKED_ACCENT = "var(--line)";
 export function AbilityPicker({ ch, update, stage, title, hint, budget, suggestions }: Props) {
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<AbilityTypeFilter | "">("");
-  const [showAll, setShowAll] = useState(false);
+  /** The browse list is a lot of chrome for three stages on one page, so it
+   *  stays folded away behind one button until the player wants to go hunting. */
+  const [open, setOpen] = useState(false);
   /** The placeholder row awaiting its specific name ("(Area) Lore" → "Provence Lore"). */
   const [pending, setPending] = useState<AbilityOption | null>(null);
   const [param, setParam] = useState("");
@@ -74,9 +76,7 @@ export function AbilityPicker({ ch, update, stage, title, hint, budget, suggesti
     () => abilityOptions(rules.abilities, ch, stage, { search: query, type: typeFilter }),
     [ch, stage, query, typeFilter],
   );
-  // The full list is long enough to bury the rest of the step, so it stays folded
-  // away until the player searches, filters, or asks for it.
-  const browsing = Boolean(query.trim() || typeFilter || showAll);
+  const close = () => { setOpen(false); setQuery(""); setTypeFilter(""); setPending(null); };
 
   return (
     <section class="stage">
@@ -149,40 +149,46 @@ export function AbilityPicker({ ch, update, stage, title, hint, budget, suggesti
         </div>
       )}
 
-      <SearchField value={query} onInput={setQuery} placeholder="Search abilities…" />
-      <div class="filters">
-        <ChipGroup options={ABILITY_TYPES} value={typeFilter} onChange={setTypeFilter} allLabel="All types" />
-      </div>
-
-      {pending?.template && (
-        <div class="panel name-it">
-          <strong>{pending.row.name}</strong>
-          <div class="field" style="margin-top:.6rem;">
-            <label>{pending.template.label}</label>
-            <input
-              type="text" value={param} autofocus
-              aria-label={pending.template.label}
-              placeholder={pending.template.placeholder}
-              onInput={(e) => setParam((e.target as HTMLInputElement).value)}
-              onKeyDown={(e) => { if (e.key === "Enter") confirm(); }}
-            />
-            {pending.template.choices && (
-              <div class="chips" style="margin-top:.4rem;">
-                {pending.template.choices.map((c) => (
-                  <button class={`chip-toggle ${param === c ? "on" : ""}`} key={c} onClick={() => setParam(c)}>{c}</button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div class="navrow">
-            <Button variant="brand" appearance="accent" disabled={!param.trim()} onClick={confirm}>Add</Button>
-            <Button appearance="plain" onClick={() => setPending(null)}>Cancel</Button>
-          </div>
-        </div>
-      )}
-
-      {browsing ? (
+      {!open ? (
+        <Button size="small" onClick={() => setOpen(true)}>+ Add an Ability</Button>
+      ) : (
         <>
+          <div class="add-head">
+            <strong>Add an Ability</strong>
+            <Button size="small" appearance="plain" onClick={close}>Close</Button>
+          </div>
+          <SearchField value={query} onInput={setQuery} placeholder="Search abilities…" />
+          <div class="filters">
+            <ChipGroup options={ABILITY_TYPES} value={typeFilter} onChange={setTypeFilter} allLabel="All types" />
+          </div>
+
+          {pending?.template && (
+            <div class="panel name-it">
+              <strong>{pending.row.name}</strong>
+              <div class="field" style="margin-top:.6rem;">
+                <label>{pending.template.label}</label>
+                <input
+                  type="text" value={param} autofocus
+                  aria-label={pending.template.label}
+                  placeholder={pending.template.placeholder}
+                  onInput={(e) => setParam((e.target as HTMLInputElement).value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") confirm(); }}
+                />
+                {pending.template.choices && (
+                  <div class="chips" style="margin-top:.4rem;">
+                    {pending.template.choices.map((c) => (
+                      <button class={`chip-toggle ${param === c ? "on" : ""}`} key={c} onClick={() => setParam(c)}>{c}</button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div class="navrow">
+                <Button variant="brand" appearance="accent" disabled={!param.trim()} onClick={confirm}>Add</Button>
+                <Button appearance="plain" onClick={() => setPending(null)}>Cancel</Button>
+              </div>
+            </div>
+          )}
+
           <p class="note count">{options.length} abilities</p>
           <OptionList empty="No abilities match.">
             {options.map((o) => (
@@ -206,19 +212,18 @@ export function AbilityPicker({ ch, update, stage, title, hint, budget, suggesti
             ))}
           </OptionList>
         </>
-      ) : (
-        <Button size="small" onClick={() => setShowAll(true)}>Browse all {options.length} abilities</Button>
       )}
     </section>
   );
 }
 
-/** The row's facts line: type, where it's already spoken for, and any gating. */
+/** The row's facts line: type, where it's already spoken for, and any gating.
+ *  A blocked row leads with the reason — which names the type itself, so the
+ *  bare type would only repeat it. */
 function metaOf(o: AbilityOption): string {
-  const bits = [typeLabel(o.row.type)];
+  const bits = [o.blocked ?? typeLabel(o.row.type)];
   if (o.taken !== undefined) bits.push(`already here at ${o.taken}`);
   if (o.elsewhere) bits.push(`already in ${o.elsewhere.join(", ")}`);
-  if (o.blocked) bits.push(o.blocked);
-  else if (o.row.restricted) bits.push("needs an enabling Virtue");
+  if (!o.blocked && o.row.restricted) bits.push("needs an enabling Virtue");
   return bits.join(" · ");
 }

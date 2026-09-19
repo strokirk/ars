@@ -271,6 +271,8 @@ textarea { min-height: 5rem; resize: vertical; }
 }
 .spec-edit { display: flex; gap: 0.4rem; align-items: center; padding: 0.15rem 0 0.5rem; }
 .spec-edit input { flex: 1; font-size: 0.85rem; min-height: 36px; padding: 0.3rem 0.5rem; }
+.add-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin: 0.6rem 0 0.4rem; }
+.add-head strong { font-size: 0.9rem; color: var(--muted); }
 .panel.name-it { margin: 0.2rem 0 0.8rem; }
 .count { margin: 0.2rem 0 0.3rem; }
 

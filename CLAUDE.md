@@ -57,7 +57,8 @@ spell designer at `#/library/design`, draft save/resume (localStorage), inline
 copyable Markdown/JSON export, print, and shareable links.
 
 `web/src/lib/*` holds the app's own pure logic (queries, roster slugs, trait
-eligibility, wizard steps, the guideline model + spell-level arithmetic) and `web/src/components/ui/*` the shared primitives —
+eligibility, per-stage Ability options + xp costs, wizard steps, the guideline
+model + spell-level arithmetic) and `web/src/components/ui/*` the shared primitives —
 **put new logic in `lib/` and new markup patterns in `ui/` rather than inlining
 either in a page or picker.** The three browsers (`SpellBrowser`, `TraitBrowser`,
 `GuidelineBrowser`) are deliberately shared between the creator, the Library and the

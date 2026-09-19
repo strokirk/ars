@@ -90,7 +90,7 @@ describe("AbilityPicker", () => {
   test("the list stays folded until asked for, then answers the type filter", async () => {
     const el = mount(<Harness />);
     expect(rowTitles(el)).toHaveLength(0);
-    button(el, `Browse all ${rules.abilities.length} abilities`).click();
+    button(el, "+ Add an Ability").click();
     await flush();
     expect(rowTitles(el).length).toBe(rules.abilities.length);
 
@@ -101,7 +101,7 @@ describe("AbilityPicker", () => {
 
   test("childhood locks non-General rows with the engine's own reason", async () => {
     const el = mount(<Harness />);
-    button(el, `Browse all ${rules.abilities.length} abilities`).click();
+    button(el, "+ Add an Ability").click();
     await flush();
 
     const martial = optionFor(el, "Single Weapon");
@@ -116,7 +116,7 @@ describe("AbilityPicker", () => {
     const el = mount(<Harness />);
     button(el, "+ Awareness").click();
     await flush();
-    button(el, `Browse all ${rules.abilities.length} abilities`).click();
+    button(el, "+ Add an Ability").click();
     await flush();
 
     const row = optionFor(el, "Awareness");
@@ -126,7 +126,7 @@ describe("AbilityPicker", () => {
 
   test("a placeholder row asks for the specific name before adding it", async () => {
     const el = mount(<Harness />);
-    button(el, `Browse all ${rules.abilities.length} abilities`).click();
+    button(el, "+ Add an Ability").click();
     await flush();
 
     const lore = optionFor(el, "(Area) Lore");
@@ -170,7 +170,7 @@ describe("AbilityPicker", () => {
       { op: "ability", name: "Awareness", score: 2, stage: "childhood" },
     ]);
     const el = mount(<Harness start={started} stage="later-life" />);
-    button(el, `Browse all ${rules.abilities.length} abilities`).click();
+    button(el, "+ Add an Ability").click();
     await flush();
     expect(optionFor(el, "Awareness").meta).toContain("already in Childhood");
   });
