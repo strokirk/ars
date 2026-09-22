@@ -100,6 +100,29 @@ describe("abilityOptions", () => {
     expect(martial.length).toBeGreaterThan(0);
     expect(martial.every((o) => typeLabel(o.row.type) === "Martial")).toBe(true);
   });
+
+  test("recommended rows are flagged and float to the top, ahead of everything else takeable", () => {
+    const opts = abilityOptions(rules.abilities, grog, "childhood", { recommended: ["Swim", "Athletics"] });
+    expect(find(opts, "Swim").recommended).toBe(true);
+    expect(find(opts, "Awareness").recommended).toBeUndefined();
+    const names = opts.map((o) => o.row.name);
+    expect(names.slice(0, 2).sort()).toEqual(["Athletics", "Swim"]);
+  });
+
+  test("recommended never outranks takeable over blocked — blocked still sorts last", () => {
+    const opts = abilityOptions(rules.abilities, grog, "childhood", { recommended: ["Single Weapon"] });
+    expect(find(opts, "Single Weapon").recommended).toBe(true);
+    expect(find(opts, "Single Weapon").blocked).toBeTruthy();
+    // Still below every takeable row, recommended or not.
+    expect(opts.findIndex((o) => o.row.name === "Single Weapon")).toBeGreaterThan(opts.findIndex((o) => !o.blocked));
+  });
+
+  test("onlyAvailable drops what the stage refuses instead of just explaining it", () => {
+    const opts = abilityOptions(rules.abilities, grog, "childhood", { onlyAvailable: true });
+    expect(opts.some((o) => o.blocked)).toBe(false);
+    expect(find(opts, "Athletics").blocked).toBeUndefined();
+    expect(opts.find((o) => o.row.name === "Single Weapon")).toBeUndefined();
+  });
 });
 
 describe("placeholder rows", () => {

@@ -112,11 +112,17 @@ export interface AbilityOption {
   blocked?: string;
   /** Set when the player has to name the specific Lore/Craft/language first. */
   template?: AbilityTemplate;
+  /** In the caller's `recommended` list for this stage. */
+  recommended?: boolean;
 }
 
 export interface AbilityQuery {
   search?: string;
   type?: AbilityTypeFilter | "";
+  /** Drop blocked rows instead of listing them (disabled) at the bottom. */
+  onlyAvailable?: boolean;
+  /** Names to flag `recommended` and float to the top of the list. */
+  recommended?: readonly string[];
 }
 
 const norm = (s: string) => s.trim().toLowerCase();
@@ -127,7 +133,8 @@ const norm = (s: string) => s.trim().toLowerCase();
  *
  * Blocked rows stay in the list rather than being filtered out — a player hunting
  * for Single Weapon in childhood is better served by the reason than by an empty
- * result — but they sort below everything takeable.
+ * result (unless `onlyAvailable` says otherwise) — but they always sort below
+ * everything takeable, and recommended rows float to the top of what's left.
  */
 export function abilityOptions(
   all: readonly AbilityRow[],
@@ -136,6 +143,7 @@ export function abilityOptions(
   q: AbilityQuery = {},
 ): AbilityOption[] {
   const s = q.search ? norm(q.search) : undefined;
+  const recommended = new Set((q.recommended ?? []).map(norm));
   const opts = all
     .filter((row) =>
       (!q.type || typeLabel(row.type) === q.type) &&
@@ -151,9 +159,14 @@ export function abilityOptions(
         elsewhere: elsewhere.length ? elsewhere : undefined,
         blocked: pol.allowed ? undefined : pol.reason,
         template: abilityTemplate(row.name),
+        recommended: recommended.has(norm(row.name)) || undefined,
       };
-    });
+    })
+    .filter((o) => !q.onlyAvailable || !o.blocked);
   return opts.sort(
-    (a, b) => Number(Boolean(a.blocked)) - Number(Boolean(b.blocked)) || a.row.name.localeCompare(b.row.name),
+    (a, b) =>
+      Number(Boolean(a.blocked)) - Number(Boolean(b.blocked)) ||
+      Number(Boolean(b.recommended)) - Number(Boolean(a.recommended)) ||
+      a.row.name.localeCompare(b.row.name),
   );
 }

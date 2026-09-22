@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-// Render tests for the creator's Abilities step: the stage meter, the quick-add
-// chips, and the browse list refusing what the stage can't take. Plain preact
-// render over the real rules data, like browsers.test.tsx.
+// Render tests for the creator's Abilities step: the stage meter, the always-visible
+// browse list (recommended rows first, locked rows explained and hideable), and the
+// specialty/template flows. Plain preact render over the real rules data, like
+// browsers.test.tsx.
 import { afterEach, describe, expect, test } from "vitest";
 import { render } from "preact";
 import { useState } from "preact/hooks";
@@ -33,11 +34,13 @@ const rowTitles = (el: HTMLElement) => [...el.querySelectorAll(".option .ttl")].
 const optionFor = (el: HTMLElement, title: string) => {
   const li = [...el.querySelectorAll<HTMLElement>(".option")].find((n) => n.querySelector(".ttl")!.textContent!.trim() === title);
   if (!li) throw new Error(`no row "${title}"`);
-  return { meta: li.querySelector(".facts")!.textContent!, action: buttons(li)[0]! };
+  return { li, meta: li.querySelector(".facts")!.textContent!, action: buttons(li)[0]! };
 };
 
 /** The picker drives a real character through the engine, exactly as the Wizard does. */
-function Harness({ start, stage = "childhood" as const }: { start?: Character; stage?: "childhood" | "later-life" }) {
+function Harness({ start, stage = "childhood" as const, recommended }: {
+  start?: Character; stage?: "childhood" | "later-life"; recommended?: string[];
+}) {
   const [ch, setCh] = useState<Character>(start ?? createGrog({ name: "Otto" }).character);
   const update = (ops: Op[]) => setCh(apply(ch, ops));
   const b = budgetsOf(ch);
@@ -46,7 +49,7 @@ function Harness({ start, stage = "childhood" as const }: { start?: Character; s
       ch={ch} update={update} stage={stage}
       budget={stage === "childhood" ? b.childhood : b.laterLife}
       title="Early childhood" hint="Mundane skills."
-      suggestions={stage === "childhood" ? ["Athletics", "Awareness"] : undefined}
+      recommended={stage === "childhood" ? (recommended ?? ["Athletics", "Awareness"]) : recommended}
     />
   );
 }
@@ -57,7 +60,7 @@ describe("AbilityPicker", () => {
     expect(el.querySelector(".stage-head .meter")!.textContent).toContain("0/45 xp");
     expect(el.querySelector(".stage-head .meter")!.textContent).toContain("45 left");
 
-    button(el, "+ Athletics").click();
+    optionFor(el, "Athletics").action.click();
     await flush();
     const meter = el.querySelector(".stage-head .meter")!;
     expect(meter.textContent).toContain("5/45 xp");
@@ -66,7 +69,7 @@ describe("AbilityPicker", () => {
 
   test("a taken row prints what the next point costs, and the stepper raises it", async () => {
     const el = mount(<Harness />);
-    button(el, "+ Athletics").click();
+    optionFor(el, "Athletics").action.click();
     await flush();
     expect(el.querySelector(".char-row .cost")!.textContent).toBe("+1 = 10 xp");
 
@@ -78,7 +81,7 @@ describe("AbilityPicker", () => {
 
   test("the age cap stops the stepper and says why", async () => {
     const el = mount(<Harness />);
-    button(el, "+ Athletics").click();
+    optionFor(el, "Athletics").action.click();
     await flush();
     const plus = () => el.querySelector<HTMLButtonElement>('.stepper button[aria-label="increase Athletics"]')!;
     for (let i = 1; i < 5; i++) { plus().click(); await flush(); }
@@ -87,36 +90,52 @@ describe("AbilityPicker", () => {
     expect(plus().title).toMatch(/caps Abilities at 5/);
   });
 
-  test("the list stays folded until asked for, then answers the type filter", async () => {
+  test("the full list of what childhood can actually take is visible immediately, recommended first", async () => {
     const el = mount(<Harness />);
-    expect(rowTitles(el)).toHaveLength(0);
-    button(el, "+ Add an Ability").click();
+    // No search, no click needed — every General Ability is already there (locked
+    // rows start hidden, so the list isn't 74 rows of mostly "Locked").
+    expect(rowTitles(el).length).toBeGreaterThan(0);
+    expect(rowTitles(el).length).toBeLessThan(rules.abilities.length);
+    expect(rowTitles(el)).not.toContain("Single Weapon");
+    expect(rowTitles(el).slice(0, 2)).toEqual(["Athletics", "Awareness"]);
+    expect(optionFor(el, "Athletics").li.querySelector(".badge-tag")!.textContent).toBe("Recommended");
+  });
+
+  test("'Show locked' reveals what this stage refuses, with the engine's own reason", async () => {
+    const el = mount(<Harness />);
+    expect(rowTitles(el)).not.toContain("Single Weapon");
+    button(el, "Show locked").click();
     await flush();
     expect(rowTitles(el).length).toBe(rules.abilities.length);
+    const martial = optionFor(el, "Single Weapon");
+    expect(label(martial.action)).toBe("Locked");
+    expect(martial.action.getAttribute("disabled")).not.toBeNull();
+    expect(martial.meta).toMatch(/can't be learned in childhood/);
+    // ...and it sorts below everything actually takeable.
+    expect(rowTitles(el).indexOf("Single Weapon")).toBeGreaterThan(rowTitles(el).indexOf("Swim"));
+  });
 
+  test("the type filter narrows the always-visible list (and implies showing locked rows)", async () => {
+    const el = mount(<Harness />);
+    button(el, "Show locked").click();
+    await flush();
     button(el, "Martial").click();
     await flush();
     expect(rowTitles(el)).toEqual(["Bows", "Great Weapon", "Single Weapon", "Thrown Weapon"]);
   });
 
-  test("childhood locks non-General rows with the engine's own reason", async () => {
+  test("search narrows it too, without any extra step to reveal the list", async () => {
     const el = mount(<Harness />);
-    button(el, "+ Add an Ability").click();
+    const input = el.querySelector<HTMLInputElement>('input[type="search"]')!;
+    input.value = "swim";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
     await flush();
-
-    const martial = optionFor(el, "Single Weapon");
-    expect(label(martial.action)).toBe("Locked");
-    expect(martial.action.getAttribute("disabled")).not.toBeNull();
-    expect(martial.meta).toMatch(/can't be learned in childhood/);
-    // ...and they sort below everything a child could actually pick up.
-    expect(rowTitles(el).indexOf("Single Weapon")).toBeGreaterThan(rowTitles(el).indexOf("Swim"));
+    expect(rowTitles(el)).toEqual(["Swim"]);
   });
 
   test("an already-taken row says so instead of offering a second copy", async () => {
     const el = mount(<Harness />);
-    button(el, "+ Awareness").click();
-    await flush();
-    button(el, "+ Add an Ability").click();
+    optionFor(el, "Awareness").action.click();
     await flush();
 
     const row = optionFor(el, "Awareness");
@@ -126,9 +145,6 @@ describe("AbilityPicker", () => {
 
   test("a placeholder row asks for the specific name before adding it", async () => {
     const el = mount(<Harness />);
-    button(el, "+ Add an Ability").click();
-    await flush();
-
     const lore = optionFor(el, "(Area) Lore");
     expect(label(lore.action)).toBe("Name it…");
     lore.action.click();
@@ -147,7 +163,7 @@ describe("AbilityPicker", () => {
 
   test("a specialty can be typed onto a taken Ability", async () => {
     const el = mount(<Harness />);
-    button(el, "+ Athletics").click();
+    optionFor(el, "Athletics").action.click();
     await flush();
 
     button(el, "add specialty").click();
@@ -170,8 +186,6 @@ describe("AbilityPicker", () => {
       { op: "ability", name: "Awareness", score: 2, stage: "childhood" },
     ]);
     const el = mount(<Harness start={started} stage="later-life" />);
-    button(el, "+ Add an Ability").click();
-    await flush();
     expect(optionFor(el, "Awareness").meta).toContain("already in Childhood");
   });
 });

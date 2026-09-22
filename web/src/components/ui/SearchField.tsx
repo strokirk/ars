@@ -1,7 +1,8 @@
 import type { ComponentChildren } from "preact";
-import { Button } from "./Button.tsx";
 
-/** The search box that heads every picker and browser. */
+/** The search box that heads every picker and browser. `type="search"` gets us the
+ *  right mobile keyboard and an Escape-to-clear for free; the native clear glyph is
+ *  suppressed in favour of our own × so it can sit inside the field on every browser. */
 export function SearchField({
   value, onInput, placeholder, children,
 }: {
@@ -13,11 +14,15 @@ export function SearchField({
 }) {
   return (
     <div class="toolbar">
-      <input
-        type="text" value={value} placeholder={placeholder} aria-label={placeholder}
-        onInput={(e) => onInput((e.target as HTMLInputElement).value)}
-      />
-      {value && <Button size="small" appearance="plain" title="Clear search" onClick={() => onInput("")}>×</Button>}
+      <div class="search-wrap">
+        <input
+          type="search" value={value} placeholder={placeholder} aria-label={placeholder}
+          onInput={(e) => onInput((e.target as HTMLInputElement).value)}
+        />
+        {value && (
+          <button type="button" class="search-clear" title="Clear search" onClick={() => onInput("")}>×</button>
+        )}
+      </div>
       {children}
     </div>
   );

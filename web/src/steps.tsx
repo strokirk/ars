@@ -37,6 +37,12 @@ const APPRENTICE_ABILITIES = [
   "Magic Theory", "Latin", "Parma Magica", "Artes Liberales", "Concentration", "Finesse", "Penetration", "Code of Hermes",
 ];
 
+// Later life has no rulebook-mandated list — this is a generalist's starter set
+// (social + practical Generals), not tailored to any one concept.
+const LATER_LIFE_ABILITIES = [
+  "Etiquette", "Bargain", "Leadership", "Intrigue", "Ride", "Profession (Type)",
+];
+
 export function ConceptStep({ ch, update, reseed }: StepProps) {
   const kind = charKind(ch);
   const houseChoices = ch.house ? HOUSE_PUISSANT_CHOICES[ch.house] : undefined;
@@ -139,8 +145,8 @@ export function AbilitiesStep({ ch, update }: StepProps) {
       <AbilityPicker
         ch={ch} update={update} stage="childhood" budget={b.childhood}
         title="Early childhood"
-        hint="Mundane skills picked up as a child — General Abilities only. Tap to add, then adjust the score."
-        suggestions={CHILDHOOD_ABILITIES}
+        hint="Mundane skills picked up as a child — General Abilities only."
+        recommended={CHILDHOOD_ABILITIES}
       />
       <hr class="soft" />
       <AbilityPicker
@@ -149,6 +155,7 @@ export function AbilitiesStep({ ch, update }: StepProps) {
         hint={magus
           ? "The years before apprenticeship — General Abilities only."
           : "Academic, Martial and Supernatural Abilities open up here only if a Virtue enables them."}
+        recommended={LATER_LIFE_ABILITIES}
       />
       {magus && (
         <>
@@ -164,7 +171,7 @@ export function AbilitiesStep({ ch, update }: StepProps) {
                 <Mandatory ok={min.parmaMagica} label="Parma Magica" />
               </>
             }
-            suggestions={APPRENTICE_ABILITIES}
+            recommended={APPRENTICE_ABILITIES}
           />
         </>
       )}
@@ -186,7 +193,7 @@ export function PersonalityStep({ ch, update }: StepProps) {
     <div>
       {kind === "grog" && (
         <div class="chips" style="margin-bottom:.8rem;">
-          {["Loyal", "Brave"].map((t) => <button class="chip-toggle" key={t} onClick={() => add(t, 3)}>+ {t} (+3)</button>)}
+          {["Loyal", "Brave"].map((t) => <Button size="small" variant="brand" appearance="outlined" key={t} onClick={() => add(t, 3)}>+ {t} (+3)</Button>)}
         </div>
       )}
       {ch.personality.length > 0 && (
