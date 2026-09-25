@@ -38,12 +38,12 @@ function spell(ch: Character, name: string): Character {
 }
 
 test("full Marcus build is legal and exports a complete sheet", () => {
-  let ch = newCharacter({ name: "Marcus", house: "Flambeau", concept: "vengeful fire mage", favoredTechnique: "Creo", favoredForm: "Ignem", focus: "fire" });
+  let ch = newCharacter({ name: "Marcus", house: "Flambeau", concept: "vengeful fire mage" });
   for (const n of ["The Gift", "Hermetic Magus"]) {
     const r = rules.resolveTrait(n);
     if (r.ok) ch.virtues.push({ name: r.trait.canonical, display: r.trait.display, size: r.trait.size, category: r.trait.row.category, points: 0, free: true });
   }
-  ch.virtues.push(...applyHouse("Flambeau", { puissant: "Ignem" }, rules, { favoredTechnique: "Creo", favoredForm: "Ignem" }).virtues);
+  ch.virtues.push(...applyHouse("Flambeau", { puissant: "Ignem" }, rules).virtues);
 
   // Stage 1: Characteristics (ordered to never transiently exceed 7).
   for (const [c, v] of [["Str", -1], ["Int", 3], ["Sta", 1], ["Per", 1]] as const) ch = step(ch, setCharacteristic(ch, c, v));

@@ -9,7 +9,7 @@ re-validates and prints the five-budget ledger.
 FASTEST PATH (one call) — describe the whole magus, the tool checks it:
   chargen schema                       # learn the build-spec + op vocabulary
   chargen build '{ "name":"Marcus","house":"Flambeau","concept":"vengeful fire mage",
-    "favoredTechnique":"Creo","favoredForm":"Ignem","focus":"fire","puissant":"Ignem",
+    "puissant":"Ignem",
     "characteristics":{"Int":3,"Sta":1,"Per":1,"Str":-1},
     "virtues":["Affinity with Ignem","Self-Confident","Cautious Sorcerer"],
     "flaws":["Necessary Condition"], "nativeLanguage":"German",
@@ -90,8 +90,7 @@ export const COMMAND_HELP: Record<string, string> = {
 
   --house <House>         Bjornaer Bonisagus Criamon Ex Miscellanea Flambeau Guernicus
                           Jerbiton Mercere Merinita Tremere Tytalus Verditius
-  --concept "<text>"      --notes "<markdown>"   --focus "<text>"   --age <n>
-  --technique <Tech>      --form <Form>
+  --concept "<text>"      --notes "<markdown>"   --age <n>
   --puissant <choice>     Bonisagus: Magic Theory|Intrigue · Flambeau: Perdo|Ignem ·
                           Mercere: Creo|Muto`,
 
@@ -112,8 +111,7 @@ export const COMMAND_HELP: Record<string, string> = {
   set char <Characteristic> <value −3..+3>
   set art <Art> <score>
   set native-language <language>     spoken vernacular, never Latin (= score 5)
-  set concept "<text>" · set focus "<text>" · set reputation "<text>"
-  set technique <Tech> · set form <Form>
+  set concept "<text>" · set reputation "<text>"
   set age <n> · set later-life-years <n> · set confidence <n>`,
 
   add: `chargen add <what> ...    (one-off sugar; for many at once use \`apply\`)

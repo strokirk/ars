@@ -52,9 +52,6 @@ export interface Character {
   /** Freeform Markdown: fluff, goals, interpretation, GM notes. Off-budget. */
   notes: string;
   age: number;
-  favoredTechnique?: Technique;
-  favoredForm?: Form;
-  focus?: string;
   characteristics: Partial<Record<Characteristic, number>>;
   virtues: TraitPick[];
   flaws: TraitPick[];
@@ -75,9 +72,6 @@ export interface NewCharacterOpts {
   concept?: string;
   notes?: string;
   age?: number;
-  favoredTechnique?: Technique;
-  favoredForm?: Form;
-  focus?: string;
 }
 
 export function newCharacter(opts: NewCharacterOpts): Character {
@@ -89,9 +83,6 @@ export function newCharacter(opts: NewCharacterOpts): Character {
     concept: opts.concept ?? "",
     notes: opts.notes ?? "",
     age: opts.age ?? 25,
-    favoredTechnique: opts.favoredTechnique,
-    favoredForm: opts.favoredForm,
-    focus: opts.focus,
     characteristics: {},
     virtues: [],
     flaws: [],

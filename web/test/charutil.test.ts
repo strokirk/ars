@@ -41,12 +41,9 @@ describe("firstSentence", () => {
 });
 
 describe("specLine", () => {
-  test("summarises a magus by House, Arts and focus", () => {
+  test("summarises a magus by House", () => {
     const ch = magus("Marcus");
-    ch.favoredTechnique = "Creo";
-    ch.favoredForm = "Ignem";
-    ch.focus = "fire";
-    expect(specLine(ch)).toBe("House Flambeau · CrIg · focus: fire");
+    expect(specLine(ch)).toBe("House Flambeau");
   });
 
   test("uses the Social Status for non-magi", () => {

@@ -20,10 +20,8 @@ export function magusTitle(ch: Character): string {
 export function renderSheet(ch: Character, b: Budgets = computeBudgets(ch)): string {
   const L: string[] = [];
   const magus = charKind(ch) === "magus";
-  const spec = [ch.favoredTechnique, ch.favoredForm].filter(Boolean).join(" ");
   L.push(`# ${magusTitle(ch)}`, "");
-  L.push(`**Concept:** ${ch.concept || "—"} · **Age:** ${ch.age}${magus ? " (fresh Gauntlet unless noted)" : ""}`);
-  L.push(`**Specialty:** ${[spec, ch.focus ? `focus: ${ch.focus}` : ""].filter(Boolean).join(" / ") || "—"}`, "");
+  L.push(`**Concept:** ${ch.concept || "—"} · **Age:** ${ch.age}${magus ? " (fresh Gauntlet unless noted)" : ""}`, "");
 
   L.push("## Characteristics");
   L.push(CHARACTERISTICS.map((c) => `${c} ${fmt(ch.characteristics[c] ?? 0)}`).join(", ") + `   (spent: ${b.characteristics.spent})`, "");

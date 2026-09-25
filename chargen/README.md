@@ -29,7 +29,7 @@ The CLI reads the repo's committed rules data (`../data/*.json`); override with
 ```sh
 bin/chargen build '{
   "name":"Marcus","house":"Flambeau","concept":"vengeful fire mage",
-  "favoredTechnique":"Creo","favoredForm":"Ignem","focus":"fire","puissant":"Ignem",
+  "puissant":"Ignem",
   "characteristics":{"Int":3,"Sta":1,"Per":1,"Str":-1},
   "virtues":["Affinity with Ignem","Self-Confident","Cautious Sorcerer"],
   "flaws":["Necessary Condition"], "nativeLanguage":"German",

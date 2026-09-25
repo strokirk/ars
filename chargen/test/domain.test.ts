@@ -60,12 +60,12 @@ test("resolveTrait: unknown name errors", () => {
 
 // Build a fresh Flambeau and apply the universal + house free benefits.
 function freshMarcus(): Character {
-  const ch = newCharacter({ name: "Marcus", house: "Flambeau", favoredTechnique: "Creo", favoredForm: "Ignem", focus: "fire" });
+  const ch = newCharacter({ name: "Marcus", house: "Flambeau" });
   for (const n of ["The Gift", "Hermetic Magus"]) {
     const r = rules.resolveTrait(n);
     if (r.ok) ch.virtues.push({ name: r.trait.canonical, display: r.trait.display, size: r.trait.size, category: r.trait.row.category, points: 0, free: true });
   }
-  const app = applyHouse("Flambeau", { puissant: "Ignem" }, rules, { favoredTechnique: "Creo", favoredForm: "Ignem" });
+  const app = applyHouse("Flambeau", { puissant: "Ignem" }, rules);
   ch.virtues.push(...app.virtues);
   return ch;
 }
@@ -89,11 +89,12 @@ test("adding Puissant Ignem again is rejected (duplicates the free benefit)", ()
   assert.match(res.rejected ?? "", /free benefit/i);
 });
 
-test("characteristic overspend is rejected, within-budget is accepted", () => {
+test("characteristic overspend saves anyway, flagged as a warning; within-budget is accepted", () => {
   let ch = freshMarcus();
   ch = setCharacteristic(ch, "Int", 3, false).character; // 6 pts
   const over = setCharacteristic(ch, "Com", 2, false);   // +3 -> 9 > 7
-  assert.equal(over.ok, false);
+  assert.equal(over.ok, true);
+  assert.ok(validate(over.character).some((i) => i.code === "char-over" && i.level === "warning"));
   const ok = setCharacteristic(ch, "Sta", 1, false);     // 7 pts exactly
   assert.equal(ok.ok, true);
   assert.equal(computeBudgets(ok.character).characteristics.spent, 7);
@@ -142,27 +143,28 @@ test("childhood: General abilities count toward the 45-xp pool", () => {
   assert.equal(computeBudgets(ch).childhood.nativeLanguageSet, true);
 });
 
-test("childhood: an Academic ability is rejected", () => {
+test("childhood: an Academic ability is allowed but flagged as a warning", () => {
   let ch = setNativeLanguage(freshMarcus(), "German").character;
   const res = addAbility(ch, { name: "Latin", type: "Academic", restricted: false }, 1, "childhood", undefined);
-  assert.equal(res.ok, false);
-  assert.match(res.rejected ?? "", /childhood/i);
+  assert.equal(res.ok, true);
+  assert.ok(validate(res.character).some((i) => i.code === "ability-stage" && i.level === "warning"));
 });
 
-test("childhood: an ability above the age-25 max (5) is rejected", () => {
+test("childhood: an ability above the age-25 max (5) is allowed but flagged as a warning", () => {
   const ch = setNativeLanguage(freshMarcus(), "German").character;
   const res = addAbility(ch, { name: "Awareness", type: "General", restricted: false }, 6, "childhood", undefined);
-  assert.equal(res.ok, false);
-  assert.match(res.rejected ?? "", /maximum/i);
+  assert.equal(res.ok, true);
+  assert.ok(validate(res.character).some((i) => i.code === "age-cap" && i.level === "warning"));
 });
 
-test("later-life: General ability fills the years×15 pool; Academic is rejected", () => {
+test("later-life: General ability fills the years×15 pool; Academic is allowed but flagged", () => {
   let ch = freshMarcus();
   ch = addAbility(ch, { name: "Charm", type: "General", restricted: false }, 3, "later-life", undefined).character;
   assert.equal(computeBudgets(ch).laterLife.spent, 30);
   assert.equal(computeBudgets(ch).laterLife.cap, 75);
   const academic = addAbility(ch, { name: "Latin", type: "Academic", restricted: false }, 1, "later-life", undefined);
-  assert.equal(academic.ok, false);
+  assert.equal(academic.ok, true);
+  assert.ok(validate(academic.character).some((i) => i.code === "ability-stage" && i.level === "warning"));
 });
 
 test("later-life: an enabling Virtue (Warrior) permits a Martial ability", () => {
@@ -185,11 +187,12 @@ test("apprenticeship: Affinity discounts Art xp (Ignem 10 costs 37, not 55)", ()
   assert.equal(ap.spent, 37 + 21);
 });
 
-test("apprenticeship: overspending the 240-xp pool is rejected", () => {
+test("apprenticeship: overspending the 240-xp pool saves anyway, flagged as a warning", () => {
   let ch = freshMarcus();
   ch = setArt(ch, "Ignem", 20).character; // 210 xp
   const over = setArt(ch, "Creo", 10); // +55 -> 265 > 240
-  assert.equal(over.ok, false);
+  assert.equal(over.ok, true);
+  assert.ok(validate(over.character).some((i) => i.code === "appr-over" && i.level === "warning"));
 });
 
 // A fire mage with the Arts/Int/Magic-Theory needed for Lab Totals.
@@ -216,7 +219,7 @@ test("spellLabTotal: a requisite drags the total to the lowest applicable Art", 
   assert.equal(lt.total, 15);
 });
 
-test("addSpell: within Lab Total accepted, over rejected", () => {
+test("addSpell: within Lab Total accepted; over Lab Total allowed but flagged as a warning", () => {
   const ch = fireMage();
   const pilum = rules.spell("Pilum of Fire");
   assert.ok(pilum && pilum.level === 20);
@@ -225,8 +228,8 @@ test("addSpell: within Lab Total accepted, over rejected", () => {
   const big = rules.spell("Ball of Abysmal Flame");
   assert.ok(big && (big.level ?? 0) > 28);
   const over = addSpell(ch, big!);
-  assert.equal(over.ok, false);
-  assert.match(over.rejected ?? "", /Lab Total/i);
+  assert.equal(over.ok, true);
+  assert.ok(validate(over.character).some((i) => i.code === "spell-labtotal" && i.level === "warning"));
 });
 
 test("Affinity with Ignem is detected as a modifier", () => {

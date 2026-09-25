@@ -3,13 +3,15 @@
 //  - Abilities and Spells sort on click (A–Z / score / level / Form).
 //  - Traits and Spells expand to their full rules text WHERE WE HAVE IT — pass a
 //    SheetData with description lookups (the CLI/site wire these from the rules DB).
-//  - Arts are split into Techniques and Forms, each Art colour- and icon-coded.
+//  - Arts are split into Techniques and Forms, each Art colour-coded; Forms also
+//    carry an icon (the same Lucide glyphs as the web app's FormIcon — copied in as
+//    inline SVG since this module ships no dependencies and no external assets).
 //  - Virtues/Flaws are ordered Major→Minor then A–Z (hardcoded, no control).
 import { type Character, type SpellPick, type TraitPick, type AbilityPick, charKind } from "../domain/character.ts";
 import { type Budgets, computeBudgets } from "../domain/budgets.ts";
 import { confidenceScore } from "../domain/modifiers.ts";
 import {
-  type Art, CHARACTERISTICS, CHARACTERISTIC_NAMES, FORMS, TECHNIQUES, ART_ABBR,
+  type Art, type Form, CHARACTERISTICS, CHARACTERISTIC_NAMES, FORMS, TECHNIQUES, ART_ABBR, isForm,
 } from "../domain/glossary.ts";
 import { magusTitle } from "./sheet.ts";
 
@@ -25,17 +27,32 @@ const esc = (s: string): string =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const sign = (n: number): string => (n > 0 ? `+${n}` : `${n}`);
 
-/** Per-Art colour + a small relevant icon. */
-const ART_THEME: Record<Art, { c: string; icon: string }> = {
-  Creo: { c: "#3f8f5b", icon: "✦" }, Intellego: { c: "#3a6ea5", icon: "◎" },
-  Muto: { c: "#8a5cb0", icon: "⟳" }, Perdo: { c: "#5a5550", icon: "☠" },
-  Rego: { c: "#b08a2e", icon: "✋" },
-  Animal: { c: "#8a6d3b", icon: "🐾" }, Aquam: { c: "#2f8fb0", icon: "💧" },
-  Auram: { c: "#7fb6d6", icon: "🌬" }, Corpus: { c: "#c08a7a", icon: "🧍" },
-  Herbam: { c: "#5a9e3f", icon: "🌿" }, Ignem: { c: "#c64a2e", icon: "🔥" },
-  Imaginem: { c: "#b07fb0", icon: "🎭" }, Mentem: { c: "#9a7bc0", icon: "🧠" },
-  Terram: { c: "#8a7a5a", icon: "⛰" }, Vim: { c: "#6a6fb0", icon: "✨" },
+/** Per-Art colour. */
+const ART_COLOR: Record<Art, string> = {
+  Creo: "#3f8f5b", Intellego: "#3a6ea5", Muto: "#8a5cb0", Perdo: "#5a5550", Rego: "#b08a2e",
+  Animal: "#8a6d3b", Aquam: "#2f8fb0", Auram: "#7fb6d6", Corpus: "#c08a7a", Herbam: "#5a9e3f",
+  Ignem: "#c64a2e", Imaginem: "#b07fb0", Mentem: "#9a7bc0", Terram: "#8a7a5a", Vim: "#6a6fb0",
 };
+
+/** Inner markup (path/circle elements) for each Form's icon, lifted from lucide-preact's
+ * icon data — PawPrint, Droplets, Wind, PersonStanding, Leaf, Flame, Eye, Brain, Mountain,
+ * Sparkles (see web/src/components/ui/ArtBadge.tsx, the same set the wizard renders). */
+const FORM_ICON_PATHS: Record<Form, string> = {
+  Animal: '<circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/>',
+  Aquam: '<path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/>',
+  Auram: '<path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/>',
+  Corpus: '<circle cx="12" cy="5" r="1"/><path d="m9 20 3-6 3 6"/><path d="m6 8 6 2 6-2"/><path d="M12 10v4"/>',
+  Herbam: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>',
+  Ignem: '<path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/>',
+  Imaginem: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
+  Mentem: '<path d="M12 18V5"/><path d="M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4"/><path d="M17.598 6.5A3 3 0 1 0 12 5a3 3 0 1 0-5.598 1.5"/><path d="M17.997 5.125a4 4 0 0 1 2.526 5.77"/><path d="M18 18a4 4 0 0 0 2-7.464"/><path d="M19.967 17.483A4 4 0 1 1 12 18a4 4 0 1 1-7.967-.517"/><path d="M6 18a4 4 0 0 1-2-7.464"/><path d="M6.003 5.125a4 4 0 0 0-2.526 5.77"/>',
+  Terram: '<path d="m8 3 4 8 5-5 5 15H2L8 3z"/>',
+  Vim: '<path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/>',
+};
+
+function formIconSvg(form: Form): string {
+  return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${FORM_ICON_PATHS[form]}</svg>`;
+}
 
 /** Minimal inline Markdown → HTML (bold, italic, code, links) on escaped text. */
 function inline(s: string): string {
@@ -91,8 +108,8 @@ function abilityItem(a: AbilityPick): string {
 }
 
 function artChip(a: Art, score: number): string {
-  const t = ART_THEME[a];
-  return `<div class="art" style="--c:${t.c}"><span class="ic">${t.icon}</span><b>${ART_ABBR[a]}</b><span class="sc">${score}</span></div>`;
+  const icon = isForm(a) ? `<span class="ic">${formIconSvg(a)}</span>` : "";
+  return `<div class="art" style="--c:${ART_COLOR[a]}">${icon}<b>${ART_ABBR[a]}</b><span class="sc">${score}</span></div>`;
 }
 
 const STYLE = `
@@ -112,7 +129,7 @@ h3.sub { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color
 .arts { display:grid; grid-template-columns:repeat(5,1fr); gap:.4rem; }
 .art { display:flex; align-items:center; gap:.35rem; background:#fff; border:1px solid var(--line);
   border-left:4px solid var(--c); border-radius:6px; padding:.35rem .5rem; }
-.art .ic { font-size:.95rem; line-height:1; filter:saturate(.85); }
+.art .ic { display:flex; color:var(--c); opacity:.85; }
 .art b { color:var(--c); font-size:.9rem; }
 .art .sc { margin-left:auto; font-size:1.05rem; font-weight:600; }
 ul { margin:.3rem 0; padding-left:1.2rem; } li { margin:.15rem 0; }
@@ -161,8 +178,6 @@ const SCRIPT = `
 export function renderSheetHtml(ch: Character, data: SheetData = {}, b: Budgets = computeBudgets(ch)): string {
   const magus = charKind(ch) === "magus";
   const hasConfidence = charKind(ch) !== "grog"; // companions & magi have Confidence; grogs don't
-  const spec = [ch.favoredTechnique, ch.favoredForm].filter(Boolean).join(" ");
-  const specialty = [spec, ch.focus ? `focus: ${ch.focus}` : ""].filter(Boolean).join(" / ") || "—";
   const conf = confidenceScore(ch);
   const free = ch.virtues.filter((v) => v.free);
   const bySize = (a: TraitPick, c: TraitPick) => (SIZE_RANK[a.size]! - SIZE_RANK[c.size]!) || a.display.localeCompare(c.display);
@@ -177,7 +192,7 @@ export function renderSheetHtml(ch: Character, data: SheetData = {}, b: Budgets 
 
   const body = `
   <h1>${esc(magusTitle(ch))}</h1>
-  <p class="sub">${esc(ch.concept || "—")} · Age ${ch.age}${specialty !== "—" ? ` · ${esc(specialty)}` : ""}</p>
+  <p class="sub">${esc(ch.concept || "—")} · Age ${ch.age}</p>
 
   <h2>Characteristics</h2>
   <div class="grid">${stats}</div>

@@ -17,9 +17,6 @@ export interface BuildSpec {
   concept?: string;
   notes?: string;
   age?: number;
-  favoredTechnique?: string;
-  favoredForm?: string;
-  focus?: string;
   /** House Puissant choice (Bonisagus/Flambeau/Mercere). */
   puissant?: string;
   laterLifeYears?: number;
@@ -58,9 +55,6 @@ export function specToBuild(spec: BuildSpec): BuildPlan {
     concept: spec.concept,
     notes: spec.notes,
     age: spec.age,
-    favoredTechnique: spec.favoredTechnique as CreateOpts["favoredTechnique"],
-    favoredForm: spec.favoredForm as CreateOpts["favoredForm"],
-    focus: spec.focus,
     puissant: spec.puissant,
   };
 

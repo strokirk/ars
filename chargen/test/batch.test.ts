@@ -13,7 +13,7 @@ import { specToBuild, type BuildSpec } from "../src/cli/spec.ts";
 import { renderSheetHtml } from "../src/cli/sheet-html.ts";
 
 const rules = loadRules();
-const fresh = () => createMagus({ name: "Marcus", house: "Flambeau", favoredTechnique: "Creo", favoredForm: "Ignem", focus: "fire", puissant: "Ignem" }, rules).character;
+const fresh = () => createMagus({ name: "Marcus", house: "Flambeau", puissant: "Ignem" }, rules).character;
 
 test("applyOps: a legal batch applies all ops and saves", () => {
   const r = applyOps(fresh(), [
@@ -33,10 +33,10 @@ test("applyOps: chars map is order-safe (transient overflow is not rejected)", (
   assert.equal(computeBudgets(r.character).characteristics.spent, 7);
 });
 
-test("applyOps: a chars map that truly overspends is rejected (not saved)", () => {
+test("applyOps: a chars map that overspends the point budget saves anyway, flagged as a warning", () => {
   const r = applyOps(fresh(), [{ op: "chars", values: { Int: 3, Sta: 3 } }], rules); // 12 > 7
-  assert.equal(r.saved, false);
-  assert.match(r.results[0]!.rejected ?? "", /overspent/i);
+  assert.equal(r.saved, true);
+  assert.ok(validate(r.character).some((i) => i.code === "char-over" && i.level === "warning"));
 });
 
 test("applyOps: reports every rejection together and saves nothing", () => {
@@ -52,14 +52,9 @@ test("applyOps: reports every rejection together and saves nothing", () => {
   assert.match(r.results[2]!.rejected ?? "", /stage/i);
 });
 
-test("applyOps: --force overrides a cap violation and saves", () => {
-  const forced = applyOps(fresh(), [{ op: "chars", values: { Int: 3, Sta: 3 } }], rules, { force: true });
-  assert.equal(forced.saved, true);
-});
-
 const MARCUS_SPEC: BuildSpec = {
   name: "Marcus", house: "Flambeau", concept: "vengeful fire mage",
-  favoredTechnique: "Creo", favoredForm: "Ignem", focus: "fire", puissant: "Ignem",
+  puissant: "Ignem",
   notes: "## Goals\n- Avenge his master",
   characteristics: { Int: 3, Sta: 1, Per: 1, Str: -1 },
   virtues: ["Affinity with Ignem", "Self-Confident", "Cautious Sorcerer"],

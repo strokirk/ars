@@ -28,7 +28,7 @@ export function createMagus(opts: CreateOpts, rules: RulesData): CreateResult {
     const r = rules.resolveTrait(n);
     if (r.ok) ch.virtues.push({ name: r.trait.canonical, display: r.trait.display, size: r.trait.size, category: r.trait.row.category, points: 0, free: true });
   }
-  const app = applyHouse(opts.house, { puissant: opts.puissant }, rules, { favoredTechnique: opts.favoredTechnique, favoredForm: opts.favoredForm });
+  const app = applyHouse(opts.house, { puissant: opts.puissant }, rules);
   ch.virtues.push(...app.virtues);
   ch.flaws.push(...app.flaws);
   ch.abilities.push(...app.abilities);

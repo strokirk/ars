@@ -80,13 +80,9 @@ export function cmdNew(ctx: Ctx): number {
   if (characterExists(ctx.charPath) && !flagBool(ctx.flags, "force")) {
     return fail(ctx, `${ctx.charPath} already exists. Use --force to overwrite or --char <path>.`);
   }
-  const technique = TECHNIQUES.find((t) => t.toLowerCase() === (flagStr(ctx.flags, "technique") ?? "").toLowerCase());
-  const form = FORMS.find((f) => f.toLowerCase() === (flagStr(ctx.flags, "form") ?? "").toLowerCase());
-
   const { character: ch, free, notes } = createMagus({
     name, house, concept: flagStr(ctx.flags, "concept"), notes: flagStr(ctx.flags, "notes"),
-    age: flagNum(ctx.flags, "age"), favoredTechnique: technique, favoredForm: form,
-    focus: flagStr(ctx.flags, "focus"), puissant: flagStr(ctx.flags, "puissant"),
+    age: flagNum(ctx.flags, "age"), puissant: flagStr(ctx.flags, "puissant"),
   }, ctx.rules);
   saveCharacter(ctx.charPath, ch);
 
@@ -287,15 +283,12 @@ export function cmdSet(ctx: Ctx): number {
       return runBatch(ctx, ch, [{ op: "native-language", value: lang }]);
     }
     case "concept": return rest.length ? meta({ concept: rest.join(" ") }) : fail(ctx, `Usage: chargen set concept "<text>"`);
-    case "focus": return meta({ focus: rest.join(" ") });
-    case "technique": case "favored-technique": return meta({ favoredTechnique: rest[0] });
-    case "form": case "favored-form": return meta({ favoredForm: rest[0] });
     case "reputation": return meta({ reputation: rest.join(" ") || null });
     case "age": return Number.isInteger(Number(rest[0])) ? meta({ age: Number(rest[0]) }) : fail(ctx, `Usage: chargen set age <n>`);
     case "later-life-years": return Number.isInteger(Number(rest[0])) ? meta({ laterLifeYears: Number(rest[0]) }) : fail(ctx, `Usage: chargen set later-life-years <n>`);
     case "confidence": return Number.isInteger(Number(rest[0])) ? meta({ confidence: Number(rest[0]) }) : fail(ctx, `Usage: chargen set confidence <n>`);
     default:
-      return fail(ctx, `Unknown set target "${what}". Try: char | art | native-language | concept | focus | age | later-life-years | confidence | reputation`);
+      return fail(ctx, `Unknown set target "${what}". Try: char | art | native-language | concept | age | later-life-years | confidence | reputation`);
   }
 }
 
@@ -418,8 +411,7 @@ export function cmdSchema(ctx: Ctx): number {
       _: "Pass to `chargen build` (JSON via arg, --file, or stdin) to create + validate a whole magus in one call.",
       name: "string (required)", house: "House (required)",
       concept: "string", notes: "markdown string (fluff/goals/interpretation)",
-      age: "int ≥25 (default 25)", favoredTechnique: "Technique", favoredForm: "Form",
-      focus: "string", puissant: "House Puissant choice (Bonisagus/Flambeau/Mercere)",
+      age: "int ≥25 (default 25)", puissant: "House Puissant choice (Bonisagus/Flambeau/Mercere)",
       laterLifeYears: "int (default 5; ×15 xp)", confidence: "int", reputation: "string|null",
       characteristics: "{ Int: 3, Sta: 1, ... }  (net 7 pts)",
       virtues: '[ "Affinity with Ignem", { "name":"Magical Focus","param":"fire","size":"Minor" } ]',

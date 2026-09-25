@@ -3,17 +3,12 @@
 // any required choice) into concrete free Virtue/Ability/Flaw picks + notes for
 // choices the player still owes.
 import type { AbilityPick, TraitPick } from "./character.ts";
-import type { House, Technique } from "./glossary.ts";
+import type { House } from "./glossary.ts";
 import type { RulesData } from "../data/rules.ts";
 
 export interface HouseChoices {
   /** For Houses offering a Puissant choice (Bonisagus/Flambeau/Mercere). */
   puissant?: string;
-}
-
-export interface HouseContext {
-  favoredTechnique?: Technique;
-  favoredForm?: string;
 }
 
 export interface HouseApplication {
@@ -51,36 +46,26 @@ function pickPuissant(
 interface HouseBenefit {
   virtues?: { name: string; param?: string }[];
   abilities?: { name: string; score: number }[];
-  puissant?: { kind: "art" | "ability"; options: string[]; fallback: (ctx: HouseContext) => string };
+  puissant?: { kind: "art" | "ability"; options: string[]; fallback: string };
   notes?: string[];
 }
 
 /** The free, off-budget benefit each House grants at creation. */
 const HOUSE_BENEFITS: Record<House, HouseBenefit> = {
   Bjornaer: { abilities: [{ name: "Heartbeast", score: 1 }] },
-  Bonisagus: { puissant: { kind: "ability", options: ["Magic Theory", "Intrigue"], fallback: () => "Magic Theory" } },
+  Bonisagus: { puissant: { kind: "ability", options: ["Magic Theory", "Intrigue"], fallback: "Magic Theory" } },
   Criamon: { abilities: [{ name: "Enigmatic Wisdom", score: 1 }] },
   "Ex Miscellanea": {
     notes: [
       "Ex Miscellanea grants (off-budget): one free Minor Hermetic Virtue, one free Major non-Hermetic Virtue, and a compulsory Major Hermetic Flaw. Add them with `add virtue/flaw --free` once chosen.",
     ],
   },
-  Flambeau: {
-    puissant: {
-      kind: "art", options: ["Perdo", "Ignem"],
-      fallback: (ctx) => (ctx.favoredForm === "Ignem" ? "Ignem" : ctx.favoredTechnique === "Perdo" ? "Perdo" : "Ignem"),
-    },
-  },
+  Flambeau: { puissant: { kind: "art", options: ["Perdo", "Ignem"], fallback: "Ignem" } },
   Guernicus: { virtues: [{ name: "Hermetic Prestige" }] },
   Jerbiton: {
     notes: ["Jerbiton grants one free Minor Virtue (scholarship, the arts, or mundane interaction). Add it with `add virtue --free` once chosen."],
   },
-  Mercere: {
-    puissant: {
-      kind: "art", options: ["Creo", "Muto"],
-      fallback: (ctx) => (ctx.favoredTechnique === "Muto" ? "Muto" : "Creo"),
-    },
-  },
+  Mercere: { puissant: { kind: "art", options: ["Creo", "Muto"], fallback: "Creo" } },
   Merinita: {
     virtues: [{ name: "Faerie Magic" }],
     notes: ["Merinita: +1 Warping Point if you take no faerie-related Virtue/Flaw."],
@@ -94,7 +79,6 @@ export function applyHouse(
   house: House,
   choices: HouseChoices,
   rules: RulesData,
-  ctx: HouseContext,
 ): HouseApplication {
   const app: HouseApplication = { virtues: [], abilities: [], flaws: [], notes: [] };
   const addV = (input: string, param?: string) => {
@@ -113,7 +97,7 @@ export function applyHouse(
   for (const a of benefit.abilities ?? []) addA(a.name, a.score);
   if (benefit.puissant) {
     const { kind, options, fallback } = benefit.puissant;
-    const p = pickPuissant(choices.puissant, options, fallback(ctx));
+    const p = pickPuissant(choices.puissant, options, fallback);
     if (p.note) app.notes.push(p.note);
     addV(kind === "art" ? "Puissant Art" : "Puissant Ability", p.value);
   }

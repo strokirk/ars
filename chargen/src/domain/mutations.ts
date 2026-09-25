@@ -5,7 +5,7 @@
 // over these; a web app can call them identically.
 import { charKind } from "./character.ts";
 import type { AbilityPick, Character, PersonalityTrait, SpellPick, TraitPick } from "./character.ts";
-import { type Art, type Characteristic, type Form, type Stage, type Technique, FORMS, TECHNIQUES, isArt, isCharacteristic } from "./glossary.ts";
+import { type Art, type Characteristic, type Form, type Stage, type Technique, isArt, isCharacteristic } from "./glossary.ts";
 import type { ResolvedAbility, ResolvedTrait } from "../data/rules.ts";
 import type { SpellRow } from "../data/types.ts";
 import { type Issue, VIOLATION_CODES, validate } from "./validate.ts";
@@ -42,8 +42,8 @@ function finalize(original: Character, candidate: Character, applied: string, fo
 }
 
 export function setCharacteristic(ch: Character, characteristic: Characteristic, value: number, force = false): MutationResult {
-  if (value < -3 || value > 3) {
-    return { ok: false, character: ch, rejected: `Characteristic value ${value} is out of range (−3..+3).`, issues: validate(ch) };
+  if (!Number.isInteger(value)) {
+    return { ok: false, character: ch, rejected: `Characteristic value ${value} must be an integer.`, issues: validate(ch) };
   }
   const candidate = clone(ch);
   if (value === 0) delete candidate.characteristics[characteristic];
@@ -199,8 +199,8 @@ export function setConcept(ch: Character, concept: string): MutationResult {
   return finalize(ch, candidate, `Concept: ${concept}`, true);
 }
 
-// Age, confidence, later-life-years, focus, favored Tech/Form and reputation are
-// all set via setMeta (below) — one mutation for the scalar header fields.
+// Age, confidence, later-life-years and reputation are all set via setMeta
+// (below) — one mutation for the scalar header fields.
 
 /**
  * Assign a whole Characteristic map at once, validating the final total (not each
@@ -213,7 +213,7 @@ export function setCharacteristics(ch: Character, values: Record<string, number>
   const applied: string[] = [];
   for (const [name, value] of Object.entries(values)) {
     if (!isCharacteristic(name)) return reject(ch, `Unknown Characteristic "${name}".`);
-    if (!Number.isInteger(value) || value < -3 || value > 3) return reject(ch, `${name} value ${value} is out of range (−3..+3).`);
+    if (!Number.isInteger(value)) return reject(ch, `${name} value ${value} must be an integer.`);
     if (value === 0) delete candidate.characteristics[name as Characteristic];
     else candidate.characteristics[name as Characteristic] = value;
     if (value !== 0) applied.push(`${name} ${value > 0 ? "+" : ""}${value}`);
@@ -249,9 +249,6 @@ export interface MetaFields {
   name?: string;
   concept?: string;
   age?: number;
-  focus?: string;
-  favoredTechnique?: string;
-  favoredForm?: string;
   confidence?: number;
   laterLifeYears?: number;
   reputation?: string | null;
@@ -263,18 +260,7 @@ export function setMeta(ch: Character, m: MetaFields, force = false): MutationRe
   const applied: string[] = [];
   if (m.name !== undefined) { candidate.name = m.name; applied.push("name"); }
   if (m.concept !== undefined) { candidate.concept = m.concept; applied.push("concept"); }
-  if (m.focus !== undefined) { candidate.focus = m.focus; applied.push(`focus "${m.focus}"`); }
   if (m.reputation !== undefined) { candidate.reputation = m.reputation; applied.push("reputation"); }
-  if (m.favoredTechnique !== undefined) {
-    const t = TECHNIQUES.find((x) => x.toLowerCase() === m.favoredTechnique!.toLowerCase());
-    if (!t) return reject(ch, `Unknown Technique "${m.favoredTechnique}" (Creo Intellego Muto Perdo Rego).`);
-    candidate.favoredTechnique = t; applied.push(`favored Technique ${t}`);
-  }
-  if (m.favoredForm !== undefined) {
-    const f = FORMS.find((x) => x.toLowerCase() === m.favoredForm!.toLowerCase());
-    if (!f) return reject(ch, `Unknown Form "${m.favoredForm}".`);
-    candidate.favoredForm = f; applied.push(`favored Form ${f}`);
-  }
   if (m.age !== undefined) {
     // Magi finish a 15-year apprenticeship, so they're ≥25; grogs/companions can be younger.
     const floor = charKind(ch) === "magus" ? 25 : 5;
