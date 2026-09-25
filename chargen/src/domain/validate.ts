@@ -4,7 +4,7 @@
 import { type Character, charKind } from "./character.ts";
 import { type Budgets, ageAbilityMax, computeBudgets } from "./budgets.ts";
 import { type Modifiers, deriveModifiers, grantAccepts } from "./modifiers.ts";
-import { abilityCost } from "./budgets.ts";
+import { abilityTotals } from "./budgets.ts";
 import { houseWarping } from "./houses.ts";
 import { abilityAllowed } from "./ability-policy.ts";
 import { spellLabTotal } from "./labtotal.ts";
@@ -116,7 +116,7 @@ export function validate(ch: Character, mods: Modifiers = deriveModifiers(ch), b
     restricted.set(k, prev ? { ...prev, xp: prev.xp + g.xp } : g); // a Virtue taken twice needs twice the xp
   }
   for (const g of restricted.values()) {
-    const eligible = ch.abilities.filter((a) => a.stage === g.pool && grantAccepts(g, a)).reduce((s, a) => s + abilityCost(a, mods), 0);
+    const eligible = ch.abilities.filter((a) => a.stage === g.pool && grantAccepts(g, a)).reduce((s, a) => s + a.xp, 0);
     if (eligible < g.xp) warn("grant-restricted", g.pool, `${g.source}: its ${g.xp} xp must be spent on ${g.only!.label} in ${g.pool} — only ${eligible} xp is.`);
   }
 
@@ -148,10 +148,14 @@ export function validate(ch: Character, mods: Modifiers = deriveModifiers(ch), b
   // Age caps + stage/type legality on Abilities (Affinity allows +2 over at creation).
   const max = ageAbilityMax(ch.age);
   const stageBudget: Record<string, string> = { childhood: "childhood", "later-life": "later-life", apprenticeship: "apprenticeship" };
+  // The cap is on the combined score; it's filed under the last creation stage that paid in.
+  for (const t of abilityTotals(ch, mods)) {
+    const last = t.rows.filter((a) => a.stage !== "free" && a.stage !== "post-gauntlet").at(-1);
+    const cap = mods.affinityAbility.has(t.name) ? max + 2 : max;
+    if (last && t.score > cap) warn("age-cap", stageBudget[last.stage] ?? "apprenticeship", `${t.name} ${t.score} exceeds the age-${ch.age} maximum of ${cap}.`);
+  }
   for (const a of ch.abilities) {
     if (a.stage === "free" || a.stage === "post-gauntlet") continue;
-    const cap = mods.affinityAbility.has(a.name) ? max + 2 : max;
-    if (a.score > cap) warn("age-cap", stageBudget[a.stage] ?? "apprenticeship", `${a.name} ${a.score} exceeds the age-${ch.age} maximum of ${cap}.`);
     const pol = abilityAllowed(ch, a.type, a.stage);
     if (!pol.allowed) warn("ability-stage", stageBudget[a.stage] ?? "apprenticeship", `${a.name} (${a.type}) not allowed in ${a.stage}: ${pol.reason}`);
   }

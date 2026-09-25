@@ -9,7 +9,7 @@ import { dirname } from "node:path";
 import { type Flags, flagBool, flagNum, flagStr } from "./args.ts";
 import type { RulesData } from "../data/rules.ts";
 import { loadCharacter, saveCharacter, characterExists } from "./persist.ts";
-import { renderIssues, renderStatus, renderBatch } from "./render.ts";
+import { renderIssues, renderStatus, renderBatch, withHint } from "./render.ts";
 import { renderSheet, kebab } from "./sheet.ts";
 import { renderSheetHtml, type SheetData } from "./sheet-html.ts";
 import { createMagus } from "../domain/create.ts";
@@ -89,7 +89,7 @@ export function cmdNew(ctx: Ctx): number {
   const text = [
     `Created ${ctx.charPath} — ${name} of House ${house}, age ${ch.age} (fresh Gauntlet).`,
     `Free (off-budget): ${free.join(" · ")}`,
-    ...notes.map((n) => `  • ${n}`),
+    ...notes.map((n) => `  • ${withHint(n)}`),
     `Next: \`chargen build\` the whole magus in one call, or \`chargen status\` to go stage by stage.`,
   ].join("\n");
   out(ctx, text, { ok: true, path: ctx.charPath, character: ch, notes });
@@ -122,7 +122,7 @@ export function cmdBuild(ctx: Ctx): number {
   const head = [
     `${result.saved ? "Built" : "Build FAILED (not saved)"} — ${spec.name} of House ${house}.`,
     created.free.length ? `Free (off-budget): ${created.free.join(" · ")}` : "",
-    ...created.notes.map((n) => `  • ${n}`),
+    ...created.notes.map((n) => `  • ${withHint(n)}`),
   ].filter(Boolean).join("\n");
   out(ctx, head + "\n" + renderBatch(result, b) + exportNote, {
     ok: result.ok, saved: result.saved, path: ctx.charPath,
@@ -417,7 +417,7 @@ export function cmdSchema(ctx: Ctx): number {
       virtues: '[ "Affinity with Ignem", { "name":"Magical Focus","param":"fire","size":"Minor" } ]',
       flaws: '[ "Necessary Condition" ]   (≥1 Hermetic; V pts = F pts; ≤10 F pts)',
       nativeLanguage: "string vernacular (never Latin; = score 5)",
-      abilities: '[ { "name":"Magic Theory","score":3,"stage":"apprenticeship","specialty":"..." } ]',
+      abilities: '[ { "name":"Magic Theory","score":3,"stage":"apprenticeship","specialty":"..." } ]  (score = the combined score, this stage paying what earlier stages did not; or "xp": what this stage spends)',
       arts: "{ Ignem: 10, Creo: 6 }",
       spells: '[ "Pilum of Fire", { "name":"...","aura":5,"focus":true } ]   (each level ≤ its Lab Total)',
       personality: '[ { "trait":"Brave","value":3 } ]',
@@ -431,6 +431,7 @@ export function cmdSchema(ctx: Ctx): number {
         { op: "virtue", name: "Magical Focus", param: "fire", size: "Minor", free: false },
         { op: "flaw", name: "Necessary Condition" },
         { op: "ability", name: "Magic Theory", score: 3, stage: "apprenticeship", specialty: "spells" },
+        { op: "ability", name: "Athletics", xp: 5, stage: "later-life" },
         { op: "arts", values: { Ignem: 10, Creo: 6 } },
         { op: "art", name: "Rego", score: 4 },
         { op: "spell", name: "Pilum of Fire", aura: 3, focus: false },

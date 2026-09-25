@@ -84,11 +84,11 @@ describe("AbilityPicker", () => {
     const el = mount(<Harness />);
     optionFor(el, "Athletics").action.click();
     await flush();
-    expect(el.querySelector(".char-row .cost")!.textContent).toBe("+1 = 10 xp");
+    expect(el.querySelector(".char-row .cost")!.textContent).toBe("5/15 · +1 = 10 xp");
 
     el.querySelector<HTMLElement>('.stepper button[aria-label="increase Athletics"]')!.click();
     await flush();
-    expect(el.querySelector(".char-row .cost")!.textContent).toBe("+1 = 15 xp");
+    expect(el.querySelector(".char-row .cost")!.textContent).toBe("15/30 · +1 = 15 xp");
     expect(el.querySelector(".stage-head .meter")!.textContent).toContain("15/45 xp");
   });
 
@@ -229,6 +229,33 @@ describe("AbilityPicker", () => {
     await key(input, "Enter");
     expect(tag().textContent).toBe("jumping");
     expect(el.querySelector(".stage-head .meter")!.textContent).toContain("5/45 xp");
+
+    // Saving it empty clears it.
+    tag().click();
+    await flush();
+    await type(el.querySelector<HTMLInputElement>(".spec-popover input")!, "");
+    await key(el.querySelector(".spec-popover input")!, "Enter");
+    expect(tag().textContent).toBe("+ specialty");
+  });
+
+  test("a second stage's xp adds to the same Ability: one combined score, ± spending this stage's share", async () => {
+    const started = apply(createGrog({ name: "Otto" }).character, [
+      { op: "ability", name: "Athletics", score: 1, stage: "childhood", specialty: "running" },
+    ]);
+    const el = mount(<Harness start={started} stage="later-life" />);
+    optionFor(el, "Athletics").action.click(); // buys the next point: 10 xp here on top of childhood's 5
+    await flush();
+    expect(el.querySelector(".stepper .val")!.textContent).toBe("2");
+    expect(el.querySelector(".char-row .cost")!.textContent).toBe("15/30 · +1 = 15 xp");
+    expect(el.querySelector(".char-row small")!.textContent).toContain("10 xp here + 5 in Childhood");
+    expect(el.querySelector(".spec-tag")!.textContent).toBe("running");
+    expect(el.querySelector(".stage-head .meter")!.textContent).toContain("10/75 xp");
+
+    el.querySelector<HTMLElement>('.stepper button[aria-label="decrease Athletics"]')!.click();
+    await flush();
+    // Refunding all of this stage's xp drops its row; childhood's Athletics 1 remains.
+    expect(el.querySelector(".stage-head .meter")!.textContent).toContain("0/75 xp");
+    expect(takenNames(el)).toEqual([]);
   });
 
   test("later life offers the stages a character has already spent an Ability in", async () => {

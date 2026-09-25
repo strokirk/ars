@@ -120,6 +120,7 @@ export const COMMAND_HELP: Record<string, string> = {
        Friendly parameterized names work: "Puissant Ignem", "Affinity with Ignem",
        "Deficient Ignem". Or the template + --param ("Minor Magical Focus" --param fire).
   add ability <name> <score> --stage childhood|later-life|apprenticeship [--specialty X] [--type T]
+    (score is the combined score across stages; this stage pays the xp the others did not)
   add spell <name> [--aura N] [--focus]
   add personality <trait> <value −3..+3>`,
 

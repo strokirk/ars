@@ -4,6 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { loadRules } from "../src/data/load-node.ts";
+import { abilityXp } from "../src/domain/costs.ts";
 import { newCharacter, type Character } from "../src/domain/character.ts";
 import { applyHouse } from "../src/domain/houses.ts";
 import {
@@ -28,7 +29,7 @@ function trait(ch: Character, kind: "Virtue" | "Flaw", name: string, param?: str
 function ability(ch: Character, name: string, score: number, stage: Stage, type: string, specialty?: string): Character {
   const r = rules.resolveAbility(name, type);
   assert.ok(r.ok, `resolve ability ${name}`);
-  return step(ch, addAbility(ch, r.ability, score, stage, specialty));
+  return step(ch, addAbility(ch, r.ability, abilityXp(score), stage, specialty));
 }
 function spell(ch: Character, name: string): Character {
   const s = rules.spell(name);
@@ -68,6 +69,8 @@ test("a full magus (House benefit, Puissant, a parameterized Focus, all four Abi
 
   ch = ability(ch, "Charm", 3, "later-life", "General");
   ch = ability(ch, "Folk Ken", 2, "later-life", "General");
+  ch = ability(ch, "Athletics", 1, "later-life", "General"); // a second stage's xp on the same Ability
+  assert.match(renderSheet(ch), /^- Athletics 2 · childhood 15 xp, later-life 5 xp$/m);
 
   ch = ability(ch, "Latin", 4, "apprenticeship", "Academic");
   ch = ability(ch, "Magic Theory", 3, "apprenticeship", "Arcane");
@@ -137,4 +140,14 @@ test("the explicit **Type:** line wins over shape-based inference, and older exp
   const edited = md.replace(" / Confidence", "");
   assert.equal(parseSheetMarkdown(edited, rules).character.kind, "companion");
   assert.equal(parseSheetMarkdown(md.replace(/^\*\*Type:\*\*.*\n/m, ""), rules).character.kind, "companion");
+});
+
+test("an older export (one line per stage, a score per entry) imports as xp with the same scores", () => {
+  const md = renderSheet(newCharacter({ name: "Otto", kind: "companion" }))
+    .replace(/## Abilities\n—/, "## Abilities\nChildhood: Athletics 2 (running), Awareness 1\nLater life: Charm 3");
+  const { character, warnings } = parseSheetMarkdown(md, rules);
+  assert.deepEqual(warnings, []);
+  assert.deepEqual(character.abilities.map((a) => [a.name, a.xp, a.stage, a.specialty]), [
+    ["Athletics", 15, "childhood", "running"], ["Awareness", 5, "childhood", undefined], ["Charm", 30, "later-life", undefined],
+  ]);
 });

@@ -16,7 +16,7 @@ function read(): Draft[] {
   try {
     const raw = localStorage.getItem(KEY);
     const list = raw ? (JSON.parse(raw) as Draft[]) : [];
-    for (const d of list) rules.refreshTraitFlags(d.character);
+    for (const d of list) rules.refresh(d.character);
     return list;
   } catch {
     return [];
@@ -65,7 +65,7 @@ export function decodeCharacter(data: string): Character | null {
     const b64 = data.replace(/-/g, "+").replace(/_/g, "/");
     const bin = atob(b64);
     const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
-    return rules.refreshTraitFlags(JSON.parse(new TextDecoder().decode(bytes)) as Character);
+    return rules.refresh(JSON.parse(new TextDecoder().decode(bytes)) as Character);
   } catch {
     return null;
   }

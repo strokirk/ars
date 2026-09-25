@@ -1,7 +1,7 @@
 // The only state I/O: load/save the character JSON file.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
-import type { Character } from "../domain/character.ts";
+import { type Character, migrateCharacter } from "../domain/character.ts";
 import type { RulesData } from "../data/rules.ts";
 
 export function characterExists(path: string): boolean {
@@ -14,8 +14,7 @@ export function loadCharacter(path: string, rules?: RulesData): Character {
   }
   const ch = JSON.parse(readFileSync(path, "utf8")) as Character;
   if (ch.schema !== 2) throw new Error(`Unsupported character schema ${ch.schema} in ${path}. Schema 2 is current; rebuild older characters with \`chargen build\`.`);
-  if (ch.notes === undefined) ch.notes = "";
-  return rules ? rules.refreshTraitFlags(ch) : ch;
+  return rules ? rules.refresh(ch) : migrateCharacter(ch);
 }
 
 export function saveCharacter(path: string, ch: Character): void {

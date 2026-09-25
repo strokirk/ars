@@ -26,7 +26,7 @@ export interface BuildSpec {
   virtues?: TraitEntry[];
   flaws?: TraitEntry[];
   nativeLanguage?: string;
-  abilities?: { name: string; score: number; stage: string; specialty?: string; type?: string }[];
+  abilities?: { name: string; score?: number; xp?: number; stage: string; specialty?: string; type?: string }[];
   arts?: Record<string, number>;
   spells?: SpellEntry[];
   personality?: { trait: string; value: number }[];
@@ -69,7 +69,7 @@ export function specToBuild(spec: BuildSpec): BuildPlan {
   for (const v of spec.virtues ?? []) ops.push(traitOp("virtue", v));
   for (const f of spec.flaws ?? []) ops.push(traitOp("flaw", f));
   if (spec.nativeLanguage) ops.push({ op: "native-language", value: spec.nativeLanguage });
-  for (const a of spec.abilities ?? []) ops.push({ op: "ability", name: a.name, score: a.score, stage: a.stage, specialty: a.specialty, type: a.type });
+  for (const a of spec.abilities ?? []) ops.push({ op: "ability", name: a.name, score: a.score, xp: a.xp, stage: a.stage, specialty: a.specialty, type: a.type });
   if (spec.arts) ops.push({ op: "arts", values: spec.arts });
   for (const s of spec.spells ?? []) ops.push(spellOp(s));
   for (const p of spec.personality ?? []) ops.push({ op: "personality", trait: p.trait, value: p.value });

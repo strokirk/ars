@@ -1,8 +1,8 @@
 // Renders the finished character to the Markdown sheet from skills/magus-creation
 // (the "Output template" section), so exports match what the skill prescribes.
 import { type Character, charKind } from "../domain/character.ts";
-import { type Budgets, computeBudgets } from "../domain/budgets.ts";
-import { confidenceScore } from "../domain/modifiers.ts";
+import { type Budgets, abilityTotals, computeBudgets } from "../domain/budgets.ts";
+import { confidenceScore, deriveModifiers } from "../domain/modifiers.ts";
 import { CHARACTERISTICS, FORMS, TECHNIQUES, ART_ABBR } from "../domain/glossary.ts";
 
 export function kebab(name: string): string {
@@ -35,21 +35,15 @@ export function renderSheet(ch: Character, b: Budgets = computeBudgets(ch)): str
   L.push(`- Virtues (${b.virtuesFlaws.virtuePoints} pts): ${vir.map((v) => `${v.display} (${v.size})`).join("; ") || "—"}`);
   L.push(`- Flaws (${b.virtuesFlaws.flawPoints} pts): ${flw.map((f) => `${f.display} (${f.size})`).join("; ") || "—"}   ← Virtue pts ${b.virtuesFlaws.balanced ? "=" : "≠"} Flaw pts`, "");
 
-  // Abilities are broken out by stage (not one flat list) so an export carries
-  // enough to re-derive which xp pool paid for each — the Markdown importer
-  // (sheet-import.ts) depends on this shape to round-trip.
+  // Each Ability once, with its combined score, then the xp each stage paid —
+  // the Markdown importer (sheet-import.ts) reads that breakdown to round-trip.
   L.push("## Abilities");
   if (ch.nativeLanguage) L.push(`Native Language: ${ch.nativeLanguage} 5`);
-  const fmtAbils = (list: typeof ch.abilities) =>
-    list.map((a) => `${a.name} ${a.score}${a.specialty ? ` (${a.specialty})` : ""}`).join(", ") || "—";
-  const byStage = (stage: string) => ch.abilities.filter((a) => a.stage === stage);
-  L.push(`Childhood: ${fmtAbils(byStage("childhood"))}`);
-  L.push(`Later life: ${fmtAbils(byStage("later-life"))}`);
-  if (magus) L.push(`Apprenticeship: ${fmtAbils(byStage("apprenticeship"))}`);
-  const postGauntlet = byStage("post-gauntlet");
-  if (postGauntlet.length) L.push(`Post-Gauntlet: ${fmtAbils(postGauntlet)}`);
-  const freeAb = byStage("free");
-  if (freeAb.length) L.push(`Granted: ${freeAb.map((a) => `${a.name} ${a.score}`).join(", ")}`);
+  const totals = abilityTotals(ch, deriveModifiers(ch));
+  for (const t of totals) {
+    L.push(`- ${t.name} ${t.score}${t.specialty ? ` (${t.specialty})` : ""} · ${t.rows.map((r) => `${r.stage} ${r.xp} xp`).join(", ")}`);
+  }
+  if (!totals.length) L.push("—");
   L.push(`(xp: childhood ${b.childhood.spent}/${b.childhood.cap} · later life ${b.laterLife.spent}/${b.laterLife.cap}${magus ? ` · apprenticeship ${b.apprenticeship.spent}/${b.apprenticeship.cap}` : ""})`, "");
 
   if (magus) {

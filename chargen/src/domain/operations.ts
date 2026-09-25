@@ -19,6 +19,8 @@ import {
   setMastery, setMeta, setNativeLanguage, setNotes, type MetaFields, type MutationResult,
 } from "./mutations.ts";
 import { XP_STAGES, isArt, isCharacteristic } from "./glossary.ts";
+import { abilityCost } from "./budgets.ts";
+import { deriveModifiers } from "./modifiers.ts";
 
 const STAGE_NAMES = new Set<string>([...XP_STAGES, "free"]);
 
@@ -27,7 +29,8 @@ export type Op =
   | { op: "char"; name: string; value: number }
   | { op: "virtue"; name: string; param?: string; size?: "Minor" | "Major"; free?: boolean }
   | { op: "flaw"; name: string; param?: string; size?: "Minor" | "Major"; free?: boolean }
-  | { op: "ability"; name: string; score: number; stage: string; specialty?: string; type?: string }
+  /** `xp` sets what this stage spends; `score` asks for that combined score instead, this stage paying what the others don't. */
+  | { op: "ability"; name: string; score?: number; xp?: number; stage: string; specialty?: string; type?: string }
   | { op: "arts"; values: Record<string, number> }
   | { op: "art"; name: string; score: number }
   | { op: "spell"; name: string; aura?: number; focus?: boolean }
@@ -84,7 +87,14 @@ export function applyOp(ch: Character, op: Op, rules: RulesData, force = false):
       if (!STAGE_NAMES.has(op.stage)) return { ok: false, character: ch, rejected: `Unknown stage "${op.stage}" (childhood | later-life | apprenticeship).`, issues: validate(ch) };
       const res = rules.resolveAbility(op.name, op.type);
       if (!res.ok) return { ok: false, character: ch, rejected: res.error, issues: validate(ch) };
-      return addAbility(ch, res.ability, op.score, op.stage as never, op.specialty, force);
+      let xp = op.xp;
+      if (xp === undefined) {
+        const name = res.ability.name.toLowerCase();
+        const others = ch.abilities.filter((a) => a.name.toLowerCase() === name && a.stage !== op.stage).reduce((s, a) => s + a.xp, 0);
+        xp = abilityCost(res.ability.name, op.score ?? 0, deriveModifiers(ch)) - others;
+        if (others && xp < 1) return { ok: false, character: ch, rejected: `${res.ability.name} already reaches ${op.score} from other stages.`, issues: validate(ch) };
+      }
+      return addAbility(ch, res.ability, xp, op.stage as never, op.specialty, force);
     }
     case "arts":
       return setArts(ch, op.values, force);
@@ -152,7 +162,7 @@ export function opSummary(op: Op): string {
     case "chars": return `chars ${Object.entries(op.values).map(([k, v]) => `${k} ${v}`).join(", ")}`;
     case "char": return `char ${op.name} ${op.value}`;
     case "virtue": case "flaw": return `${op.op} ${op.name}${op.param ? ` (${op.param})` : ""}${op.free ? " [free]" : ""}`;
-    case "ability": return `ability ${op.name} ${op.score} [${op.stage}]`;
+    case "ability": return `ability ${op.name} ${op.xp !== undefined ? `${op.xp} xp` : op.score} [${op.stage}]`;
     case "arts": return `arts ${Object.entries(op.values).map(([k, v]) => `${k} ${v}`).join(", ")}`;
     case "art": return `art ${op.name} ${op.score}`;
     case "spell": return `spell ${op.name}`;

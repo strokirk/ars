@@ -7,7 +7,7 @@ import { Button } from "./Button.tsx";
  * Used to name a placeholder Ability, rename one, and set a specialty.
  */
 export function TextPrompt({
-  initial = "", label, placeholder, choices = [], saveLabel = "Save", onSave, onCancel,
+  initial = "", label, placeholder, choices = [], saveLabel = "Save", allowEmpty, onSave, onCancel,
 }: {
   initial?: string;
   /** Accessible name of the input. */
@@ -15,6 +15,8 @@ export function TextPrompt({
   placeholder?: string;
   choices?: readonly string[];
   saveLabel?: string;
+  /** Saving an empty value is allowed (it clears the field). */
+  allowEmpty?: boolean;
   onSave: (value: string) => void;
   onCancel: () => void;
 }) {
@@ -22,7 +24,7 @@ export function TextPrompt({
   const input = useRef<HTMLInputElement>(null);
   // `autofocus` only fires on page load, not when Preact mounts the input later.
   useLayoutEffect(() => { input.current?.focus(); input.current?.select(); }, []);
-  const save = (v: string) => { if (v.trim()) onSave(v.trim()); };
+  const save = (v: string) => { if (v.trim() || allowEmpty) onSave(v.trim()); };
   return (
     <div class="text-prompt">
       <div class="text-prompt-row">
@@ -35,7 +37,7 @@ export function TextPrompt({
             if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); onCancel(); }
           }}
         />
-        <Button size="small" variant="brand" appearance="accent" disabled={!value.trim()} onClick={() => save(value)}>{saveLabel}</Button>
+        <Button size="small" variant="brand" appearance="accent" disabled={!value.trim() && !allowEmpty} onClick={() => save(value)}>{saveLabel}</Button>
         <Button size="small" appearance="plain" onClick={onCancel}>Cancel</Button>
       </div>
       {choices.length > 0 && (

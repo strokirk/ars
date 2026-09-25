@@ -4,6 +4,8 @@
 // primitive case, and a roster/draft character is just a prefill (fromCharacter).
 import type { Character } from "../../../chargen/src/domain/character.ts";
 import type { Art, Characteristic } from "../../../chargen/src/domain/glossary.ts";
+import { abilityTotals } from "../../../chargen/src/domain/budgets.ts";
+import { deriveModifiers } from "../../../chargen/src/domain/modifiers.ts";
 
 export interface Subject {
   name: string;
@@ -24,7 +26,7 @@ export const BLANK_SUBJECT: Subject = {
 
 export function fromCharacter(ch: Character): Subject {
   const abilities: Record<string, number> = {};
-  for (const a of ch.abilities) abilities[a.name] = a.score;
+  for (const t of abilityTotals(ch, deriveModifiers(ch))) abilities[t.name] = t.score;
   return {
     name: ch.name,
     age: ch.age,

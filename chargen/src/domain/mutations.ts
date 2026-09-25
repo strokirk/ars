@@ -11,6 +11,7 @@ import type { SpellRow } from "../data/types.ts";
 import { type Issue, VIOLATION_CODES, validate } from "./validate.ts";
 import { affinityXp, artXp } from "./costs.ts";
 import { deriveModifiers } from "./modifiers.ts";
+import { abilityScore } from "./budgets.ts";
 import { type LabTotalOpts, spellLabTotal } from "./labtotal.ts";
 
 export interface MutationResult {
@@ -87,19 +88,32 @@ export function removeTrait(ch: Character, kind: "Virtue" | "Flaw", query: strin
   return { ok: true, character: candidate, applied: `− ${kind}: ${removed!.display}`, issues: validate(candidate) };
 }
 
-export function addAbility(ch: Character, resolved: ResolvedAbility, score: number, stage: Stage, specialty: string | undefined, force = false): MutationResult {
-  if (!Number.isInteger(score) || score < 1) {
-    return { ok: false, character: ch, rejected: `Ability score must be a positive integer.`, issues: validate(ch) };
+/**
+ * Set the xp one stage spends on an Ability. The score comes from all its stages
+ * together. `specialty` is per Ability: given (an empty string clears it), it's
+ * written to every stage's row.
+ */
+export function addAbility(ch: Character, resolved: ResolvedAbility, xp: number, stage: Stage, specialty: string | undefined, force = false): MutationResult {
+  if (!Number.isInteger(xp) || xp < 1) {
+    return { ok: false, character: ch, rejected: `Ability xp must be a positive integer.`, issues: validate(ch) };
   }
   const candidate = clone(ch);
-  const existing = candidate.abilities.find((a) => a.name.toLowerCase() === resolved.name.toLowerCase() && a.stage === stage);
+  const same = candidate.abilities.filter((a) => a.name.toLowerCase() === resolved.name.toLowerCase());
+  const existing = same.find((a) => a.stage === stage);
   const pick: AbilityPick = {
-    name: resolved.name, score, stage, type: resolved.type, restricted: resolved.restricted || undefined,
-    specialty: specialty ?? existing?.specialty,
+    name: resolved.name, xp, stage, type: resolved.type, restricted: resolved.restricted || undefined,
+    specialty: same.find((a) => a.specialty)?.specialty,
   };
-  if (existing) Object.assign(existing, pick);
-  else candidate.abilities.push(pick);
-  return finalize(ch, candidate, `+ ${resolved.name} ${score}${specialty ? ` (${specialty})` : ""} [${stage}]`, force);
+  const row = existing ? Object.assign(existing, pick) : pick;
+  if (!existing) candidate.abilities.push(pick);
+  if (specialty !== undefined) {
+    for (const a of new Set([...same, row])) {
+      if (specialty.trim()) a.specialty = specialty.trim();
+      else delete a.specialty;
+    }
+  }
+  const score = abilityScore(candidate, resolved.name, deriveModifiers(candidate));
+  return finalize(ch, candidate, `+ ${resolved.name} ${xp} xp [${stage}] → ${resolved.name} ${score}${specialty?.trim() ? ` (${specialty.trim()})` : ""}`, force);
 }
 
 export function removeAbility(ch: Character, query: string, stage?: Stage): MutationResult {
@@ -108,20 +122,19 @@ export function removeAbility(ch: Character, query: string, stage?: Stage): Muta
   const idx = candidate.abilities.findIndex((a) => a.name.toLowerCase() === q && a.stage !== "free" && (!stage || a.stage === stage));
   if (idx === -1) return { ok: false, character: ch, rejected: `No (non-granted) Ability matching "${query}" to remove.`, issues: validate(ch) };
   const [removed] = candidate.abilities.splice(idx, 1);
-  return { ok: true, character: candidate, applied: `− ${removed!.name} ${removed!.score}`, issues: validate(candidate) };
+  return { ok: true, character: candidate, applied: `− ${removed!.name} ${removed!.xp} xp [${removed!.stage}]`, issues: validate(candidate) };
 }
 
-/** Rename one stage's copy of an Ability ("Provense Lore" → "Provence Lore"), keeping score, type and specialty. */
+/** Rename an Ability ("Provense Lore" → "Provence Lore") in every stage that has it, keeping xp, type and specialty. */
 export function renameAbility(ch: Character, from: string, to: string, stage: Stage): MutationResult {
   const name = to.trim();
   const candidate = clone(ch);
-  const row = candidate.abilities.find((a) => a.name.toLowerCase() === from.toLowerCase() && a.stage === stage);
-  if (!row) return reject(ch, `No Ability "${from}" in ${stage} to rename.`);
+  const rows = candidate.abilities.filter((a) => a.name.toLowerCase() === from.toLowerCase());
+  if (!rows.some((a) => a.stage === stage)) return reject(ch, `No Ability "${from}" in ${stage} to rename.`);
   if (!name) return reject(ch, "An Ability needs a name.");
-  if (candidate.abilities.some((a) => a !== row && a.stage === stage && a.name.toLowerCase() === name.toLowerCase())) {
-    return reject(ch, `${name} is already taken in ${stage}.`);
-  }
-  row.name = name;
+  const clash = candidate.abilities.find((a) => !rows.includes(a) && a.name.toLowerCase() === name.toLowerCase() && rows.some((r) => r.stage === a.stage));
+  if (clash) return reject(ch, `${name} is already taken in ${clash.stage}.`);
+  for (const r of rows) r.name = name;
   return { ok: true, character: candidate, applied: `${from} → ${name} [${stage}]`, issues: validate(candidate) };
 }
 

@@ -21,6 +21,13 @@ describe("share-link codec", () => {
     expect(encoded).toMatch(/^[A-Za-z0-9_-]+$/);
   });
 
+  test("an old link (a score per Ability row) decodes to xp with the same score", () => {
+    const ch = createMagus({ name: "Marcus", house: "Bonisagus" }, rules).character;
+    const old = { ...ch, abilities: [{ name: "Athletics", score: 2, stage: "childhood", type: "General" }] } as never;
+    const back = decodeCharacter(encodeCharacter(old))!;
+    expect(back.abilities).toEqual([{ name: "Athletics", xp: 15, stage: "childhood", type: "General" }]);
+  });
+
   test("returns null for corrupt input rather than throwing", () => {
     expect(decodeCharacter("not-valid-base64!!")).toBeNull();
     expect(decodeCharacter("")).toBeNull();

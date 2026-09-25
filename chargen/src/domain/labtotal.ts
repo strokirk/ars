@@ -7,6 +7,7 @@
 import type { Character } from "./character.ts";
 import type { Modifiers } from "./modifiers.ts";
 import { type Art, type Form, type Technique, isForm, isTechnique } from "./glossary.ts";
+import { abilityScore } from "./budgets.ts";
 
 export const DEFAULT_AURA = 3;
 
@@ -31,11 +32,6 @@ export interface LabTotalResult {
 
 const score = (ch: Character, art: Art): number => ch.arts[art] ?? 0;
 
-function magicTheoryScore(ch: Character): number {
-  const a = ch.abilities.find((x) => x.name.toLowerCase() === "magic theory");
-  return a?.score ?? 0;
-}
-
 export interface LabTotalOpts {
   aura?: number;
   inFocus?: boolean;
@@ -54,7 +50,7 @@ export function spellLabTotal(ch: Character, mods: Modifiers, spell: SpellLike, 
   // Puissant Magic Theory (e.g. the Bonisagus free benefit) adds +2 to MT in ALL
   // totals, including the Lab Total.
   const mtPuissant = mods.puissantAbility.get("Magic Theory") ?? 0;
-  const magicTheory = magicTheoryScore(ch) + mtPuissant;
+  const magicTheory = abilityScore(ch, "Magic Theory", mods) + mtPuissant;
   const aura = opts.aura ?? DEFAULT_AURA;
 
   const puissantBonus = (mods.puissantArt.get(lowestTech) ?? 0) + (mods.puissantArt.get(lowestForm) ?? 0);

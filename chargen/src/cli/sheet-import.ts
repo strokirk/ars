@@ -2,7 +2,7 @@
 // Round-trips the standard export exactly; anything it can't resolve (a Virtue/Flaw
 // or Ability name the rules data doesn't recognize) is skipped and reported in
 // `warnings` rather than failing the whole import.
-import { newCharacter, traitPick, type Character, type CharacterKind, type TraitPick } from "../domain/character.ts";
+import { migrateCharacter, newCharacter, traitPick, type Character, type CharacterKind, type TraitPick } from "../domain/character.ts";
 import { CHARACTERISTICS, TECHNIQUES, FORMS, ART_ABBR, HOUSES, type Art, type Characteristic, type House, type Technique, type Form, type Stage } from "../domain/glossary.ts";
 import { deriveModifiers } from "../domain/modifiers.ts";
 import { spellLabTotal } from "../domain/labtotal.ts";
@@ -123,19 +123,34 @@ export function parseSheetMarkdown(md: string, rules: RulesData): ImportResult {
   const nativeLine = abilLines.find((l) => l.startsWith("Native Language:"));
   if (nativeLine) ch.nativeLanguage = nativeLine.replace("Native Language:", "").trim().replace(/\s+\d+$/, "");
 
+  // Current shape: "- Athletics 1 (Running) · childhood 5 xp, later-life 5 xp" (the score is derived; xp is kept).
+  const STAGES = new Set<string>(["childhood", "later-life", "apprenticeship", "post-gauntlet", "free"]);
+  for (const line of abilLines.filter((l) => l.startsWith("- "))) {
+    const m = line.match(/^-\s+(.+?)\s+\d+(?:\s+\(([^()]+)\))?\s+·\s+(.+)$/);
+    if (!m) { warnings.push(`Could not parse Ability line "${line}"`); continue; }
+    const res = rules.resolveAbility(m[1]!.trim());
+    if (!res.ok) { warnings.push(`Could not resolve Ability "${m[1]}" (${res.error})`); continue; }
+    for (const part of m[3]!.split(",")) {
+      const pm = part.trim().match(/^(\S+)\s+(\d+)\s+xp$/);
+      if (!pm || !STAGES.has(pm[1]!)) { warnings.push(`Could not parse "${part.trim()}" for ${res.ability.name}`); continue; }
+      ch.abilities.push({ name: res.ability.name, xp: Number(pm[2]), stage: pm[1] as Stage, specialty: m[2], type: res.ability.type, restricted: res.ability.restricted });
+    }
+  }
+  // Older exports: one "Childhood: Athletics 1, …" line per stage, a score per entry (migrated below).
   const parseAbilityEntry = (entry: string, stage: Stage) => {
     const m = entry.match(/^(.+?)\s+(\d+)(?:\s+\(([^()]+)\))?$/);
     if (!m) { warnings.push(`Could not parse Ability entry "${entry}"`); return; }
     const [, abName, scoreStr, specialty] = m;
     const res = rules.resolveAbility(abName!.trim());
     if (!res.ok) { warnings.push(`Could not resolve Ability "${abName}" (${res.error})`); return; }
-    ch.abilities.push({ name: res.ability.name, score: Number(scoreStr), stage, specialty, type: res.ability.type, restricted: res.ability.restricted });
+    ch.abilities.push({ name: res.ability.name, score: Number(scoreStr), stage, specialty, type: res.ability.type, restricted: res.ability.restricted } as never);
   };
   const stageBody = (label: string) => afterColon(abilLines.find((l) => l.startsWith(`${label}:`)));
   for (const [label, stage] of [["Childhood", "childhood"], ["Later life", "later-life"], ["Apprenticeship", "apprenticeship"], ["Post-Gauntlet", "post-gauntlet"]] as const) {
     for (const entry of splitList(stageBody(label))) parseAbilityEntry(entry, stage);
   }
   for (const entry of splitList(stageBody("Granted"))) parseAbilityEntry(entry, "free");
+  migrateCharacter(ch);
 
   // ── arts & spells (magi only) ────────────────────────────────────────────
   if (kind === "magus") {

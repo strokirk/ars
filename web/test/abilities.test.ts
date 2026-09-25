@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
-  abilityCost, abilityMax, abilityOptions, abilityTemplate, specialtyHints, typeLabel, xpToNext,
+  abilityCost, abilityMax, abilityOptions, abilityProgress, abilityTemplate, specialtyHints, typeLabel, xpToNext, xpToPrev,
 } from "../src/lib/abilities.ts";
 import { rules } from "../src/rules.ts";
 import { apply } from "../src/engine.ts";
@@ -24,7 +24,14 @@ describe("xp arithmetic", () => {
   });
 
   test("the next point costs more the higher you go", () => {
-    expect([0, 1, 2, 3, 4].map((n) => xpToNext("Athletics", n, mods))).toEqual([5, 10, 15, 20, 25]);
+    expect([0, 5, 15, 30, 50].map((xp) => xpToNext("Athletics", xp, mods))).toEqual([5, 10, 15, 20, 25]);
+  });
+
+  test("xp between points: progress, the rest of the next point, and the refund back to the last one", () => {
+    expect(abilityProgress("Athletics", 10, mods)).toBe("10/15");
+    expect(xpToNext("Athletics", 10, mods)).toBe(5);
+    expect(xpToPrev("Athletics", 10, mods)).toBe(5); // back to 5 (score 1)
+    expect(xpToPrev("Athletics", 5, mods)).toBe(5); // on a point: back to the one before
   });
 
   test("an Affinity discounts both the total and the next point", () => {
@@ -32,7 +39,8 @@ describe("xp arithmetic", () => {
     const m = deriveModifiers(gifted);
     expect(m.affinityAbility.has("Athletics")).toBe(true);
     expect(abilityCost("Athletics", 4, m)).toBe(34); // ceil(50 × 2/3)
-    expect(xpToNext("Athletics", 4, m)).toBe(50 - 34); // 75 → 50 after the discount
+    expect(xpToNext("Athletics", 34, m)).toBe(50 - 34); // 75 → 50 after the discount
+    expect(abilityProgress("Athletics", 34, m)).toBe("51/75"); // 34 × 1.5
   });
 });
 

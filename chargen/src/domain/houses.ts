@@ -4,6 +4,7 @@
 // choices the player still owes.
 import { type AbilityPick, type Character, type TraitPick, traitPick } from "./character.ts";
 import type { House } from "./glossary.ts";
+import { abilityXp } from "./costs.ts";
 import type { RulesData } from "../data/rules.ts";
 
 export interface HouseChoices {
@@ -15,7 +16,13 @@ export interface HouseApplication {
   virtues: TraitPick[];
   abilities: AbilityPick[];
   flaws: TraitPick[];
-  notes: string[];
+  notes: Note[];
+}
+
+/** A note about a House choice still owed. `hint` is the CLI command that makes it — the CLI appends it, the web ignores it (like Issue.hint). */
+export interface Note {
+  message: string;
+  hint?: string;
 }
 
 function freeTrait(rules: RulesData, input: string, param?: string): TraitPick | { error: string } {
@@ -28,7 +35,7 @@ function freeTrait(rules: RulesData, input: string, param?: string): TraitPick |
 function freeAbility(rules: RulesData, name: string, score: number): AbilityPick | { error: string } {
   const a = rules.ability(name);
   if (!a) return { error: `ability "${name}" not found` };
-  return { name: a.name, score, stage: "free", type: a.type };
+  return { name: a.name, xp: abilityXp(score), stage: "free", type: a.type };
 }
 
 /** Resolve a Puissant choice against an allowed option set, falling back to a default. */
@@ -49,7 +56,7 @@ interface HouseBenefit {
   puissant?: { kind: "art" | "ability"; options: string[]; fallback: string };
   /** Warping Points inflicted at creation unless a paid Virtue/Flaw's name matches `unless`. */
   warping?: { points: number; unless: RegExp; reason: string };
-  notes?: string[];
+  notes?: Note[];
 }
 
 /** The free, off-budget benefit each House grants at creation. */
@@ -59,13 +66,16 @@ const HOUSE_BENEFITS: Record<House, HouseBenefit> = {
   Criamon: { abilities: [{ name: "Enigmatic Wisdom", score: 1 }] },
   "Ex Miscellanea": {
     notes: [
-      "Ex Miscellanea grants (off-budget): one free Minor Hermetic Virtue, one free Major non-Hermetic Virtue, and a compulsory Major Hermetic Flaw. Add them with `add virtue/flaw --free` once chosen.",
+      {
+        message: "Ex Miscellanea grants (off-budget): one free Minor Hermetic Virtue, one free Major non-Hermetic Virtue, and a compulsory Major Hermetic Flaw. Add them as free picks once chosen.",
+        hint: "add virtue/flaw --free",
+      },
     ],
   },
   Flambeau: { puissant: { kind: "art", options: ["Perdo", "Ignem"], fallback: "Ignem" } },
   Guernicus: { virtues: [{ name: "Hermetic Prestige" }] },
   Jerbiton: {
-    notes: ["Jerbiton grants one free Minor Virtue (scholarship, the arts, or mundane interaction). Add it with `add virtue --free` once chosen."],
+    notes: [{ message: "Jerbiton grants one free Minor Virtue (scholarship, the arts, or mundane interaction). Add it as a free pick once chosen.", hint: "add virtue --free" }],
   },
   Mercere: { puissant: { kind: "art", options: ["Creo", "Muto"], fallback: "Creo" } },
   Merinita: {
@@ -95,12 +105,12 @@ export function applyHouse(
   const app: HouseApplication = { virtues: [], abilities: [], flaws: [], notes: [] };
   const addV = (input: string, param?: string) => {
     const v = freeTrait(rules, input, param);
-    if ("error" in v) app.notes.push(`House benefit not applied: ${v.error}`);
+    if ("error" in v) app.notes.push({ message: `House benefit not applied: ${v.error}` });
     else app.virtues.push(v);
   };
   const addA = (name: string, score: number) => {
     const a = freeAbility(rules, name, score);
-    if ("error" in a) app.notes.push(`House benefit not applied: ${a.error}`);
+    if ("error" in a) app.notes.push({ message: `House benefit not applied: ${a.error}` });
     else app.abilities.push(a);
   };
 
@@ -110,7 +120,7 @@ export function applyHouse(
   if (benefit.puissant) {
     const { kind, options, fallback } = benefit.puissant;
     const p = pickPuissant(choices.puissant, options, fallback);
-    if (p.note) app.notes.push(p.note);
+    if (p.note) app.notes.push({ message: p.note });
     addV(kind === "art" ? "Puissant Art" : "Puissant Ability", p.value);
   }
   app.notes.push(...(benefit.notes ?? []));

@@ -4,6 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { loadRules } from "../src/data/load-node.ts";
+import { abilityXp } from "../src/domain/costs.ts";
 import { newCharacter, type Character } from "../src/domain/character.ts";
 import { applyHouse } from "../src/domain/houses.ts";
 import {
@@ -29,7 +30,7 @@ function trait(ch: Character, kind: "Virtue" | "Flaw", name: string): Character 
 function ability(ch: Character, name: string, score: number, stage: Stage, type: string): Character {
   const r = rules.resolveAbility(name, type);
   assert.ok(r.ok, `resolve ability ${name}`);
-  return step(ch, addAbility(ch, r.ability, score, stage, undefined));
+  return step(ch, addAbility(ch, r.ability, abilityXp(score), stage, undefined));
 }
 function spell(ch: Character, name: string): Character {
   const s = rules.spell(name);

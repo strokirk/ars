@@ -18,6 +18,7 @@ import { HOUSES, TECHNIQUES, FORMS, ART_ABBR, type Art, type Technique } from ".
 import { TECHNIQUE_COLOR } from "./lib/arts.ts";
 import { HOUSE_PUISSANT_CHOICES } from "../../chargen/src/domain/houses.ts";
 import { deriveModifiers } from "../../chargen/src/domain/modifiers.ts";
+import { abilityScore } from "../../chargen/src/domain/budgets.ts";
 import { spellLabTotal } from "../../chargen/src/domain/labtotal.ts";
 import { artXp, affinityXp } from "../../chargen/src/domain/costs.ts";
 import { rules } from "./engine.ts";
@@ -192,7 +193,7 @@ export function AbilitiesStep({ ch, update }: StepProps) {
           {granted.map((a) => (
             <div class="char-row" key={a.name}>
               <span class="nm">{a.name} <small>{a.type ?? "—"} · {ch.house ? `House ${ch.house}` : "a Virtue"}, off-budget</small></span>
-              <span class="val">{a.score}</span>
+              <span class="val">{abilityScore(ch, a.name, mods)}</span>
             </div>
           ))}
         </div>

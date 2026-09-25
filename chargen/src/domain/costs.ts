@@ -29,3 +29,10 @@ export function charCost(value: number): number {
 export function affinityXp(rawXp: number): number {
   return Math.ceil((rawXp * 2) / 3);
 }
+
+/** Ability score `xp` buys (the inverse of abilityXp): 14 → 1, 15 → 2. */
+export function abilityScoreFromXp(xp: number): number {
+  let n = 0;
+  while (abilityXp(n + 1) <= xp) n++;
+  return n;
+}

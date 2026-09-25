@@ -6,7 +6,7 @@ import { loadRules } from "../src/data/load-node.ts";
 import { artXp, abilityXp, charCost, affinityXp } from "../src/domain/costs.ts";
 import { newCharacter } from "../src/domain/character.ts";
 import { applyHouse } from "../src/domain/houses.ts";
-import { computeBudgets } from "../src/domain/budgets.ts";
+import { abilityScore, abilityTotals, computeBudgets } from "../src/domain/budgets.ts";
 import { deriveModifiers, confidenceScore } from "../src/domain/modifiers.ts";
 import { validate, isLegal } from "../src/domain/validate.ts";
 import { addAbility, addSpell, addTrait, setArt, setCharacteristic, setConcept, setNativeLanguage } from "../src/domain/mutations.ts";
@@ -137,32 +137,32 @@ test("resolveAbility: exact, Latin alias, and Lore template", () => {
 test("childhood: General abilities count toward the 45-xp pool", () => {
   let ch = freshMarcus();
   ch = setNativeLanguage(ch, "German").character;
-  ch = addAbility(ch, { name: "Awareness", type: "General", restricted: false }, 2, "childhood", "alertness").character;
-  ch = addAbility(ch, { name: "Athletics", type: "General", restricted: false }, 2, "childhood", undefined).character;
+  ch = addAbility(ch, { name: "Awareness", type: "General", restricted: false }, abilityXp(2), "childhood", "alertness").character;
+  ch = addAbility(ch, { name: "Athletics", type: "General", restricted: false }, abilityXp(2), "childhood", undefined).character;
   assert.equal(computeBudgets(ch).childhood.spent, 30); // 15 + 15
   assert.equal(computeBudgets(ch).childhood.nativeLanguageSet, true);
 });
 
 test("childhood: an Academic ability is allowed but flagged as a warning", () => {
   let ch = setNativeLanguage(freshMarcus(), "German").character;
-  const res = addAbility(ch, { name: "Latin", type: "Academic", restricted: false }, 1, "childhood", undefined);
+  const res = addAbility(ch, { name: "Latin", type: "Academic", restricted: false }, abilityXp(1), "childhood", undefined);
   assert.equal(res.ok, true);
   assert.ok(validate(res.character).some((i) => i.code === "ability-stage" && i.level === "warning"));
 });
 
 test("childhood: an ability above the age-25 max (5) is allowed but flagged as a warning", () => {
   const ch = setNativeLanguage(freshMarcus(), "German").character;
-  const res = addAbility(ch, { name: "Awareness", type: "General", restricted: false }, 6, "childhood", undefined);
+  const res = addAbility(ch, { name: "Awareness", type: "General", restricted: false }, abilityXp(6), "childhood", undefined);
   assert.equal(res.ok, true);
   assert.ok(validate(res.character).some((i) => i.code === "age-cap" && i.level === "warning"));
 });
 
 test("later-life: General ability fills the years×15 pool; Academic is allowed but flagged", () => {
   let ch = freshMarcus();
-  ch = addAbility(ch, { name: "Charm", type: "General", restricted: false }, 3, "later-life", undefined).character;
+  ch = addAbility(ch, { name: "Charm", type: "General", restricted: false }, abilityXp(3), "later-life", undefined).character;
   assert.equal(computeBudgets(ch).laterLife.spent, 30);
   assert.equal(computeBudgets(ch).laterLife.cap, 75);
-  const academic = addAbility(ch, { name: "Latin", type: "Academic", restricted: false }, 1, "later-life", undefined);
+  const academic = addAbility(ch, { name: "Latin", type: "Academic", restricted: false }, abilityXp(1), "later-life", undefined);
   assert.equal(academic.ok, true);
   assert.ok(validate(academic.character).some((i) => i.code === "ability-stage" && i.level === "warning"));
 });
@@ -172,7 +172,7 @@ test("later-life: an enabling Virtue (Warrior) permits a Martial ability", () =>
   const w = rules.resolveTrait("Warrior");
   assert.ok(w.ok);
   ch = addTrait(ch, "Virtue", w.trait).character;
-  const res = addAbility(ch, { name: "Single Weapon", type: "Martial", restricted: false }, 1, "later-life", undefined);
+  const res = addAbility(ch, { name: "Single Weapon", type: "Martial", restricted: false }, abilityXp(1), "later-life", undefined);
   assert.equal(res.ok, true);
 });
 
@@ -200,7 +200,7 @@ function fireMage(): Character {
   let ch = freshMarcus(); // free Puissant Ignem
   ch = setCharacteristic(ch, "Int", 3, false).character;
   ch = setNativeLanguage(ch, "German").character;
-  ch = addAbility(ch, { name: "Magic Theory", type: "Arcane", restricted: true }, 3, "apprenticeship", undefined).character;
+  ch = addAbility(ch, { name: "Magic Theory", type: "Arcane", restricted: true }, abilityXp(3), "apprenticeship", undefined).character;
   ch = setArt(ch, "Ignem", 10).character;
   ch = setArt(ch, "Creo", 6).character;
   return ch;
@@ -284,7 +284,7 @@ test("Puissant Magic Theory adds +2 to the Lab Total (was ignored)", () => {
   assert.ok(p.ok && p.trait.canonical === "Puissant Ability" && p.trait.param === "Magic Theory");
   ch.virtues.push({ name: p.trait.canonical, display: p.trait.display, param: p.trait.param, size: p.trait.size, category: p.trait.row.category, points: 0, free: true });
   ch = setCharacteristic(ch, "Int", 3, false).character;
-  ch = addAbility(ch, { name: "Magic Theory", type: "Arcane", restricted: true }, 3, "apprenticeship", undefined).character;
+  ch = addAbility(ch, { name: "Magic Theory", type: "Arcane", restricted: true }, abilityXp(3), "apprenticeship", undefined).character;
   ch = setArt(ch, "Intellego", 5).character;
   ch = setArt(ch, "Vim", 5).character;
   // InVi: Int3 + Vi5 + In5 + (MT3 + Puissant2) + aura3 = 21
@@ -304,7 +304,7 @@ test("Virtue xp grants, manual bonuses, mastery, Merinita warping, soft dupes, d
   const { createMagus } = await import("../src/domain/create.ts");
   const { applyOps } = await import("../src/domain/operations.ts");
   let ch = createMagus({ name: "Fenn", house: "Merinita" }, rules).character;
-  assert.ok(ch.abilities.some((a) => a.name === "Faerie Magic" && a.score === 1), "Merinita grants Faerie Magic 1");
+  assert.equal(abilityScore(ch, "Faerie Magic", deriveModifiers(ch)), 1, "Merinita grants Faerie Magic 1");
   assert.equal(validate(ch).find((i) => i.code === "house-warping")?.level, "info", "starting Warping is a fact, not a problem");
 
   ch = applyOps(ch, [
@@ -336,4 +336,35 @@ test("Virtue xp grants, manual bonuses, mastery, Merinita warping, soft dupes, d
   issues = validate(ch);
   assert.ok(issues.find((i) => i.code === "later-under")?.dismissed, "warnings can be dismissed");
   assert.ok(!issues.find((i) => i.code === "char-under")?.dismissed, "errors ignore dismissal");
+});
+
+test("old-format drafts (a score per Ability row) load with identical scores, through every loader", async () => {
+  const { traitPick } = await import("../src/domain/character.ts");
+  const { loadCharacter } = await import("../src/cli/persist.ts");
+  const { mkdtempSync, writeFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const aff = rules.resolveTrait("Affinity with Ability", "Awareness");
+  assert.ok(aff.ok);
+  const old = {
+    ...newCharacter({ name: "Old", house: "Bonisagus" }),
+    virtues: [traitPick(aff.trait)],
+    abilities: [
+      { name: "Awareness", score: 4, stage: "childhood", type: "General" },
+      { name: "Magic Theory", score: 3, stage: "apprenticeship", type: "Arcane", specialty: "spells" },
+      { name: "Faerie Magic", score: 1, stage: "free", type: "Supernatural" },
+    ],
+  } as unknown as Character;
+  const scores = (ch: Character) => abilityTotals(ch, deriveModifiers(ch)).map((t) => [t.name, t.score, t.specialty]);
+  const want = [["Awareness", 4, undefined], ["Magic Theory", 3, "spells"], ["Faerie Magic", 1, undefined]];
+
+  const loaded = rules.refresh(structuredClone(old));
+  assert.deepEqual(scores(loaded), want);
+  assert.equal(loaded.abilities[0]!.xp, affinityXp(abilityXp(4)), "Affinity-aware: the xp the score really cost");
+  assert.ok(loaded.abilities.every((a) => !("score" in a)));
+  assert.deepEqual(rules.refresh(structuredClone(loaded)), loaded, "idempotent");
+
+  const path = join(mkdtempSync(join(tmpdir(), "chargen-")), "old.json");
+  writeFileSync(path, JSON.stringify(old));
+  assert.deepEqual(scores(loadCharacter(path)), want, "the CLI file loader migrates too");
 });

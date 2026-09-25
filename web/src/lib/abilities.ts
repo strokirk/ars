@@ -3,11 +3,11 @@
 // player still has to name. It mirrors the engine (ability-policy, costs, budgets)
 // rather than second-guessing it, so the picker never offers a pick validate()
 // will turn round and flag.
-import { abilityXp, affinityXp } from "../../../chargen/src/domain/costs.ts";
-import { ageAbilityMax } from "../../../chargen/src/domain/budgets.ts";
+import { abilityScoreFromXp, abilityXp } from "../../../chargen/src/domain/costs.ts";
+import { abilityCost, abilityScore, ageAbilityMax, effectiveXp } from "../../../chargen/src/domain/budgets.ts";
 import { abilityAllowed } from "../../../chargen/src/domain/ability-policy.ts";
 import type { Character } from "../../../chargen/src/domain/character.ts";
-import type { Modifiers } from "../../../chargen/src/domain/modifiers.ts";
+import { deriveModifiers, type Modifiers } from "../../../chargen/src/domain/modifiers.ts";
 import type { Stage } from "../../../chargen/src/domain/glossary.ts";
 import type { AbilityRow, AbilityType } from "../../../chargen/src/data/types.ts";
 import type { RulesData } from "../../../chargen/src/data/rules.ts";
@@ -29,18 +29,30 @@ export const typeLabel = (t: AbilityType): string => t ?? "General";
 // ── xp arithmetic ────────────────────────────────────────────────────────────
 
 /** Total xp tied up in an Ability at `score`, after any Affinity discount. */
-export function abilityCost(name: string, score: number, mods: Modifiers): number {
-  const raw = abilityXp(score);
-  return mods.affinityAbility.has(name) ? affinityXp(raw) : raw;
-}
+export { abilityCost };
+
+const scoreOf = (name: string, xp: number, mods: Modifiers) => abilityScoreFromXp(effectiveXp(name, xp, mods));
 
 /**
- * What the *next* point costs. Ability xp is quadratic (5, 15, 30, 50, 75…), so
- * 4 → 5 costs 25 where 1 → 2 costs 10 — the single most surprising thing about
- * spending a creation budget, and the reason the picker prints it on every row.
+ * Real xp still needed to reach the next point, from `xp` spent across every stage.
+ * Ability xp is quadratic (5, 15, 30, 50, 75…), so 4 → 5 costs 25 where 1 → 2 costs
+ * 10 — the single most surprising thing about spending a creation budget, and the
+ * reason the picker prints it on every row.
  */
-export function xpToNext(name: string, score: number, mods: Modifiers): number {
-  return abilityCost(name, score + 1, mods) - abilityCost(name, score, mods);
+export function xpToNext(name: string, xp: number, mods: Modifiers): number {
+  return abilityCost(name, scoreOf(name, xp, mods) + 1, mods) - xp;
+}
+
+/** Real xp to give back to drop to the last whole point (or the one before, if already on it). */
+export function xpToPrev(name: string, xp: number, mods: Modifiers): number {
+  const score = scoreOf(name, xp, mods);
+  const floor = abilityCost(name, score, mods);
+  return xp - (xp > floor || score === 0 ? floor : abilityCost(name, score - 1, mods));
+}
+
+/** "10/15": the ladder xp an Ability has, over what its next point needs (Affinity included). */
+export function abilityProgress(name: string, xp: number, mods: Modifiers): string {
+  return `${effectiveXp(name, xp, mods)}/${abilityXp(scoreOf(name, xp, mods) + 1)}`;
 }
 
 /** Highest score this Ability may reach at creation. An Affinity buys two more. */
@@ -116,7 +128,7 @@ export function specialtyHints(row: AbilityRow): string[] {
 
 export interface AbilityOption {
   row: AbilityRow;
-  /** Score already taken at the stage being browsed. */
+  /** Set when the stage being browsed already has it: the Ability's combined score. */
   taken?: number;
   /** Other stages that already carry this Ability, labelled. */
   elsewhere?: string[];
@@ -156,6 +168,7 @@ export function abilityOptions(
 ): AbilityOption[] {
   const s = q.search ? norm(q.search) : undefined;
   const recommended = new Set((q.recommended ?? []).map(norm));
+  const mods = deriveModifiers(ch);
   const opts = all
     .filter((row) =>
       (!q.type || typeLabel(row.type) === q.type) &&
@@ -168,7 +181,7 @@ export function abilityOptions(
       const pol = abilityAllowed(ch, row.type, stage);
       return {
         row,
-        taken: here?.score,
+        taken: here ? abilityScore(ch, row.name, mods) : undefined,
         elsewhere: elsewhere.length ? elsewhere : undefined,
         blocked: pol.allowed ? undefined : pol.reason,
         template: abilityTemplate(row.name),

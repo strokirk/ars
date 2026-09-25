@@ -3,7 +3,8 @@
 // Hermetic Magus, and the House's free benefit. Previously this loop was copy-
 // pasted across cmdNew and both test files.
 import { newCharacter, traitPick, type Character, type NewCharacterOpts } from "./character.ts";
-import { applyHouse } from "./houses.ts";
+import { applyHouse, type Note } from "./houses.ts";
+import { abilityScoreFromXp } from "./costs.ts";
 import type { House } from "./glossary.ts";
 import type { RulesData } from "../data/rules.ts";
 
@@ -17,7 +18,7 @@ export interface CreateOpts extends NewCharacterOpts {
 export interface CreateResult {
   character: Character;
   /** Notes about House choices still owed (e.g. Ex Miscellanea's free Virtues). */
-  notes: string[];
+  notes: Note[];
   /** Display labels of the granted off-budget picks. */
   free: string[];
 }
@@ -32,7 +33,7 @@ export function createMagus(opts: CreateOpts, rules: RulesData): CreateResult {
   ch.virtues.push(...app.virtues);
   ch.flaws.push(...app.flaws);
   ch.abilities.push(...app.abilities);
-  const free = [...ch.virtues.filter((v) => v.free).map((v) => v.display), ...app.abilities.map((a) => `${a.name} ${a.score}`)];
+  const free = [...ch.virtues.filter((v) => v.free).map((v) => v.display), ...app.abilities.map((a) => `${a.name} ${abilityScoreFromXp(a.xp)}`)];
   return { character: ch, notes: app.notes, free };
 }
 
@@ -46,8 +47,8 @@ export function createGrog(opts: NewCharacterOpts): CreateResult {
     character: ch,
     free: [],
     notes: [
-      "Grogs: up to 3 points of Minor Flaws balanced by Minor Virtues — no Major V/F, no Story Flaws, no The Gift.",
-      "Take a Social Status (e.g. Covenfolk) and give the grog a score in Loyal (warriors also take Brave).",
+      { message: "Grogs: up to 3 points of Minor Flaws balanced by Minor Virtues — no Major V/F, no Story Flaws, no The Gift." },
+      { message: "Take a Social Status (e.g. Covenfolk) and give the grog a score in Loyal (warriors also take Brave)." },
     ],
   };
 }
@@ -62,8 +63,8 @@ export function createCompanion(opts: NewCharacterOpts): CreateResult {
     character: ch,
     free: [],
     notes: [
-      "Companions: up to 10 points of Flaws balanced by an equal number of points of Virtues.",
-      "Take a Social Status. A Major Personality or Story Flaw helps tell the troupe what stories you want.",
+      { message: "Companions: up to 10 points of Flaws balanced by an equal number of points of Virtues." },
+      { message: "Take a Social Status. A Major Personality or Story Flaw helps tell the troupe what stories you want." },
     ],
   };
 }

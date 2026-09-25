@@ -55,14 +55,16 @@ export function renderStatus(ch: Character, b: Budgets, issues: Issue[], guidanc
   return lines.join("\n");
 }
 
+/** A message plus the CLI command that acts on it (Issue.hint, a House Note's hint) — the web shows the message alone. */
+export const withHint = (m: { message: string; hint?: string }): string => m.message + (m.hint ? ` Use \`${m.hint}\`.` : "");
+
 export function renderIssues(issues: Issue[]): string {
   if (issues.length === 0) return "LEGAL ✓ — no problems found.";
   const errs = issues.filter((i) => i.level === "error");
   const warns = issues.filter((i) => i.level === "warning");
   const lines: string[] = [];
-  const hint = (i: Issue) => (i.hint ? ` Use \`${i.hint}\`.` : "");
-  for (const e of errs) lines.push(`✗ [${e.budget}] ${e.message}${hint(e)}`);
-  for (const w of warns) lines.push(`⚠ [${w.budget}] ${w.message}${hint(w)}`);
+  for (const e of errs) lines.push(`✗ [${e.budget}] ${withHint(e)}`);
+  for (const w of warns) lines.push(`⚠ [${w.budget}] ${withHint(w)}`);
   for (const i of issues.filter((i) => i.level === "info")) lines.push(`· [${i.budget}] ${i.message}`);
   lines.push("");
   lines.push(errs.length === 0 ? "LEGAL ✓ — ready to export." : `ILLEGAL ✗ — ${errs.length} error${errs.length === 1 ? "" : "s"} to fix.`);

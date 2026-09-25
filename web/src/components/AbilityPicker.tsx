@@ -2,12 +2,12 @@ import type { ComponentChildren } from "preact";
 import { useMemo, useRef, useState } from "preact/hooks";
 import { CircleCheck, TriangleAlert } from "lucide-preact";
 import { rules, type Character, type Op } from "../engine.ts";
-import type { BudgetLine } from "../../../chargen/src/domain/budgets.ts";
+import { abilityTotals, type AbilityTotal, type BudgetLine } from "../../../chargen/src/domain/budgets.ts";
 import { deriveModifiers, type Modifiers } from "../../../chargen/src/domain/modifiers.ts";
 import type { AbilityPick } from "../../../chargen/src/domain/character.ts";
 import type { Stage } from "../../../chargen/src/domain/glossary.ts";
 import {
-  ABILITY_TYPES, STAGE_LABEL, abilityCost, abilityMax, abilityOptions, baseAbilityRow, specialtyHints, typeLabel, xpToNext,
+  ABILITY_TYPES, STAGE_LABEL, abilityMax, abilityOptions, abilityProgress, baseAbilityRow, specialtyHints, typeLabel, xpToNext, xpToPrev,
   type AbilityOption, type AbilityTypeFilter,
 } from "../lib/abilities.ts";
 import { FilterBar, type ActiveFilter } from "./ui/FilterBar.tsx";
@@ -48,6 +48,7 @@ export function AbilityPicker({ ch, update, stages }: Props) {
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState<Stage>(stages[0]!.stage);
   const mods = deriveModifiers(ch);
+  const totals = new Map(abilityTotals(ch, mods).map((t) => [t.name.toLowerCase(), t]));
   return (
     <>
       {stages.map((s) => {
@@ -65,7 +66,7 @@ export function AbilityPicker({ ch, update, stages }: Props) {
             {s.hint && <p class="note stage-hint">{s.hint}</p>}
             <div class="taken-rows">
               {ch.abilities.filter((a) => a.stage === s.stage).map((a) => (
-                <TakenAbility key={a.name} ch={ch} a={a} mods={mods} update={update} />
+                <TakenAbility key={a.name} ch={ch} a={a} total={totals.get(a.name.toLowerCase())!} mods={mods} update={update} />
               ))}
             </div>
           </section>
@@ -76,15 +77,28 @@ export function AbilityPicker({ ch, update, stages }: Props) {
   );
 }
 
-/** A taken Ability: rename (named ones), specialty tag, score stepper, remove. */
-function TakenAbility({ ch, a, mods, update }: { ch: Character; a: AbilityPick; mods: Modifiers; update: (ops: Op[]) => void }) {
+/**
+ * One stage's spend on an Ability: rename (named ones), specialty tag, remove, and a
+ * stepper showing the *combined* score across stages, whose ± spends or refunds this
+ * stage's xp one point at a time.
+ */
+function TakenAbility({ ch, a, total, mods, update }: {
+  ch: Character; a: AbilityPick; total: AbilityTotal; mods: Modifiers; update: (ops: Op[]) => void;
+}) {
   const [renaming, setRenaming] = useState(false);
   const [editingSpec, setEditingSpec] = useState(false);
   const own = rules.ability(a.name);
   const base = baseAbilityRow(rules, a.name);
   const max = abilityMax(ch, a.name, mods);
-  const set = (fields: Partial<AbilityPick>) =>
-    update([{ op: "ability", name: a.name, score: a.score, stage: a.stage, type: a.type ?? undefined, specialty: a.specialty, ...fields } as Op]);
+  const score = total.score;
+  const specialty = total.specialty;
+  const others = total.rows.filter((r) => r !== a).map((r) => `${r.xp} in ${STAGE_LABEL[r.stage]}`);
+  const set = (fields: { xp?: number; specialty?: string }) =>
+    update([{ op: "ability", name: a.name, xp: a.xp, stage: a.stage, type: a.type ?? undefined, ...fields }]);
+  const step = (next: number) => {
+    const xp = next > score ? a.xp + xpToNext(a.name, total.xp, mods) : a.xp - xpToPrev(a.name, total.xp, mods);
+    update([xp > 0 ? { op: "ability", name: a.name, xp, stage: a.stage, type: a.type ?? undefined } : { op: "remove", kind: "ability", name: a.name, stage: a.stage }]);
+  };
 
   return (
     <div class="char-row">
@@ -102,13 +116,13 @@ function TakenAbility({ ch, a, mods, update }: { ch: Character; a: AbilityPick; 
           <button type="button" class="linkish ab-name" title="Rename" onClick={() => setRenaming(true)}>{a.name}</button>
         )}{" "}
         <span class="spec-anchor">
-          <button type="button" class={`spec-tag ${a.specialty ? "" : "empty"}`} onClick={() => setEditingSpec(!editingSpec)}>
-            {a.specialty ?? "+ specialty"}
+          <button type="button" class={`spec-tag ${specialty ? "" : "empty"}`} onClick={() => setEditingSpec(!editingSpec)}>
+            {specialty ?? "+ specialty"}
           </button>
           {editingSpec && (
             <div class="spec-popover">
               <TextPrompt
-                initial={a.specialty ?? ""} label={`Specialty for ${a.name}`}
+                initial={specialty ?? ""} label={`Specialty for ${a.name}`} allowEmpty
                 placeholder="a narrow application" choices={base ? specialtyHints(base) : []}
                 onSave={(specialty) => { set({ specialty }); setEditingSpec(false); }}
                 onCancel={() => setEditingSpec(false)}
@@ -116,19 +130,22 @@ function TakenAbility({ ch, a, mods, update }: { ch: Character; a: AbilityPick; 
             </div>
           )}
         </span>
-        <small>{typeLabel(a.type)} · {abilityCost(a.name, a.score, mods)} xp{mods.affinityAbility.has(a.name) && " · Affinity"}</small>
+        <small>
+          {typeLabel(a.type)} · {a.xp} xp here{others.length > 0 && ` + ${others.join(", ")}`}
+          {mods.affinityAbility.has(a.name) && " · Affinity"}
+        </small>
       </span>
-      <span class="cost">+1 = {xpToNext(a.name, a.score, mods)} xp</span>
+      <span class="cost" title="xp toward the next point">{abilityProgress(a.name, total.xp, mods)} · +1 = {xpToNext(a.name, total.xp, mods)} xp</span>
       <span class="score">
-        {a.score > max && (
+        {score > max && (
           <span class="badge-tag age-cap" style="--row:var(--warn)" title={`At age ${ch.age} the usual maximum is ${max}`}>
             <TriangleAlert size={12} aria-hidden="true" /> over cap {max}
           </span>
         )}
         <Stepper
-          value={a.score} min={1} label={a.name}
-          maxHint={a.score >= max ? `Past ${max} is beyond the usual cap at age ${ch.age}` : undefined}
-          onChange={(score) => set({ score })}
+          value={score} min={0} label={a.name}
+          maxHint={score >= max ? `Past ${max} is beyond the usual cap at age ${ch.age}` : undefined}
+          onChange={step}
         />
       </span>
       <Button size="small" appearance="plain" onClick={() => update([{ op: "remove", kind: "ability", name: a.name, stage: a.stage }])}>remove</Button>
@@ -157,7 +174,10 @@ function AbilityCatalog({ ch, update, stages, stage, setStage, open, setOpen }: 
   );
 
   const addAs = (name: string, o: AbilityOption) => {
-    update([{ op: "ability", name, score: 1, stage: spec.stage, type: o.row.type ?? undefined }]);
+    // The first point, or the next one when another stage already paid in.
+    const mods = deriveModifiers(ch);
+    const had = abilityTotals(ch, mods).find((t) => t.name.toLowerCase() === name.toLowerCase())?.xp ?? 0;
+    update([{ op: "ability", name, xp: xpToNext(name, had, mods), stage: spec.stage, type: o.row.type ?? undefined }]);
     setNaming(null);
     focusSearch();
   };

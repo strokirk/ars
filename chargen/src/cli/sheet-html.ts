@@ -7,9 +7,9 @@
 //    carry an icon (the same Lucide glyphs as the web app's FormIcon — copied in as
 //    inline SVG since this module ships no dependencies and no external assets).
 //  - Virtues/Flaws are ordered Major→Minor then A–Z (hardcoded, no control).
-import { type Character, type SpellPick, type TraitPick, type AbilityPick, charKind } from "../domain/character.ts";
-import { type Budgets, computeBudgets } from "../domain/budgets.ts";
-import { confidenceScore } from "../domain/modifiers.ts";
+import { type Character, type SpellPick, type TraitPick, charKind } from "../domain/character.ts";
+import { type AbilityTotal, type Budgets, abilityTotals, computeBudgets } from "../domain/budgets.ts";
+import { confidenceScore, deriveModifiers } from "../domain/modifiers.ts";
 import { houseWarping } from "../domain/houses.ts";
 import {
   type Art, type Form, CHARACTERISTICS, CHARACTERISTIC_NAMES, FORMS, TECHNIQUES, ART_ABBR, isForm,
@@ -104,7 +104,7 @@ function spellItem(s: SpellPick, data: SheetData): string {
     : `<div class="row flat" ${attrs}>${head}</div>`;
 }
 
-function abilityItem(a: AbilityPick): string {
+function abilityItem(a: AbilityTotal): string {
   return `<li data-name="${esc(a.name.toLowerCase())}" data-score="${a.score}">${esc(a.name)} ${a.score}${a.specialty ? ` <span class="tag">(${esc(a.specialty)})</span>` : ""}</li>`;
 }
 
@@ -184,8 +184,10 @@ export function renderSheetHtml(ch: Character, data: SheetData = {}, b: Budgets 
   const bySize = (a: TraitPick, c: TraitPick) => (SIZE_RANK[a.size]! - SIZE_RANK[c.size]!) || a.display.localeCompare(c.display);
   const vir = ch.virtues.filter((v) => !v.free).sort(bySize);
   const flw = ch.flaws.filter((f) => !f.free).sort(bySize);
-  const abil = ch.abilities.filter((a) => a.stage !== "free").sort((a, c) => a.name.localeCompare(c.name));
-  const freeAb = ch.abilities.filter((a) => a.stage === "free");
+  const totals = abilityTotals(ch, deriveModifiers(ch));
+  const granted = (t: AbilityTotal) => t.rows.every((r) => r.stage === "free");
+  const abil = totals.filter((t) => !granted(t)).sort((a, c) => a.name.localeCompare(c.name));
+  const freeAb = totals.filter(granted);
   const spells = [...ch.spells].sort((a, c) => a.level - c.level);
 
   const stats = CHARACTERISTICS.map((c) =>

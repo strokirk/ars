@@ -3,7 +3,7 @@
 // come from the derived Modifiers.
 import { charKind } from "./character.ts";
 import type { AbilityPick, Character, XpPool } from "./character.ts";
-import { abilityXp, affinityXp, artXp, charCost } from "./costs.ts";
+import { abilityScoreFromXp, abilityXp, affinityXp, artXp, charCost } from "./costs.ts";
 import { type Modifiers, deriveModifiers } from "./modifiers.ts";
 import { ARTS, type Art } from "./glossary.ts";
 
@@ -69,9 +69,47 @@ export interface Budgets {
 export const grantedXp = (mods: Modifiers, pool: XpPool): number =>
   mods.grants.filter((g) => g.pool === pool).reduce((s, g) => s + g.xp, 0);
 
-export function abilityCost(a: AbilityPick, mods: Modifiers): number {
-  const raw = abilityXp(a.score);
-  return mods.affinityAbility.has(a.name) ? affinityXp(raw) : raw;
+/** Real xp that takes an Ability from 0 to `score`, after any Affinity discount. */
+export function abilityCost(name: string, score: number, mods: Modifiers): number {
+  const raw = abilityXp(score);
+  return mods.affinityAbility.has(name) ? affinityXp(raw) : raw;
+}
+
+/** What `xp` real xp counts for on the Ability ladder (an Affinity makes it ×1.5). */
+export function effectiveXp(name: string, xp: number, mods: Modifiers): number {
+  return mods.affinityAbility.has(name) ? Math.floor(xp * 1.5) : xp;
+}
+
+/** One Ability summed across the stages that paid for it. */
+export interface AbilityTotal {
+  name: string;
+  type: AbilityPick["type"];
+  restricted?: boolean;
+  specialty?: string;
+  /** Real xp across every stage row. */
+  xp: number;
+  score: number;
+  rows: AbilityPick[];
+}
+
+/** Each Ability once, with its score from the xp of all its stage rows combined. */
+export function abilityTotals(ch: Pick<Character, "abilities">, mods: Modifiers): AbilityTotal[] {
+  const byName = new Map<string, AbilityTotal>();
+  for (const a of ch.abilities) {
+    const k = a.name.toLowerCase();
+    let t = byName.get(k);
+    if (!t) byName.set(k, (t = { name: a.name, type: a.type, restricted: a.restricted, xp: 0, score: 0, rows: [] }));
+    t.rows.push(a);
+    t.xp += a.xp;
+    t.specialty ??= a.specialty || undefined;
+  }
+  for (const t of byName.values()) t.score = abilityScoreFromXp(effectiveXp(t.name, t.xp, mods));
+  return [...byName.values()];
+}
+
+/** An Ability's combined score (0 if not taken). */
+export function abilityScore(ch: Pick<Character, "abilities">, name: string, mods: Modifiers): number {
+  return abilityTotals(ch, mods).find((t) => t.name.toLowerCase() === name.toLowerCase())?.score ?? 0;
 }
 
 export function artCost(art: Art, score: number, mods: Modifiers): number {
@@ -106,7 +144,7 @@ export function computeBudgets(ch: Character, mods: Modifiers = deriveModifiers(
 
   // 3-5. xp pools by stage
   const stageXp = (stage: AbilityPick["stage"]) =>
-    ch.abilities.filter((a) => a.stage === stage).reduce((s, a) => s + abilityCost(a, mods), 0);
+    ch.abilities.filter((a) => a.stage === stage).reduce((s, a) => s + a.xp, 0);
   const childhoodSpent = stageXp("childhood");
   const childhoodCap = CHILDHOOD_XP + grantedXp(mods, "childhood");
   const laterLifeSpent = stageXp("later-life");
@@ -129,7 +167,7 @@ export function computeBudgets(ch: Character, mods: Modifiers = deriveModifiers(
   });
 
   const hasAbility = (name: string) =>
-    ch.abilities.some((a) => a.name.toLowerCase() === name.toLowerCase() && a.score >= 1);
+    abilityScore(ch, name, mods) >= 1;
 
   return {
     characteristics: line("characteristics", "Characteristics", charSpent, CHAR_POINTS),
@@ -149,7 +187,7 @@ export function computeBudgets(ch: Character, mods: Modifiers = deriveModifiers(
       minimums: {
         parmaMagica: hasAbility("Parma Magica"),
         magicTheory: hasAbility("Magic Theory"),
-        latin: ch.abilities.some((a) => /latin/i.test(a.name) || /latin/i.test(a.specialty ?? "")),
+        latin: abilityTotals(ch, mods).some((t) => t.score >= 1 && (/latin/i.test(t.name) || /latin/i.test(t.specialty ?? ""))),
       },
     },
     mastery: line("mastery", "Mastery xp", masterySpent - masteryOverflow, masteryCap),

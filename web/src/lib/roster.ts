@@ -32,7 +32,7 @@ export function buildRoster(characters: Character[]): RosterEntry[] {
     });
 }
 
-export const roster: RosterEntry[] = buildRoster(Object.values(modules).map((m) => rules.refreshTraitFlags(m.default)));
+export const roster: RosterEntry[] = buildRoster(Object.values(modules).map((m) => rules.refresh(m.default)));
 
 export function rosterEntry(slug: string): RosterEntry | undefined {
   return roster.find((e) => e.slug === slug);

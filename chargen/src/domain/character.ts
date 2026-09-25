@@ -4,6 +4,8 @@
 import type { Art, Characteristic, Form, House, Stage, Technique } from "./glossary.ts";
 import type { ResolvedTrait } from "../data/rules.ts";
 import type { VirtueFlawRow } from "../data/types.ts";
+import { abilityXp, affinityXp } from "./costs.ts";
+import { deriveModifiers } from "./modifiers.ts";
 
 /** Player-character category. Drives which budgets and V&F limits apply. */
 export type CharacterKind = "grog" | "companion" | "magus";
@@ -31,11 +33,16 @@ export function traitPick(t: ResolvedTrait, free = false): TraitPick {
   };
 }
 
+/**
+ * One stage's spend on an Ability. An Ability taken in several stages has one row
+ * per stage; its score comes from the xp summed across them (abilityTotals() in
+ * budgets.ts), so 5 xp in childhood + 5 in later life is score 1, 10/15 to 2.
+ */
 export interface AbilityPick {
   name: string;
-  score: number;
+  xp: number;          // real xp this stage spent (an Affinity multiplies it when scoring)
   stage: Stage;        // which xp pool paid for it ("free" = granted, off-budget)
-  specialty?: string;
+  specialty?: string;  // one per Ability: the same on every stage's row
   type: "General" | "Academic" | "Arcane" | "Martial" | "Supernatural" | null;
   restricted?: boolean; // marked * in the rules: can't be used untrained
 }
@@ -139,6 +146,24 @@ export function newCharacter(opts: NewCharacterOpts): Character {
     reputation: null,
     laterLifeYears,
   };
+}
+
+/**
+ * Bring a loaded character up to the current shape — the one migration step every
+ * loader runs (via RulesData.refresh). Ability rows used to carry a per-row `score`;
+ * they now carry the xp that score cost (Affinity-aware), which reads back as the
+ * same score. Idempotent.
+ */
+export function migrateCharacter(ch: Character): Character {
+  if (ch.notes === undefined) ch.notes = "";
+  const mods = deriveModifiers(ch);
+  for (const a of ch.abilities as (AbilityPick & { score?: number })[]) {
+    if (a.score === undefined) continue;
+    const raw = abilityXp(a.score);
+    a.xp ??= mods.affinityAbility.has(a.name) ? affinityXp(raw) : raw;
+    delete a.score;
+  }
+  return ch;
 }
 
 /** Resolve a character's kind, defaulting legacy data (no `kind`) to "magus". */

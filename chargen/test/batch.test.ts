@@ -8,7 +8,8 @@ import { createMagus } from "../src/domain/create.ts";
 import { applyOps, type Op } from "../src/domain/operations.ts";
 import { setNotes, setMeta } from "../src/domain/mutations.ts";
 import { validate, isLegal } from "../src/domain/validate.ts";
-import { computeBudgets } from "../src/domain/budgets.ts";
+import { abilityScore, abilityTotals, computeBudgets } from "../src/domain/budgets.ts";
+import { deriveModifiers } from "../src/domain/modifiers.ts";
 import { specToBuild, type BuildSpec } from "../src/cli/spec.ts";
 import { renderSheetHtml } from "../src/cli/sheet-html.ts";
 
@@ -123,14 +124,34 @@ test("renderSheetHtml: includes sections, escapes HTML, renders notes markdown",
   assert.ok(!html.includes("<one>"), "raw tag not leaked");
 });
 
-test("applyOps: rename fixes a named Ability's typo, keeping score, stage and specialty", () => {
+test("applyOps: rename fixes a named Ability's typo in every stage, keeping xp and the one specialty", () => {
   const r = applyOps(fresh(), [
     { op: "ability", name: "Provense Lore", score: 2, stage: "later-life", specialty: "geography" },
-    { op: "ability", name: "Provense Lore", score: 1, stage: "childhood" },
+    { op: "ability", name: "Provense Lore", xp: 5, stage: "childhood" },
     { op: "rename", name: "Provense Lore", to: "Provence Lore", stage: "later-life" },
-    { op: "remove", kind: "ability", name: "Provense Lore", stage: "childhood" },
   ], rules);
   assert.equal(r.results.every((x) => x.ok), true);
   const lore = r.character.abilities.filter((a) => a.name.endsWith("Lore"));
-  assert.deepEqual(lore.map((a) => [a.name, a.score, a.stage, a.specialty]), [["Provence Lore", 2, "later-life", "geography"]]);
+  assert.deepEqual(lore.map((a) => [a.name, a.xp, a.stage, a.specialty]), [
+    ["Provence Lore", 15, "later-life", "geography"],
+    ["Provence Lore", 5, "childhood", "geography"],
+  ]);
+});
+
+test("an Ability's xp from two stages combines into one score; an empty specialty clears it", () => {
+  const r = applyOps(fresh(), [
+    { op: "ability", name: "Athletics", score: 1, stage: "childhood", specialty: "running" },
+    { op: "ability", name: "Athletics", xp: 5, stage: "later-life" },
+  ], rules);
+  const b = computeBudgets(r.character);
+  assert.equal(b.childhood.spent, 5);
+  assert.equal(b.laterLife.spent, 5);
+  const t = abilityTotals(r.character, deriveModifiers(r.character)).find((a) => a.name === "Athletics")!;
+  assert.deepEqual([t.xp, t.score, t.specialty], [10, 1, "running"], "10 xp is score 1, 5/10 toward 2");
+  // Asking for score 2 at later life pays only what childhood didn't: 15 − 5 = 10.
+  const two = applyOps(r.character, [{ op: "ability", name: "Athletics", score: 2, stage: "later-life" }], rules).character;
+  assert.equal(computeBudgets(two).laterLife.spent, 10);
+  assert.equal(abilityScore(two, "Athletics", deriveModifiers(two)), 2);
+  const cleared = applyOps(two, [{ op: "ability", name: "Athletics", xp: 10, stage: "later-life", specialty: "" }], rules).character;
+  assert.ok(cleared.abilities.every((a) => a.specialty === undefined));
 });
