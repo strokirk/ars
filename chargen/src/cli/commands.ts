@@ -207,7 +207,7 @@ export function cmdOptions(ctx: Ctx): number {
     if (describe) {
       const row = ctx.rules.ability(describe);
       if (!row) return fail(ctx, `No Ability named "${describe}".`);
-      out(ctx, `${row.name} (${row.type ?? "—"}${row.restricted ? ", needs enabling Virtue" : ""})${row.specialties ? `\nSpecialties: ${row.specialties}` : ""}\n${row.description}`, { row });
+      out(ctx, `${row.name} (${row.type ?? "—"}${row.restricted ? ", no untrained use" : ""})${row.specialties ? `\nSpecialties: ${row.specialties}` : ""}\n${row.description}`, { row });
       return 0;
     }
     let rows = ctx.rules.filterAbilities({ type: flagStr(ctx.flags, "type"), search: flagStr(ctx.flags, "search") });
@@ -219,7 +219,7 @@ export function cmdOptions(ctx: Ctx): number {
       stageNote = `, legal in ${stage}`;
     }
     const chosen = random !== undefined ? sample(rows, random) : rows;
-    const text = chosen.map((a) => `${(a.type ?? "?").padEnd(12)} ${a.name}${a.restricted ? " *" : ""}`).join("\n") + `\n(${rows.length} rows${random !== undefined ? `, ${chosen.length} shown` : ""}${stageNote}; * = needs an enabling Virtue; --describe <name> for full text)`;
+    const text = chosen.map((a) => `${(a.type ?? "?").padEnd(12)} ${a.name}${a.restricted ? " *" : ""}`).join("\n") + `\n(${rows.length} rows${random !== undefined ? `, ${chosen.length} shown` : ""}${stageNote}; * = no untrained use; --describe <name> for full text)`;
     out(ctx, text, { count: rows.length, rows: chosen });
     return 0;
   }

@@ -6,7 +6,7 @@ import { type Budgets, ageAbilityMax, computeBudgets } from "./budgets.ts";
 import { type Modifiers, deriveModifiers, grantAccepts } from "./modifiers.ts";
 import { abilityCost } from "./budgets.ts";
 import { houseWarping } from "./houses.ts";
-import { abilityAllowed, hasEnablingVirtue } from "./ability-policy.ts";
+import { abilityAllowed } from "./ability-policy.ts";
 import { spellLabTotal } from "./labtotal.ts";
 
 export type IssueLevel = "error" | "warning";
@@ -151,7 +151,6 @@ export function validate(ch: Character, mods: Modifiers = deriveModifiers(ch), b
     if (a.score > cap) warn("age-cap", stageBudget[a.stage] ?? "apprenticeship", `${a.name} ${a.score} exceeds the age-${ch.age} maximum of ${cap}.`);
     const pol = abilityAllowed(ch, a.type, a.stage);
     if (!pol.allowed) warn("ability-stage", stageBudget[a.stage] ?? "apprenticeship", `${a.name} (${a.type}) not allowed in ${a.stage}: ${pol.reason}`);
-    else if (a.restricted && a.stage !== "apprenticeship" && !hasEnablingVirtue(ch, a.type)) warn("ability-restricted", stageBudget[a.stage] ?? "apprenticeship", `${a.name} is marked * (needs an enabling Virtue) — verify you have one.`);
   }
 
   const w = houseWarping(ch);

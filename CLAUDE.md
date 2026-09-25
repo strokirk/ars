@@ -121,8 +121,9 @@ design lines, spells with no Technique/Form) for regressions.
   sections or skipped front-matter.
 - General-level spells have `level = NULL` / `is_general = 1`.
 - A handful of spells legitimately lack a `(design)` line (General/reference spells
-  such as Aegis of the Hearth); 3 abilities lack a `type` (cross-reference stubs).
-  These are expected, not parse failures.
+  such as Aegis of the Hearth). These are expected, not parse failures.
+- An ability's `restricted` flag is the rulebook's `*`: it **can't be used untrained**.
+  It does *not* mean "needs a Virtue" — that gating is by `type` (`ability-policy.ts`).
 
 ## Push straight to main
 

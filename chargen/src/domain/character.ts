@@ -37,7 +37,7 @@ export interface AbilityPick {
   stage: Stage;        // which xp pool paid for it ("free" = granted, off-budget)
   specialty?: string;
   type: "General" | "Academic" | "Arcane" | "Martial" | "Supernatural" | null;
-  restricted?: boolean; // marked * in the rules: needs an enabling Virtue
+  restricted?: boolean; // marked * in the rules: can't be used untrained
 }
 
 export interface SpellPick {

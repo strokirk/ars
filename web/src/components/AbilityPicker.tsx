@@ -248,6 +248,6 @@ function metaOf(o: AbilityOption): string {
   const bits = [o.blocked ?? typeLabel(o.row.type)];
   if (o.taken !== undefined) bits.push(`already here at ${o.taken}`);
   if (o.elsewhere) bits.push(`already in ${o.elsewhere.join(", ")}`);
-  if (!o.blocked && o.row.restricted) bits.push("needs an enabling Virtue");
+  if (!o.blocked && o.row.restricted) bits.push("no untrained use");
   return bits.join(" · ");
 }
