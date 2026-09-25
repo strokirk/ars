@@ -8,6 +8,7 @@
 //   #/downtime[/:who] the season planner, every category, no character needed
 //   #/lab[/:who]      the planner again, Lab category preselected
 //   #/c/:data         shared character (base64 in the hash)
+//   #/dice            the d10 roller
 import { signal } from "@preact/signals";
 
 export const route = signal(parseHash());
@@ -26,7 +27,7 @@ export function navigate(path: string): void {
 }
 
 export interface Match {
-  name: "home" | "new" | "edit" | "sheet" | "roster" | "library" | "downtime" | "share" | "notfound";
+  name: "home" | "new" | "edit" | "sheet" | "roster" | "library" | "downtime" | "dice" | "share" | "notfound";
   param?: string;
   /** downtime only: which category the page opens on — "lab" is `#/lab`'s preset. */
   category?: "all" | "lab";
@@ -42,6 +43,7 @@ export function matchRoute(path: string): Match {
   if (p[0] === "library") return { name: "library", param: p[1] };
   if (p[0] === "downtime") return { name: "downtime", param: p[1], category: "all" };
   if (p[0] === "lab") return { name: "downtime", param: p[1], category: "lab" };
+  if (p[0] === "dice") return { name: "dice" };
   if (p[0] === "c" && p[1]) return { name: "share", param: p.slice(1).join("/") };
   return { name: "notfound" };
 }

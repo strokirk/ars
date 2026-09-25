@@ -817,6 +817,15 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
 .trait-row .tr-desc { font-size: 0.86rem; color: var(--muted); margin: 0.4rem 0 0 1.2rem; white-space: pre-wrap; }
 .trait-row .x { cursor: pointer; border: none; background: transparent; min-height: auto; padding: 0 0.2rem; color: var(--faint); font-size: 1rem; border-radius: 50%; }
 
+.dice-form { display: flex; flex-wrap: wrap; gap: 0 1rem; }
+.dice-form .field { flex: 1 1 8rem; }
+.dice-result { display: flex; gap: 1rem; align-items: center; padding: .6rem .9rem; }
+.dice-result.old { opacity: .6; }
+.dice-total { display: flex; flex-direction: column; align-items: center; min-width: 3.5rem; }
+.dice-total b { font-size: 1.8rem; line-height: 1; }
+.dice-total span { font-size: .78rem; }
+.dice-result.ok .dice-total { color: var(--ok); }
+.dice-result.fail .dice-total, .dice-result.botch .dice-total { color: var(--err); }
 .bonus-list { list-style: none; padding: 0; margin: .3rem 0 .6rem; font-size: .9rem; }
 .bonus-list li { display: flex; gap: .35rem; align-items: baseline; padding: .15rem 0; flex-wrap: wrap; }
 .bonus-list .x { cursor: pointer; border: none; background: transparent; color: var(--faint); min-height: auto; padding: 0 .3rem; }
@@ -825,3 +834,4 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
 .bonus-form input[type="text"] { flex: 1; min-width: 10rem; }
 .bonus-form wa-select { min-width: 11rem; }
 .trait-row .mastery { display: inline-flex; align-items: center; gap: .3rem; color: var(--muted); }
+.dice-form .chips { flex-wrap: nowrap; }

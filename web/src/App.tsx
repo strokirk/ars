@@ -4,6 +4,7 @@ import { Wizard } from "./pages/Wizard.tsx";
 import { SheetView } from "./pages/SheetView.tsx";
 import { Library } from "./pages/Library.tsx";
 import { Downtime } from "./pages/Downtime.tsx";
+import { Dice } from "./pages/Dice.tsx";
 
 function TopBar({ current }: { current: string }) {
   return (
@@ -11,6 +12,7 @@ function TopBar({ current }: { current: string }) {
       <a class="home" href="#/" onClick={() => navigate("/")}>⚜ The Covenant Roster</a>
       <span class="spacer" />
       <a class={`navlink ${current === "downtime" ? "on" : ""}`} href="#/downtime" onClick={() => navigate("/downtime")}>Downtime</a>
+      <a class={`navlink ${current === "dice" ? "on" : ""}`} href="#/dice" onClick={() => navigate("/dice")}>Dice</a>
       <a class={`navlink ${current === "library" ? "on" : ""}`} href="#/library" onClick={() => navigate("/library")}>Library</a>
     </header>
   );
@@ -27,6 +29,7 @@ export function App() {
         {m.name === "edit" && <Wizard draftId={m.param!} />}
         {(m.name === "sheet" || m.name === "roster" || m.name === "share") && <SheetView match={m} />}
         {m.name === "library" && <Library tab={m.param} />}
+        {m.name === "dice" && <Dice />}
         {m.name === "downtime" && <Downtime who={m.param} category={m.category} />}
         {m.name === "notfound" && (
           <div class="panel">
