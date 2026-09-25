@@ -33,3 +33,10 @@ registerIconLibrary("system", {
       `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">${SYSTEM_ICONS[name] ?? ""}</svg>`,
     )}`,
 });
+
+// Focus rings on keyboard focus only. <wa-select>'s ring keys off :focus-within,
+// which a mouse click also triggers, and :focus-visible can't be read through its
+// shadow root — so record the last input modality and let CSS key off that.
+const setInput = (mode: "keyboard" | "pointer") => () => { document.documentElement.dataset.input = mode; };
+addEventListener("keydown", setInput("keyboard"), true);
+addEventListener("pointerdown", setInput("pointer"), true);

@@ -86,13 +86,13 @@ export function FilterBar<S extends string>({
           {lead}
           {sorts && sort !== undefined && onSort && (
             <span class="sort-select" title="Sort">
-              <ArrowUpDown size={13} aria-hidden="true" class="sort-ico" />
               <Select
                 label="Sort"
                 pill
                 value={sort}
                 options={sorts}
                 onChange={(v) => onSort(v as S)}
+                icon={<ArrowUpDown size={13} aria-hidden="true" />}
               />
             </span>
           )}
@@ -102,16 +102,17 @@ export function FilterBar<S extends string>({
             </Button>
           )}
           {children && (
+            // Quiet on purpose: what's filtered is summarised once, by the chips below.
             <Button
-              class={`${open || active.length ? "on" : ""}`}
-              aria-expanded={open}
+              class="quiet"
               size="small"
-              appearance={open || active.length ? "accent" : "outlined"}
+              appearance={open ? "filled-outlined" : "outlined"}
               variant="brand"
+              expanded={open}
               onClick={() => setOpen(!open)}
             >
               <SlidersHorizontal size={13} aria-hidden="true" />{" "}
-              <span class="btn-label">Filters{active.length ? ` (${active.length})` : ""}</span>
+              <span class="btn-label">Filters</span>
             </Button>
           )}
         </SearchField>
@@ -132,9 +133,9 @@ export function FilterBar<S extends string>({
             </Button>
           ))}
           {(active.length > 0 || search) && onClear && (
-            <Button size="small" onClick={onClear}>
+            <button type="button" class="linkish clear-all" onClick={onClear}>
               Clear all
-            </Button>
+            </button>
           )}
         </div>
       </div>

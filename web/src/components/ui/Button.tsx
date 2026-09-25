@@ -26,11 +26,17 @@ export function Button({
   block,
   class: klass = "",
   start,
+  pressed,
+  expanded,
 }: {
   children: ComponentChildren;
   onClick?: () => void;
   /** "accent" fills with the variant colour; "plain" is borderless. */
-  appearance?: "accent" | "filled" | "outlined" | "plain";
+  appearance?: "accent" | "filled" | "filled-outlined" | "outlined" | "plain";
+  /** Toggle state, exposed as aria-pressed. */
+  pressed?: boolean;
+  /** Disclosure state, exposed as aria-expanded. */
+  expanded?: boolean;
   variant?: "neutral" | "brand" | "danger";
   /** A CSS colour (e.g. a Technique's) to recolour this instance instead of `variant`. */
   color?: string;
@@ -58,6 +64,8 @@ export function Button({
       size={size === "small" ? "s" : "m"}
       pill
       disabled={disabled}
+      aria-pressed={pressed}
+      aria-expanded={expanded}
       title={title}
       style={style}
       onClick={onClick}

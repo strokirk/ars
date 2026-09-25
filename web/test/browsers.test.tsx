@@ -116,14 +116,14 @@ describe("SpellBrowser", () => {
     expect(formulaic).toBeGreaterThan(rituals);
   });
 
-  test("the filters stay dismissed until asked for, and count themselves", async () => {
+  test("the filters stay dismissed until asked for, and are summarised once — by the chips", async () => {
     const el = mount(<SpellBrowser />);
     expect(el.querySelector('wa-select[aria-label="Range"]')).toBeNull();
     await openFilters(el);
     const before = count(el);
     await choose(select(el, "Range"), "Touch");
     expect(count(el)).toBeLessThan(before);
-    expect(el.textContent).toContain("Filters (1)");
+    expect(el.textContent).not.toContain("Filters (1)");
     // Dismissing the panel keeps the filter, and says so where it can't be missed.
     await closeFilters(el);
     expect(el.querySelector('wa-select[aria-label="Range"]')).toBeNull();

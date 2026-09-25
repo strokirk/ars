@@ -17,6 +17,7 @@ import { ChipGroup } from "./ui/ChipGroup.tsx";
 import { OptionList, OptionRow } from "./ui/OptionList.tsx";
 import { TraitBadge } from "./ui/TraitBadge.tsx";
 import { Select } from "./ui/Select.tsx";
+import { FilterGroup } from "./ui/FilterGroup.tsx";
 
 const SIZES = ["Minor", "Major"] as const;
 const KINDS = ["Virtue", "Flaw"] as const;
@@ -109,30 +110,31 @@ export function TraitBrowser({
         onClear={clearAll}
         summary={<>{matches.length} {matches.length === 1 && kind ? kind.toLowerCase() : noun}</>}
       >
-        <div class="chips-row">
-        {!kindProp && (
-          <ChipGroup
-            options={KINDS}
-            value={ownKind}
-            onChange={(v) => { setOwnKind(v); setCategory(""); }}
-            allLabel="Both"
-            labelOf={(k) => `${k}s`}
-          />
-        )}
-        <ChipGroup
-          options={SIZES}
-          value={size}
-          onChange={(v) => setSize(v)}
-          allLabel="Any size"
-        />
-          <Select
-            label="Category"
-            pill
-            active={category !== ""}
-            value={category}
-            onChange={setCategory}
-            options={[{ value: "", label: "All categories" }, ...categories.map((c) => ({ value: c, label: c }))]}
-          />
+        <div class="fgroups">
+          {!kindProp && (
+            <FilterGroup label="Type">
+              <ChipGroup
+                options={KINDS}
+                value={ownKind}
+                onChange={(v) => { setOwnKind(v); setCategory(""); }}
+                allLabel="All"
+                labelOf={(k) => `${k}s`}
+              />
+            </FilterGroup>
+          )}
+          <FilterGroup label="Size">
+            <ChipGroup options={SIZES} value={size} onChange={(v) => setSize(v)} allLabel="Any" />
+          </FilterGroup>
+          <FilterGroup label="Category">
+            <Select
+              label="Category"
+              pill
+              active={category !== ""}
+              value={category}
+              onChange={setCategory}
+              options={[{ value: "", label: "All" }, ...categories.map((c) => ({ value: c, label: c }))]}
+            />
+          </FilterGroup>
         </div>
       </FilterBar>
 

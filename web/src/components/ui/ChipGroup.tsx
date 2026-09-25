@@ -25,7 +25,8 @@ export function ChipGroup<T extends string>({
           onClick={() => onChange("")}
           variant="brand"
           size="small"
-          appearance={value === "" ? "accent" : "outlined"}
+          appearance={value === "" ? "filled-outlined" : "outlined"}
+          pressed={value === ""}
         >
           {allLabel}
         </Button>
@@ -34,7 +35,8 @@ export function ChipGroup<T extends string>({
         <Button
           variant="brand"
           size="small"
-          appearance={value === o ? "accent" : "outlined"}
+          appearance={value === o ? "filled-outlined" : "outlined"}
+          pressed={value === o}
           key={o}
           onClick={() => onChange(value === o ? "" : o)}
         >

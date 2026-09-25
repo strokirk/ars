@@ -1,3 +1,4 @@
+import type { ComponentChildren } from "preact";
 import { useLayoutEffect, useRef } from "preact/hooks";
 import type WaSelect from "@awesome.me/webawesome/dist/components/select/select.js";
 
@@ -18,7 +19,7 @@ export interface SelectOption {
  * clear of Web Awesome's browser-only runtime.
  */
 export function Select({
-  value, options, onChange, label, pill = false, active = false, placeholder,
+  value, options, onChange, label, pill = false, active = false, placeholder, icon,
 }: {
   value: string;
   options: readonly SelectOption[];
@@ -30,6 +31,8 @@ export function Select({
   /** Mark the control as currently narrowing something. */
   active?: boolean;
   placeholder?: string;
+  /** Shown inside the control, before the value (e.g. the sort-direction glyph). */
+  icon?: ComponentChildren;
 }) {
   const ref = useRef<WaSelect | null>(null);
   const latest = useRef(onChange);
@@ -70,6 +73,7 @@ export function Select({
       aria-label={label}
       placeholder={placeholder}
     >
+      {icon && <span slot="start" class="select-icon">{icon}</span>}
       {options.map((o) => <wa-option value={o.value} key={o.value}>{o.label}</wa-option>)}
     </wa-select>
   );
