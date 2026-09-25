@@ -102,13 +102,27 @@ export function addAbility(ch: Character, resolved: ResolvedAbility, score: numb
   return finalize(ch, candidate, `+ ${resolved.name} ${score}${specialty ? ` (${specialty})` : ""} [${stage}]`, force);
 }
 
-export function removeAbility(ch: Character, query: string): MutationResult {
+export function removeAbility(ch: Character, query: string, stage?: Stage): MutationResult {
   const candidate = clone(ch);
   const q = query.toLowerCase();
-  const idx = candidate.abilities.findIndex((a) => a.name.toLowerCase() === q && a.stage !== "free");
+  const idx = candidate.abilities.findIndex((a) => a.name.toLowerCase() === q && a.stage !== "free" && (!stage || a.stage === stage));
   if (idx === -1) return { ok: false, character: ch, rejected: `No (non-granted) Ability matching "${query}" to remove.`, issues: validate(ch) };
   const [removed] = candidate.abilities.splice(idx, 1);
   return { ok: true, character: candidate, applied: `− ${removed!.name} ${removed!.score}`, issues: validate(candidate) };
+}
+
+/** Rename one stage's copy of an Ability ("Provense Lore" → "Provence Lore"), keeping score, type and specialty. */
+export function renameAbility(ch: Character, from: string, to: string, stage: Stage): MutationResult {
+  const name = to.trim();
+  const candidate = clone(ch);
+  const row = candidate.abilities.find((a) => a.name.toLowerCase() === from.toLowerCase() && a.stage === stage);
+  if (!row) return reject(ch, `No Ability "${from}" in ${stage} to rename.`);
+  if (!name) return reject(ch, "An Ability needs a name.");
+  if (candidate.abilities.some((a) => a !== row && a.stage === stage && a.name.toLowerCase() === name.toLowerCase())) {
+    return reject(ch, `${name} is already taken in ${stage}.`);
+  }
+  row.name = name;
+  return { ok: true, character: candidate, applied: `${from} → ${name} [${stage}]`, issues: validate(candidate) };
 }
 
 export function setArt(ch: Character, art: Art, score: number, force = false): MutationResult {

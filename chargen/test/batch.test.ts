@@ -122,3 +122,15 @@ test("renderSheetHtml: includes sections, escapes HTML, renders notes markdown",
   assert.ok(html.includes("&lt;one&gt;"), "angle brackets escaped");
   assert.ok(!html.includes("<one>"), "raw tag not leaked");
 });
+
+test("applyOps: rename fixes a named Ability's typo, keeping score, stage and specialty", () => {
+  const r = applyOps(fresh(), [
+    { op: "ability", name: "Provense Lore", score: 2, stage: "later-life", specialty: "geography" },
+    { op: "ability", name: "Provense Lore", score: 1, stage: "childhood" },
+    { op: "rename", name: "Provense Lore", to: "Provence Lore", stage: "later-life" },
+    { op: "remove", kind: "ability", name: "Provense Lore", stage: "childhood" },
+  ], rules);
+  assert.equal(r.results.every((x) => x.ok), true);
+  const lore = r.character.abilities.filter((a) => a.name.endsWith("Lore"));
+  assert.deepEqual(lore.map((a) => [a.name, a.score, a.stage, a.specialty]), [["Provence Lore", 2, "later-life", "geography"]]);
+});

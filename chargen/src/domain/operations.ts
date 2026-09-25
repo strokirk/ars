@@ -15,7 +15,7 @@ import type { RulesData } from "../data/rules.ts";
 import { type Issue, VIOLATION_CODES, validate } from "./validate.ts";
 import {
   addAbility, addFreeTrait, addPersonality, addSpell, addTrait,
-  removeAbility, removeSpell, removeTrait, setArt, setArts, setCharacteristic, setCharacteristics,
+  removeAbility, removeSpell, removeTrait, renameAbility, setArt, setArts, setCharacteristic, setCharacteristics,
   setMastery, setMeta, setNativeLanguage, setNotes, type MetaFields, type MutationResult,
 } from "./mutations.ts";
 import { XP_STAGES, isArt, isCharacteristic } from "./glossary.ts";
@@ -36,11 +36,12 @@ export type Op =
   | { op: "native-language"; value: string }
   | { op: "notes"; value: string; mode?: "set" | "append" }
   | { op: "meta"; fields: MetaFields }
-  | { op: "remove"; kind: "virtue" | "flaw" | "ability" | "spell"; name: string };
+  | { op: "remove"; kind: "virtue" | "flaw" | "ability" | "spell"; name: string; stage?: string }
+  | { op: "rename"; name: string; to: string; stage: string };
 
 export const OP_KINDS = [
   "chars", "char", "virtue", "flaw", "ability", "arts", "art",
-  "spell", "mastery", "personality", "native-language", "notes", "meta", "remove",
+  "spell", "mastery", "personality", "native-language", "notes", "meta", "remove", "rename",
 ] as const;
 
 export interface OpResult {
@@ -109,8 +110,10 @@ export function applyOp(ch: Character, op: Op, rules: RulesData, force = false):
       return setMeta(ch, op.fields, force);
     case "remove":
       if (op.kind === "virtue" || op.kind === "flaw") return removeTrait(ch, op.kind === "virtue" ? "Virtue" : "Flaw", op.name);
-      if (op.kind === "ability") return removeAbility(ch, op.name);
+      if (op.kind === "ability") return removeAbility(ch, op.name, op.stage as never);
       return removeSpell(ch, op.name);
+    case "rename":
+      return renameAbility(ch, op.name, op.to, op.stage as never);
   }
 }
 
@@ -159,5 +162,6 @@ export function opSummary(op: Op): string {
     case "notes": return `notes (${op.mode ?? "set"})`;
     case "meta": return `meta ${Object.keys(op.fields).join(", ")}`;
     case "remove": return `remove ${op.kind} ${op.name}`;
+    case "rename": return `rename ${op.name} → ${op.to} [${op.stage}]`;
   }
 }
