@@ -70,7 +70,7 @@ All Abilities (from `md/05-abilities/05-ability-list.md`).
 |---|---|
 | `name` | |
 | `type` | `General`, `Academic`, `Arcane`, `Martial`, `Supernatural` (NULL for 3 cross-reference stubs) |
-| `restricted` | 1 if it needs a Virtue to take (marked `*` in source) |
+| `restricted` | 1 if it can't be used untrained (marked `*` in source) |
 | `specialties` | comma-separated examples |
 | `description`, `source_file`, `source_line` | |
 

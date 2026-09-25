@@ -76,7 +76,7 @@ CREATE TABLE abilities (
   id           INTEGER PRIMARY KEY,
   name         TEXT,
   type         TEXT,           -- General, Academic, Arcane, Martial, Supernatural (NULL if unstated)
-  restricted   INTEGER,        -- 0/1: needs a Virtue to take (marked '*' in source)
+  restricted   INTEGER,        -- 0/1: can't be used untrained (marked '*' in source)
   specialties  TEXT,
   description  TEXT,
   source_file  TEXT,

@@ -217,10 +217,10 @@
   },
   {
     "name": "Embitterment",
-    "type": null,
+    "type": "Supernatural",
     "restricted": false,
     "specialties": null,
-    "description": "*: You can cause one person to hate another. This Ability is described in the Hermetic Magic chapter, page 245.",
+    "description": "*: You can cause one person to hate another. This Ability is described in the Hermetic Magic chapter, page 245. (Supernatural)",
     "source_file": "05-ability-list.md",
     "source_line": 213
   },
@@ -613,10 +613,10 @@
   },
   {
     "name": "Summon Animals",
-    "type": null,
+    "type": "Supernatural",
     "restricted": true,
     "specialties": null,
-    "description": "You can summon animals. This Ability is described in the Hermetic Magic chapter, on page 243.",
+    "description": "You can summon animals. This Ability is described in the Hermetic Magic chapter, on page 243. (Supernatural)",
     "source_file": "05-ability-list.md",
     "source_line": 493
   },
@@ -658,10 +658,10 @@
   },
   {
     "name": "Whistle Up The Wind",
-    "type": null,
+    "type": "Supernatural",
     "restricted": true,
     "specialties": null,
-    "description": "You can create wind by whistling. This Ability is described in the Hermetic Magic chapter, on page 246.",
+    "description": "You can create wind by whistling. This Ability is described in the Hermetic Magic chapter, on page 246. (Supernatural)",
     "source_file": "05-ability-list.md",
     "source_line": 516
   },

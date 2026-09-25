@@ -210,7 +210,7 @@ _Specialties:_ angels, saints, Divine creatures. (Arcane)
 **Dowsing\*:** You have the ability to find things nearby through the use of a dowsing rod (usually a forked stick) and your own intuitive sense. You concentrate on the thing to be found, hold your dowsing rod out in front of you, and follow its subtle motions to the target. If you're looking for something specific, you must have an appropriate sympathetic connection to the thing sought (such as bottled water from a stream when searching for running water). Before you roll, designate the area in which you are searching — if the item sought is not present in that area, you automatically fail. The time required to search depends on the size of the area, and must be invested whether you succeed or not. It takes about one Diameter (two minutes, or twenty combat rounds) to search for something within 25 paces, and doubling the distance quadruples the time. To find something common, like water, within 25 paces requires a Perception + Dowsing of 9+. Increased distances or dowsing for less common things increases the target number, so that, for example, finding gold within 100 paces would have an Ease Factor of 15.\
 _Specialties:_ searching for a particular kind of thing (water, gold, etc.), searching in a particular kind of place. (Supernatural)
 
-**Embitterment\***: You can cause one person to hate another. This Ability is described in the [Hermetic Magic chapter, page 245](/page/Ars_Magica_Definitive_Edition,_Chapter_Seven:_Hermetic_Magic#Embitterment "Ars Magica Definitive Edition, Chapter Seven: Hermetic Magic").
+**Embitterment\***: You can cause one person to hate another. This Ability is described in the [Hermetic Magic chapter, page 245](/page/Ars_Magica_Definitive_Edition,_Chapter_Seven:_Hermetic_Magic#Embitterment "Ars Magica Definitive Edition, Chapter Seven: Hermetic Magic"). (Supernatural)
 
 **Enchanting (Ability)\*:** When you set your mind to it, you can influence others with a particular performance ability. For a specific effect, you must use words that people can understand. You can calm the grieving with tunes alone, but you need lyrics to convince peasants to rise up against the local lord. General effects work on animals, but specific effects only work on creatures that can understand words. When you use Enchanting Ability, roll a die (stress or simple, depending on the situation) and add Communication and Enchanting Ability. An Ease Factor of 9 will calm the upset, 12 will win someone's love, 15 will incite a riot, and a 24 might win back a soul from the Prince of Darkness. If you botch, you inspire an unwanted emotion.
 
@@ -490,7 +490,7 @@ _Specialties:_ any one weapon or shield, which covers using that weapon with any
 **Stealth:** Sneaking about without being seen or heard, also hiding in one place. This includes following people without their noticing, which is rolled against the other person's Perception.\
 _Specialties:_ hide, sneak, shadowing, urban areas, natural areas. (General)
 
-**Summon Animals\*:** You can summon animals. This Ability is described in the [Hermetic Magic chapter, on page 243](/page/Ars_Magica_Definitive_Edition,_Chapter_Seven:_Hermetic_Magic#Summon_Animals "Ars Magica Definitive Edition, Chapter Seven: Hermetic Magic").
+**Summon Animals\*:** You can summon animals. This Ability is described in the [Hermetic Magic chapter, on page 243](/page/Ars_Magica_Definitive_Edition,_Chapter_Seven:_Hermetic_Magic#Summon_Animals "Ars Magica Definitive Edition, Chapter Seven: Hermetic Magic"). (Supernatural)
 
 **Survival:** Finding food, water, shelter, a direct route, and relative safety in the wilderness (a very dangerous place in Mythic Europe). This Ability covers such mundane tasks as building a fire and cooking food without implements.\
 _Specialties:_ specific locales. (General)
@@ -513,7 +513,7 @@ _Specialties:_ the Torah, creation, history, prophecies (Academic)
 **Thrown Weapon:** Fighting at range using weapons which are thrown.\
 _Specialties:_ any one weapon. (Martial)
 
-**Whistle Up The Wind\*:** You can create wind by whistling. This Ability is described in the [Hermetic Magic chapter, on page 246](/page/Ars_Magica_Definitive_Edition,_Chapter_Seven:_Hermetic_Magic#Whistle_Up_The_Wind "Ars Magica Definitive Edition, Chapter Seven: Hermetic Magic").
+**Whistle Up The Wind\*:** You can create wind by whistling. This Ability is described in the [Hermetic Magic chapter, on page 246](/page/Ars_Magica_Definitive_Edition,_Chapter_Seven:_Hermetic_Magic#Whistle_Up_The_Wind "Ars Magica Definitive Edition, Chapter Seven: Hermetic Magic"). (Supernatural)
 
 **Wilderness Sense\*:** You are mystically attuned to the ways of the wilderness. A Perception + Wilderness Sense roll against an Ease Factor of 9 lets you determine the direction of north, the upcoming weather, or the presence of natural hazards or resources. One roll will only reveal one piece of information.\
 _Specialties:_ direction, weather, hazards, resources. (Supernatural)
