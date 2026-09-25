@@ -9,13 +9,16 @@ import { houseWarping } from "./houses.ts";
 import { abilityAllowed } from "./ability-policy.ts";
 import { spellLabTotal } from "./labtotal.ts";
 
-export type IssueLevel = "error" | "warning";
+/** "info" is a fact about the character (starting Warping), not a problem — never counted. */
+export type IssueLevel = "error" | "warning" | "info";
 export interface Issue {
   level: IssueLevel;
   code: string;
   budget: string;
   message: string;
-  /** The player reviewed and accepted it (Character.dismissed) — shown, but no longer counted. */
+  /** A CLI command that fixes it — the CLI appends it; the web ignores it. */
+  hint?: string;
+  /** The player reviewed and accepted it (Character.dismissed) — shown, but no longer counted. Warnings only. */
   dismissed?: boolean;
 }
 
@@ -118,7 +121,7 @@ export function validate(ch: Character, mods: Modifiers = deriveModifiers(ch), b
   }
 
   // 3. Childhood.
-  if (!budgets.childhood.nativeLanguageSet) err("native-language", "childhood", `Native Language not set (mandatory, score ${5} for 75 xp). Use \`set native-language <lang>\`.`);
+  if (!budgets.childhood.nativeLanguageSet) issues.push({ level: "error", code: "native-language", budget: "childhood", message: `Native Language not set (mandatory, score 5 for 75 xp).`, hint: "set native-language <lang>" });
   if (budgets.childhood.over) warn("childhood-over", "childhood", `Childhood xp overspent: ${budgets.childhood.spent}/${budgets.childhood.cap}.`);
   else if (budgets.childhood.spent < budgets.childhood.cap) warn("childhood-under", "childhood", `Childhood xp unused: ${budgets.childhood.spent}/${budgets.childhood.cap}.`);
 
@@ -154,10 +157,11 @@ export function validate(ch: Character, mods: Modifiers = deriveModifiers(ch), b
   }
 
   const w = houseWarping(ch);
-  if (w) warn("house-warping", "virtues-flaws", `Warping Score starts at ${w.points} point${w.points === 1 ? "" : "s"}: ${w.reason}.`);
+  if (w) issues.push({ level: "info", code: "house-warping", budget: "virtues-flaws", message: `Warping Score starts at ${w.points} point${w.points === 1 ? "" : "s"}: ${w.reason}.` });
 
   const dismissed = new Set(ch.dismissed ?? []);
-  for (const i of issues) if (dismissed.has(i.code)) i.dismissed = true;
+  // Errors are rules facts, not opinions — only warnings can be accepted.
+  for (const i of issues) if (i.level === "warning" && dismissed.has(i.code)) i.dismissed = true;
   return issues;
 }
 

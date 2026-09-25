@@ -349,6 +349,9 @@ export function spellMeta(
     );
   if (s.is_ritual) parts.push("ritual");
   if (s.damage !== null) parts.push(`+${s.damage} damage`);
-  if (labTotalOf) parts.push(`Lab Total ${labTotalOf(s)}`);
+  if (labTotalOf) {
+    const lt = labTotalOf(s);
+    parts.push(`Lab Total ${lt}${(s.level ?? 0) > lt ? " ⚠" : ""}`);
+  }
   return parts.filter(Boolean).join(" · ");
 }

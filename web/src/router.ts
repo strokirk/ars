@@ -1,7 +1,7 @@
 // Tiny hash router backed by a signal. Routes:
 //   #/                home (roster + create + drafts)
 //   #/new/:kind       wizard for a fresh grog | companion | magus
-//   #/edit/:id        wizard resuming a saved draft
+//   #/edit/:id[/:step] wizard resuming a saved draft, optionally at a step (e.g. abilities)
 //   #/sheet/:id       finished-sheet view of a draft
 //   #/roster/:slug    sheet of a committed covenant member
 //   #/library[/:tab]  reference browser (spells | virtues), no character needed
@@ -29,6 +29,8 @@ export function navigate(path: string): void {
 export interface Match {
   name: "home" | "new" | "edit" | "sheet" | "roster" | "library" | "downtime" | "dice" | "share" | "notfound";
   param?: string;
+  /** edit only: the wizard step key to open at. */
+  step?: string;
   /** downtime only: which category the page opens on — "lab" is `#/lab`'s preset. */
   category?: "all" | "lab";
 }
@@ -37,7 +39,7 @@ export function matchRoute(path: string): Match {
   const p = path.split("/").filter(Boolean); // ["new","grog"]
   if (p.length === 0) return { name: "home" };
   if (p[0] === "new" && p[1]) return { name: "new", param: p[1] };
-  if (p[0] === "edit" && p[1]) return { name: "edit", param: p[1] };
+  if (p[0] === "edit" && p[1]) return { name: "edit", param: p[1], step: p[2] };
   if (p[0] === "sheet" && p[1]) return { name: "sheet", param: p[1] };
   if (p[0] === "roster" && p[1]) return { name: "roster", param: p[1] };
   if (p[0] === "library") return { name: "library", param: p[1] };

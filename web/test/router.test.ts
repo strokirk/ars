@@ -7,6 +7,7 @@ describe("matchRoute", () => {
     expect(matchRoute("/")).toEqual({ name: "home" });
     expect(matchRoute("/new/magus")).toEqual({ name: "new", param: "magus" });
     expect(matchRoute("/edit/abc123")).toEqual({ name: "edit", param: "abc123" });
+    expect(matchRoute("/edit/abc123/abilities")).toEqual({ name: "edit", param: "abc123", step: "abilities" });
     expect(matchRoute("/sheet/abc123")).toEqual({ name: "sheet", param: "abc123" });
     expect(matchRoute("/roster/corvus-of-tytalus")).toEqual({ name: "roster", param: "corvus-of-tytalus" });
   });

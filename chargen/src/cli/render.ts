@@ -60,8 +60,10 @@ export function renderIssues(issues: Issue[]): string {
   const errs = issues.filter((i) => i.level === "error");
   const warns = issues.filter((i) => i.level === "warning");
   const lines: string[] = [];
-  for (const e of errs) lines.push(`✗ [${e.budget}] ${e.message}`);
-  for (const w of warns) lines.push(`⚠ [${w.budget}] ${w.message}`);
+  const hint = (i: Issue) => (i.hint ? ` Use \`${i.hint}\`.` : "");
+  for (const e of errs) lines.push(`✗ [${e.budget}] ${e.message}${hint(e)}`);
+  for (const w of warns) lines.push(`⚠ [${w.budget}] ${w.message}${hint(w)}`);
+  for (const i of issues.filter((i) => i.level === "info")) lines.push(`· [${i.budget}] ${i.message}`);
   lines.push("");
   lines.push(errs.length === 0 ? "LEGAL ✓ — ready to export." : `ILLEGAL ✗ — ${errs.length} error${errs.length === 1 ? "" : "s"} to fix.`);
   return lines.join("\n");

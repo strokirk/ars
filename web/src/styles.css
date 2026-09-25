@@ -260,8 +260,12 @@ input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; appe
 .issue.error { background: #f7e7e2; color: #722; }
 .issue.warning { background: #f6efda; color: #6a5512; }
 .issue .ico { flex: 0 0 auto; }
-.issue .dismiss { margin-left: auto; flex: 0 0 auto; font-size: .8rem; }
+.issue-acts { margin-left: auto; flex: 0 0 auto; display: flex; gap: .6rem; font-size: .8rem; }
 .note.dismissed { margin-top: .4rem; }
+.note.dismissed summary { cursor: pointer; }
+.note.fact { margin: .2rem 0; }
+.panel > .issues:not(:last-child) { margin-bottom: .8rem; }
+.step-warnings { margin-bottom: 1rem; font-size: .88rem; color: var(--warn); }
 
 /* ── pickers ────────────────────────────────────────────── */
 .toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.8rem; }

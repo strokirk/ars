@@ -305,7 +305,7 @@ test("Virtue xp grants, manual bonuses, mastery, Merinita warping, soft dupes, d
   const { applyOps } = await import("../src/domain/operations.ts");
   let ch = createMagus({ name: "Fenn", house: "Merinita" }, rules).character;
   assert.ok(ch.abilities.some((a) => a.name === "Faerie Magic" && a.score === 1), "Merinita grants Faerie Magic 1");
-  assert.ok(validate(ch).some((i) => i.code === "house-warping"));
+  assert.equal(validate(ch).find((i) => i.code === "house-warping")?.level, "info", "starting Warping is a fact, not a problem");
 
   ch = applyOps(ch, [
     { op: "virtue", name: "Warrior" },
@@ -332,7 +332,8 @@ test("Virtue xp grants, manual bonuses, mastery, Merinita warping, soft dupes, d
   ch = applyOps(ch, [{ op: "mastery", name: "Pilum of Fire", score: 7 }], rules, { force: true }).character;
   assert.equal(computeBudgets(ch).apprenticeship.spent - computeBudgets({ ...ch, spells: ch.spells.map((s) => ({ ...s, mastery: 0 })) }).apprenticeship.spent, 40, "mastery past its pool spills into apprenticeship xp");
 
-  ch = applyOps(ch, [{ op: "meta", fields: { dismissed: ["char-under"] } }], rules, { force: true }).character;
+  ch = applyOps(ch, [{ op: "meta", fields: { dismissed: ["char-under", "later-under"] } }], rules, { force: true }).character;
   issues = validate(ch);
-  assert.ok(issues.find((i) => i.code === "char-under")?.dismissed);
+  assert.ok(issues.find((i) => i.code === "later-under")?.dismissed, "warnings can be dismissed");
+  assert.ok(!issues.find((i) => i.code === "char-under")?.dismissed, "errors ignore dismissal");
 });

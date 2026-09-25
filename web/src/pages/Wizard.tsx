@@ -14,7 +14,7 @@ import { Collapsible } from "../components/ui/Collapsible.tsx";
 import {
   ConceptStep, CharacteristicsStep, VirtuesStep, AbilitiesStep, PersonalityStep, ArtsSpellsStep, type StepProps,
 } from "../steps.tsx";
-import { stepsFor, metersFor, type StepDef, type StepKey } from "../lib/wizard-steps.ts";
+import { stepsFor, metersFor, stepForIssue, type StepDef, type StepKey } from "../lib/wizard-steps.ts";
 
 /** Step bodies, keyed by the step definitions in lib/wizard-steps.ts. */
 const BODIES: Record<StepKey, (p: StepProps) => JSX.Element> = {
@@ -26,14 +26,14 @@ const BODIES: Record<StepKey, (p: StepProps) => JSX.Element> = {
   personality: PersonalityStep,
 };
 
-export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: string }) {
+export function Wizard({ kindParam, draftId, stepKey }: { kindParam?: string; draftId?: string; stepKey?: string }) {
   const [id] = useState(() => draftId ?? newId());
   const [ch, setCh] = useState<Character>(() => {
     if (draftId) { const d = getDraft(draftId); if (d) return d.character; }
     const kind = (["grog", "companion", "magus"] as const).includes(kindParam as CharacterKind) ? (kindParam as CharacterKind) : "grog";
     return freshCharacter(kind).character;
   });
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(() => Math.max(0, stepsFor(charKind(ch)).findIndex((s) => s.key === stepKey)));
 
   // Started via /new/:kind — persist and switch the URL to a stable /edit/:id.
   useEffect(() => {
@@ -67,7 +67,7 @@ export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: s
   // status icons use. A step with only completeness gaps (still spending xp) never
   // flags; it just isn't "done" yet.
   const stepStatus = (s: StepDef): string => {
-    const live = issues.filter((i) => !i.dismissed);
+    const live = issues.filter((i) => !i.dismissed && i.level !== "info");
     const flagged = live.some((i) => VIOLATION_CODES.has(i.code) && (s.budgets as string[]).includes(i.budget));
     if (flagged) return "flagged";
     if (s.budgets.length && s.budgets.every((bk) => !live.some((i) => i.budget === bk))) return "done";
@@ -76,6 +76,12 @@ export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: s
 
   const Body = BODIES[cur.key];
   const stepIssues = issues.filter((i) => (cur.budgets as string[]).includes(i.budget));
+  const warnings = stepIssues.filter((i) => i.level === "warning");
+  const liveWarnings = warnings.filter((i) => !i.dismissed).length;
+  const goTo = (i: { code: string; budget: string }) => {
+    const n = steps.findIndex((s) => s.key === stepForIssue(steps, i));
+    return n >= 0 && n !== step ? () => { setStep(n); scrollTo(0, 0); } : undefined;
+  };
 
   return (
     <div>
@@ -96,12 +102,13 @@ export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: s
 
       <div class="panel">
         {cur.why && <div class="why">{cur.why}</div>}
-        {Body && <Body ch={ch} update={update} reseed={kind === "magus" ? reseed : undefined} />}
-        {stepIssues.length > 0 && (
-          <Collapsible class="why" open={false} summary={<strong>{stepIssues.length} note{stepIssues.length === 1 ? "" : "s"} on this step{stepIssues.some((i) => i.dismissed) ? ` (${stepIssues.filter((i) => i.dismissed).length} dismissed)` : ""}</strong>}>
-            <Issues issues={issues} budgets={cur.budgets} onDismiss={dismiss} />
+        <Issues issues={stepIssues.filter((i) => i.level !== "warning")} goTo={goTo} />
+        {warnings.length > 0 && (
+          <Collapsible class="step-warnings" open={false} summary={`${liveWarnings} warning${liveWarnings === 1 ? "" : "s"} on this step`}>
+            <Issues issues={warnings} onDismiss={dismiss} goTo={goTo} />
           </Collapsible>
         )}
+        {Body && <Body ch={ch} update={update} reseed={kind === "magus" ? reseed : undefined} />}
       </div>
 
       <div class="navrow">

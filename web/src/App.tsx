@@ -26,7 +26,7 @@ export function App() {
       <main class="wrap">
         {m.name === "home" && <Home />}
         {m.name === "new" && <Wizard kindParam={m.param!} />}
-        {m.name === "edit" && <Wizard draftId={m.param!} />}
+        {m.name === "edit" && <Wizard draftId={m.param!} stepKey={m.step} />}
         {(m.name === "sheet" || m.name === "roster" || m.name === "share") && <SheetView match={m} />}
         {m.name === "library" && <Library tab={m.param} />}
         {m.name === "dice" && <Dice />}

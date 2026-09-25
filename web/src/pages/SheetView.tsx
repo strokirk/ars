@@ -5,7 +5,8 @@ import { Button } from "../components/ui/Button.tsx";
 import { Collapsible } from "../components/ui/Collapsible.tsx";
 import { Issues } from "../components/Issues.tsx";
 import { getDraft, saveDraft, newId, decodeCharacter } from "../store.ts";
-import { rules, issuesOf, isCharacterLegal, type Character } from "../engine.ts";
+import { rules, issuesOf, isCharacterLegal, charKind, type Character, type Issue } from "../engine.ts";
+import { stepsFor, stepForIssue } from "../lib/wizard-steps.ts";
 import { rosterEntry } from "../lib/roster.ts";
 import { renderSheetHtml } from "../../../chargen/src/cli/sheet-html.ts";
 import { renderSheet } from "../../../chargen/src/cli/sheet.ts";
@@ -47,7 +48,13 @@ export function SheetView({ match }: { match: Match }) {
   const [, rerender] = useState(0);
   const html = renderSheetHtml(ch, sheetData);
   const issues = issuesOf(ch);
-  const live = issues.filter((i) => !i.dismissed);
+  const facts = issues.filter((i) => i.level === "info");
+  const problems = issues.filter((i) => i.level !== "info");
+  const live = problems.filter((i) => !i.dismissed);
+  const steps = stepsFor(charKind(ch));
+  const goTo = draftId && !shared
+    ? (i: Issue) => { const k = stepForIssue(steps, i); return k ? () => navigate(`/edit/${draftId}/${k}`) : undefined; }
+    : undefined;
   const legal = isCharacterLegal(ch);
   const dismiss = draftId && !shared
     ? (code: string, on: boolean) => {
@@ -83,17 +90,18 @@ export function SheetView({ match }: { match: Match }) {
         />
       )}
 
-      {issues.length > 0 && (
+      <Issues issues={facts} />
+      {problems.length > 0 && (
         <Collapsible
           class="why"
           open={!legal}
           summary={
             legal
               ? <span style="color:var(--warn);">{live.length ? `⚠ Rules-legal, with ${live.length} note${live.length === 1 ? "" : "s"} worth a look` : "✓ Rules-legal (dismissed notes only)"}</span>
-              : <span style="color:var(--err);">✗ Not yet legal — {live.length} issue{live.length === 1 ? "" : "s"} (open it in the editor to finish)</span>
+              : <span style="color:var(--err);">✗ Not yet legal — {live.length} issue{live.length === 1 ? "" : "s"} (Edit links open the step that fixes each)</span>
           }
         >
-          <Issues issues={issues} onDismiss={dismiss} />
+          <Issues issues={problems} onDismiss={dismiss} goTo={goTo} goLabel="Edit" />
         </Collapsible>
       )}
 

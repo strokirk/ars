@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { stepsFor, metersFor } from "../src/lib/wizard-steps.ts";
+import { stepsFor, metersFor, stepForIssue } from "../src/lib/wizard-steps.ts";
 import { computeBudgets } from "../../chargen/src/domain/budgets.ts";
 import { rules } from "../src/rules.ts";
 import { createGrog, createMagus } from "../../chargen/src/domain/create.ts";
@@ -54,5 +54,14 @@ describe("metersFor", () => {
   test("the magus Arts step meters both xp and spell levels", () => {
     const step = stepsFor("magus").find((s) => s.key === "arts")!;
     expect(metersFor(step, magusBudgets).map((m) => m.label)).toEqual(["Apprenticeship", "Spells"]);
+  });
+});
+
+describe("stepForIssue", () => {
+  test("mandatory Abilities point at Abilities, spell issues at Arts & Spells", () => {
+    const steps = stepsFor("magus");
+    expect(stepForIssue(steps, { code: "min-parma", budget: "apprenticeship" })).toBe("abilities");
+    expect(stepForIssue(steps, { code: "spell-labtotal", budget: "apprenticeship" })).toBe("arts");
+    expect(stepForIssue(stepsFor("grog"), { code: "char-under", budget: "characteristics" })).toBe("characteristics");
   });
 });

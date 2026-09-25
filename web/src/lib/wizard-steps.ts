@@ -57,6 +57,12 @@ export function stepsFor(kind: CharacterKind): StepDef[] {
   return [concept, ...mid, personality];
 }
 
+/** The step that fixes an issue: spell issues live on Arts & Spells, the rest on the first step owning its budget. */
+export function stepForIssue(steps: StepDef[], i: { code: string; budget: string }): StepKey | undefined {
+  if (/^(spell|mastery)-/.test(i.code) && steps.some((s) => s.key === "arts")) return "arts";
+  return steps.find((s) => (s.budgets as string[]).includes(i.budget))?.key;
+}
+
 export function metersFor(step: StepDef, b: Budgets): Meter[] {
   const out: Meter[] = [];
   if (step.budgets.includes("characteristics")) out.push({ ...b.characteristics, label: "Characteristics" });

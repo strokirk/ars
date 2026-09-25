@@ -375,7 +375,7 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
               title={taken ? "Already learned" : reachable ? "" : `Level ${s.level} exceeds your Lab Total of ${lt}`}
               onClick={() => update([{ op: "spell", name: s.name }])}
             >
-              {taken ? "Known" : reachable ? "Learn" : "Learn ⚠"}
+              {taken ? "Known" : "Learn"}
             </Button>
           );
         }}
