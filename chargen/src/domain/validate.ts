@@ -104,11 +104,17 @@ export function validate(ch: Character, mods: Modifiers = deriveModifiers(ch), b
   // pool's cap already includes it, so check the pool actually spent that much on
   // eligible Abilities. ponytail: each grant is checked alone, so two grants sharing
   // eligible Abilities can double-count them.
+  const restricted = new Map<string, typeof mods.grants[number]>();
   for (const g of mods.grants) {
     if (!g.only?.types && !g.only?.names) continue;
     if (g.pool !== "childhood" && g.pool !== "later-life" && g.pool !== "apprenticeship") continue;
+    const k = `${g.source}|${g.pool}`;
+    const prev = restricted.get(k);
+    restricted.set(k, prev ? { ...prev, xp: prev.xp + g.xp } : g); // a Virtue taken twice needs twice the xp
+  }
+  for (const g of restricted.values()) {
     const eligible = ch.abilities.filter((a) => a.stage === g.pool && grantAccepts(g, a)).reduce((s, a) => s + abilityCost(a, mods), 0);
-    if (eligible < g.xp) warn("grant-restricted", g.pool, `${g.source}: its ${g.xp} xp must be spent on ${g.only.label} in ${g.pool} — only ${eligible} xp is.`);
+    if (eligible < g.xp) warn("grant-restricted", g.pool, `${g.source}: its ${g.xp} xp must be spent on ${g.only!.label} in ${g.pool} — only ${eligible} xp is.`);
   }
 
   // 3. Childhood.

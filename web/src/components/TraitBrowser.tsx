@@ -19,6 +19,8 @@ import { TraitBadge, CategoryIcon } from "./ui/TraitBadge.tsx";
 import { Button } from "./ui/Button.tsx";
 
 const SIZES = ["Minor", "Major"] as const;
+const KINDS = ["Virtue", "Flaw"] as const;
+type KindFilter = (typeof KINDS)[number] | "";
 const SORTS: SortOption<TraitSort>[] = [
   { value: "name", label: "Sort: A → Z" },
   { value: "name-desc", label: "Sort: Z → A" },
@@ -34,22 +36,25 @@ const newSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
 
 /**
  * Browsable Virtue & Flaw list. Standalone in the reference library; `filter` lets
- * a caller (the creator) narrow it to what a character may actually take, and
- * `action` adds a per-row button. Pass `kind` to drive the Virtue/Flaw choice from
- * outside (the library's tabs do) — otherwise the browser shows its own switch.
+ * a caller (the creator) narrow it to what a character may actually take, `action`
+ * adds a per-row button and `tag` a note beside the badge. Pass `kind` to drive the
+ * Virtue/Flaw choice from outside (the library's tabs do) — otherwise it's one more
+ * filter group, and both kinds list together until narrowed.
  */
 export function TraitBrowser({
   filter,
   action,
+  tag,
   kind: kindProp,
-  initialKind = "Virtue",
+  initialKind = "",
 }: {
   filter?: (r: VirtueFlawRow) => boolean;
   action?: (r: VirtueFlawRow) => ComponentChildren;
+  tag?: (r: VirtueFlawRow) => ComponentChildren;
   kind?: "Virtue" | "Flaw";
-  initialKind?: "Virtue" | "Flaw";
+  initialKind?: KindFilter;
 }) {
-  const [ownKind, setOwnKind] = useState<"Virtue" | "Flaw">(initialKind);
+  const [ownKind, setOwnKind] = useState<KindFilter>(initialKind);
   const kind = kindProp ?? ownKind;
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -59,7 +64,7 @@ export function TraitBrowser({
 
   const pool = useMemo(
     () =>
-      queryTraits(rules.virtuesFlaws, { kind }).filter(
+      queryTraits(rules.virtuesFlaws, { kind: kind || undefined }).filter(
         (r) => !filter || filter(r),
       ),
     [kind, filter],
@@ -77,64 +82,42 @@ export function TraitBrowser({
     [pool, category, size, search, sort, seed],
   );
   const active: ActiveFilter[] = [
+    !kindProp && ownKind && { label: `${ownKind}s`, clear: () => setOwnKind("") },
     category && { label: category, clear: () => setCategory("") },
     size && { label: size, clear: () => setSize("") },
   ].filter(Boolean) as ActiveFilter[];
 
   const clearAll = () => {
     setSearch("");
+    if (!kindProp) setOwnKind("");
     setCategory("");
     setSize("");
   };
-  const noun = kind.toLowerCase();
+  const noun = kind ? `${kind.toLowerCase()}s` : "virtues & flaws";
 
   return (
     <div class="browser">
       <FilterBar
         search={search}
         onSearch={setSearch}
-        placeholder={`Search ${noun}s by name or effect…`}
+        placeholder={`Search ${noun} by name or effect…`}
         sort={sort}
         sorts={SORTS}
         onSort={setSort}
         onShuffle={sort === "random" ? () => setSeed(newSeed()) : undefined}
         active={active}
         onClear={clearAll}
-        lead={
-          kindProp ? undefined : (
-            <span class="chips kindswitch">
-              <Button
-                size="small"
-                appearance={kind === "Virtue" ? "accent" : "outlined"}
-                color={ACCENT.Virtue}
-                onClick={() => {
-                  setOwnKind("Virtue");
-                  setCategory("");
-                }}
-              >
-                Virtues
-              </Button>
-              <Button
-                size="small"
-                appearance={kind === "Flaw" ? "accent" : "outlined"}
-                color={ACCENT.Flaw}
-                onClick={() => {
-                  setOwnKind("Flaw");
-                  setCategory("");
-                }}
-              >
-                Flaws
-              </Button>
-            </span>
-          )
-        }
-        summary={
-          <>
-            {matches.length} {noun}
-            {matches.length === 1 ? "" : "s"}
-          </>
-        }
+        summary={<>{matches.length} {matches.length === 1 && kind ? kind.toLowerCase() : noun}</>}
       >
+        {!kindProp && (
+          <ChipGroup
+            options={KINDS}
+            value={ownKind}
+            onChange={(v) => { setOwnKind(v); setCategory(""); }}
+            allLabel="Both"
+            labelOf={(k) => `${k}s`}
+          />
+        )}
         <div class="artfilter" role="group" aria-label="Filter by category">
           <Button
             onClick={() => setCategory("")}
@@ -164,14 +147,17 @@ export function TraitBrowser({
         />
       </FilterBar>
 
-      <OptionList empty={`No ${noun}s match these filters.`}>
+      <OptionList empty={`No ${noun} match these filters.`}>
         {matches.map((r) => (
           <OptionRow
             key={r.name}
             title={r.name}
             accent={ACCENT[r.kind as keyof typeof ACCENT]}
             badge={
-              <TraitBadge kind={r.kind} size={r.size} category={r.category} />
+              <>
+                <TraitBadge kind={r.kind} size={r.size} category={r.category} />
+                {tag?.(r)}
+              </>
             }
             meta={
               r.categories.length > 1 ? r.categories.join(" · ") : r.category

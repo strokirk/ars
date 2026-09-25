@@ -21,6 +21,8 @@ import { deriveModifiers } from "../../chargen/src/domain/modifiers.ts";
 import { spellLabTotal } from "../../chargen/src/domain/labtotal.ts";
 import { artXp, affinityXp } from "../../chargen/src/domain/costs.ts";
 import { rules } from "./engine.ts";
+import { BonusXp } from "./components/BonusXp.tsx";
+import { abilityXp } from "../../chargen/src/domain/costs.ts";
 import type { SpellRow } from "../../chargen/src/data/types.ts";
 
 export interface StepProps {
@@ -164,7 +166,7 @@ export function AbilitiesStep({ ch, update }: StepProps) {
       <hr class="soft" />
       <AbilityPicker
         ch={ch} update={update} stage="later-life" budget={b.laterLife}
-        title={`Later life (${ch.laterLifeYears} yrs × ${mods.laterLifeXpPerYear} xp)`}
+        title={`Later life (${ch.laterLifeYears} yrs × ${mods.laterLifeXpPerYear} xp${b.laterLife.cap > ch.laterLifeYears * mods.laterLifeXpPerYear ? " + bonus" : ""})`}
         hint={magus
           ? "The years before apprenticeship — General Abilities only."
           : "Academic, Martial and Supernatural Abilities open up here only if a Virtue enables them."}
@@ -195,9 +197,12 @@ export function AbilitiesStep({ ch, update }: StepProps) {
               </>
             }
             recommended={APPRENTICE_ABILITIES}
+            collapsible
           />
         </>
       )}
+      <hr class="soft" />
+      <BonusXp ch={ch} update={update} pools={magus ? ["childhood", "later-life", "apprenticeship"] : ["childhood", "later-life"]} />
     </div>
   );
 }
@@ -242,6 +247,15 @@ export function PersonalityStep({ ch, update }: StepProps) {
         <Button variant="brand" appearance="accent" onClick={() => { add(trait, value); setTrait(""); }}>Add</Button>
       </div>
       <p class="note">Personality Traits range −3…+3. {kind === "grog" ? "Grogs should have a score in Loyal; warriors in Brave." : "These guide roleplaying; a Personality Flaw is mirrored by a ±3 trait."}</p>
+      <hr class="soft" />
+      <div class="field">
+        <label>Reputation</label>
+        <input type="text" value={ch.reputation ?? ""} placeholder="e.g. Honest Merchant 2 (local)" onInput={(e) => update([{ op: "meta", fields: { reputation: (e.target as HTMLInputElement).value || null } }])} />
+      </div>
+      <div class="field">
+        <label>Notes &amp; Description (Markdown)</label>
+        <textarea rows={6} value={ch.notes} placeholder="Appearance, goals, history, GM notes…" onInput={(e) => update([{ op: "notes", value: (e.target as HTMLTextAreaElement).value }])} />
+      </div>
     </div>
   );
 }
@@ -306,7 +320,7 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
           computed total here as a floor, not the final word — check your Virtues and Flaws by hand too.
         </p>
       </Collapsible>
-      <h3 style="font-size:1rem; margin:1rem 0 .4rem;">Spells (≤120 levels)</h3>
+      <h3 style="font-size:1rem; margin:1rem 0 .4rem;">Spells (≤{budgetsOf(ch).apprenticeship.spells.cap} levels)</h3>
       {ch.spells.length > 0 && (
         <ul class="trait-list">
           {ch.spells.map((s) => (
@@ -315,6 +329,10 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
                 <summary>
                   <ArtBadge technique={s.technique} form={s.form} level={s.level} />
                   <span class="tr-name">{s.name}</span>
+                  <span class="mastery" onClick={(e) => e.preventDefault()} title="Spell Mastery — costs xp like an Ability">
+                    <small>Mastery{s.mastery ? ` · ${abilityXp(s.mastery)} xp` : ""}</small>
+                    <Stepper value={s.mastery ?? 0} min={0} label={`${s.name} Mastery`} onChange={(v) => update([{ op: "mastery", name: s.name, score: v }])} />
+                  </span>
                   <button
                     class="x" title="remove"
                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); update([{ op: "remove", kind: "spell", name: s.name }]); }}
@@ -326,6 +344,7 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
           ))}
         </ul>
       )}
+      <BonusXp ch={ch} update={update} pools={["apprenticeship", "spells", "mastery"]} />
       <SpellBrowser
         labTotalOf={labTotalOf}
         action={(s) => {

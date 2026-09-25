@@ -74,6 +74,7 @@ export function metersFor(step: StepDef, b: Budgets): Meter[] {
   if (step.budgets.includes("apprenticeship")) {
     out.push({ ...b.apprenticeship, label: "Apprenticeship" });
     out.push({ ...b.apprenticeship.spells, label: "Spells" });
+    if (b.mastery.cap > 0 || b.mastery.spent > 0) out.push({ ...b.mastery, label: "Mastery" });
   }
   return out;
 }

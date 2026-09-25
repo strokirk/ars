@@ -239,13 +239,15 @@ describe("SpellBrowser", () => {
 });
 
 describe("TraitBrowser", () => {
-  test("switches between Virtues and Flaws", async () => {
+  test("lists Virtues and Flaws together, and narrows by kind as a filter group", async () => {
     const el = mount(<TraitBrowser />);
-    const virtues = count(el);
+    const both = count(el);
+    expect(el.textContent).toMatch(/\d+ virtues & flaws/);
+    await openFilters(el);
     chip(el, "Flaws").click();
     await flush();
     expect(el.textContent).toMatch(/\d+ flaws/);
-    expect(count(el)).not.toBe(virtues);
+    expect(count(el)).toBeLessThan(both);
   });
 
   test("a size chip narrows the list", async () => {
@@ -283,7 +285,7 @@ describe("TraitBrowser", () => {
   test("honours a caller-supplied eligibility filter", () => {
     const el = mount(<TraitBrowser filter={(r) => r.category === "Hermetic"} />);
     expect(rows(el).length).toBeGreaterThan(0);
-    expect(count(el)).toBeLessThan(100);
+    expect(count(el)).toBeLessThan(200); // of ~620 Virtues & Flaws
   });
 });
 

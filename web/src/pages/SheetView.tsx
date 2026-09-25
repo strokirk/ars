@@ -44,9 +44,20 @@ export function SheetView({ match }: { match: Match }) {
     );
   }
 
+  const [, rerender] = useState(0);
   const html = renderSheetHtml(ch, sheetData);
   const issues = issuesOf(ch);
+  const live = issues.filter((i) => !i.dismissed);
   const legal = isCharacterLegal(ch);
+  const dismiss = draftId && !shared
+    ? (code: string, on: boolean) => {
+        const set = new Set(ch.dismissed ?? []);
+        if (on) set.add(code); else set.delete(code);
+        ch.dismissed = [...set];
+        saveDraft(draftId, ch);
+        rerender((n) => n + 1);
+      }
+    : undefined;
 
   const saveCopy = () => {
     const id = newId();
@@ -78,11 +89,11 @@ export function SheetView({ match }: { match: Match }) {
           open={!legal}
           summary={
             legal
-              ? <span style="color:var(--warn);">⚠ Rules-legal, with {issues.length} note{issues.length === 1 ? "" : "s"} worth a look</span>
-              : <span style="color:var(--err);">✗ Not yet legal — {issues.length} issue{issues.length === 1 ? "" : "s"} (open it in the editor to finish)</span>
+              ? <span style="color:var(--warn);">{live.length ? `⚠ Rules-legal, with ${live.length} note${live.length === 1 ? "" : "s"} worth a look` : "✓ Rules-legal (dismissed notes only)"}</span>
+              : <span style="color:var(--err);">✗ Not yet legal — {live.length} issue{live.length === 1 ? "" : "s"} (open it in the editor to finish)</span>
           }
         >
-          <Issues issues={issues} />
+          <Issues issues={issues} onDismiss={dismiss} />
         </Collapsible>
       )}
 

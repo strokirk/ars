@@ -52,7 +52,7 @@ export function TraitBadge({
   const virtue = kind === "Virtue";
   return (
     <span
-      class={`traitbadge ${virtue ? "virtue" : "flaw"}`}
+      class={`traitbadge ${virtue ? "virtue" : "flaw"} ${size === "Major" ? "major" : size === "Major or Minor" ? "either" : "minor"}`}
       title={`${size} ${kind}${category ? ` · ${category}` : ""}`}
     >
       {virtue ? (

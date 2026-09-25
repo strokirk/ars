@@ -9,6 +9,8 @@ import {
   KIND_LABEL, type Character, type CharacterKind, type Op,
 } from "../engine.ts";
 import { BudgetBar } from "../components/BudgetBar.tsx";
+import { Issues } from "../components/Issues.tsx";
+import { Collapsible } from "../components/ui/Collapsible.tsx";
 import {
   ConceptStep, CharacteristicsStep, VirtuesStep, AbilitiesStep, PersonalityStep, ArtsSpellsStep, type StepProps,
 } from "../steps.tsx";
@@ -47,6 +49,11 @@ export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: s
     });
     setCh(next); saveDraft(id, next);
   };
+  const dismiss = (code: string, on: boolean) => {
+    const set = new Set(ch.dismissed ?? []);
+    if (on) set.add(code); else set.delete(code);
+    update([{ op: "meta", fields: { dismissed: [...set] } }]);
+  };
   const viewSheet = () => { saveDraft(id, ch); navigate(`/sheet/${id}`); };
 
   const kind = charKind(ch);
@@ -60,13 +67,15 @@ export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: s
   // status icons use. A step with only completeness gaps (still spending xp) never
   // flags; it just isn't "done" yet.
   const stepStatus = (s: StepDef): string => {
-    const flagged = issues.some((i) => VIOLATION_CODES.has(i.code) && (s.budgets as string[]).includes(i.budget));
+    const live = issues.filter((i) => !i.dismissed);
+    const flagged = live.some((i) => VIOLATION_CODES.has(i.code) && (s.budgets as string[]).includes(i.budget));
     if (flagged) return "flagged";
-    if (s.budgets.length && s.budgets.every((bk) => !issues.some((i) => i.budget === bk))) return "done";
+    if (s.budgets.length && s.budgets.every((bk) => !live.some((i) => i.budget === bk))) return "done";
     return "";
   };
 
   const Body = BODIES[cur.key];
+  const stepIssues = issues.filter((i) => (cur.budgets as string[]).includes(i.budget));
 
   return (
     <div>
@@ -88,6 +97,11 @@ export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: s
       <div class="panel">
         {cur.why && <div class="why">{cur.why}</div>}
         {Body && <Body ch={ch} update={update} reseed={kind === "magus" ? reseed : undefined} />}
+        {stepIssues.length > 0 && (
+          <Collapsible class="why" open={false} summary={<strong>{stepIssues.length} note{stepIssues.length === 1 ? "" : "s"} on this step{stepIssues.some((i) => i.dismissed) ? ` (${stepIssues.filter((i) => i.dismissed).length} dismissed)` : ""}</strong>}>
+            <Issues issues={issues} budgets={cur.budgets} onDismiss={dismiss} />
+          </Collapsible>
+        )}
       </div>
 
       <div class="navrow">
