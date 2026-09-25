@@ -117,7 +117,7 @@ design lines, spells with no Technique/Form) for regressions.
   filenames.** Files like `14-creo-mentem-spells.md` contain multiple Technique
   sections (e.g. The Call to Slumber is *Rego* Mentem, not Creo). Trust the DB.
 - ~382 looks like the spell count from raw header greps, but the real total is
-  **347** (33 of them General-level; 613 guideline rows across all 50 Art pairs) — the rest are headers inside Guidelines
+  **360** (33 of them General-level; 613 guideline rows across all 50 Art pairs) — the rest are headers inside Guidelines
   sections or skipped front-matter.
 - General-level spells have `level = NULL` / `is_general = 1`.
 - A handful of spells legitimately lack a `(design)` line (General/reference spells

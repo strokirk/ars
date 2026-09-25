@@ -697,7 +697,7 @@ Rego Corpus can be used to perform surgery. Detailed rules for surgery can be fo
 | Community Gloss                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | The rules are intentionalyy vague as to whether teleporation requires casting requisties, as discussed in [Transforming Mythic Europe](/page/Transforming_Mythic_Europe_Chapter_Four:_Magic_as_Technology#Instant_Transportation_and_Requisites "Transforming Mythic Europe Chapter Four: Magic as Technology"). That section also suggests imagining swift movement rather than teleportation as an [optional rule](/page/Transforming_Mythic_Europe_Chapter_Four:_Magic_as_Technology#Optional_Rule:_Limits_on_Instant_Transportation "Transforming Mythic Europe Chapter Four: Magic as Technology"). Finally, note that the example teleporation spell _The Seven-league Stride_ requires a Finesse roll; this can be taken to apply to all teleportation or instant-travel spells. |
 
-### Rego Corpus Svells
+### Rego Corpus Spells
 
 #### LEVEL 5
 
