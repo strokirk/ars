@@ -20,6 +20,7 @@ export function Button({
   appearance = "outlined",
   variant = "neutral",
   color,
+  tint,
   size,
   disabled,
   title,
@@ -40,6 +41,8 @@ export function Button({
   variant?: "neutral" | "brand" | "danger";
   /** A CSS colour (e.g. a Technique's) to recolour this instance instead of `variant`. */
   color?: string;
+  /** A CSS colour for a quiet control: coloured text, and a tint of it when selected. */
+  tint?: string;
   size?: "small" | "medium";
   disabled?: boolean;
   title?: string;
@@ -48,14 +51,21 @@ export function Button({
   class?: string;
   start?: Component;
 }) {
-  const style = color
+  const style: Record<string, string> | undefined = color
     ? {
         "--wa-color-brand-fill-loud": color,
         "--wa-color-brand-border-loud": color,
         "--wa-color-brand-on-loud": "#fff",
         "--wa-color-brand-on-quiet": color,
       }
-    : undefined;
+    : tint
+      ? {
+          "--wa-color-brand-on-quiet": tint,
+          "--wa-color-brand-on-normal": tint,
+          "--wa-color-brand-fill-normal": `color-mix(in srgb, ${tint} 12%, var(--card))`,
+          "--wa-color-brand-border-normal": `color-mix(in srgb, ${tint} 35%, var(--line))`,
+        }
+      : undefined;
   return (
     <wa-button
       class={`ui-button ${block ? "block" : ""} ${klass}`}

@@ -11,6 +11,7 @@ import {
 } from "../lib/abilities.ts";
 import { FilterBar, type ActiveFilter } from "./ui/FilterBar.tsx";
 import { ChipGroup } from "./ui/ChipGroup.tsx";
+import { FilterGroup } from "./ui/FilterGroup.tsx";
 import { OptionList, OptionRow } from "./ui/OptionList.tsx";
 import { MeterPill } from "./BudgetBar.tsx";
 import { Collapsible } from "./ui/Collapsible.tsx";
@@ -163,11 +164,19 @@ export function AbilityPicker({ ch, update, stage, title, hint, budget, recommen
         onClear={() => { setTypeFilter(""); setShowLocked(false); }}
         summary={<>{options.length} abilities</>}
       >
-        <div class="chips-row">
-          <ChipGroup options={ABILITY_TYPES} value={typeFilter} onChange={setTypeFilter} allLabel="All types" />
-          <Button size="small" appearance={showLocked ? "accent" : "outlined"} variant="brand" onClick={() => setShowLocked(!showLocked)}>
-            {showLocked ? "Showing locked" : "Show locked"}
-          </Button>
+        <div class="fgroups">
+          <FilterGroup label="Type">
+            <ChipGroup options={ABILITY_TYPES} value={typeFilter} onChange={setTypeFilter} allLabel="All" />
+          </FilterGroup>
+          <FilterGroup label="Unusual for this stage">
+            <Button
+              class="quiet" size="small" variant="brand"
+              appearance={showLocked ? "filled-outlined" : "outlined"} pressed={showLocked}
+              onClick={() => setShowLocked(!showLocked)}
+            >
+              Show locked
+            </Button>
+          </FilterGroup>
         </div>
       </FilterBar>
 

@@ -33,6 +33,8 @@ import { Select } from "./ui/Select.tsx";
 import { OptionList, OptionRow } from "./ui/OptionList.tsx";
 import { ArtBadge, FormIcon } from "./ui/ArtBadge.tsx";
 import { Button } from "./ui/Button.tsx";
+import { ChipGroup } from "./ui/ChipGroup.tsx";
+import { FilterGroup } from "./ui/FilterGroup.tsx";
 
 const MAX_LEVELS = [5, 10, 15, 20, 25, 30, 35, 40, 50];
 const SORTS: SortOption<SpellSort>[] = [
@@ -45,12 +47,13 @@ const SORTS: SortOption<SpellSort>[] = [
   { value: "random", label: "Sort: Random" },
 ];
 const GROUPS: { value: SpellGroupBy; label: string }[] = [
-  { value: "none", label: "Group: none" },
-  { value: "technique", label: "Group: Technique" },
-  { value: "form", label: "Group: Form" },
-  { value: "art", label: "Group: Tech + Form" },
-  { value: "level", label: "Group: Level" },
+  { value: "none", label: "None" },
+  { value: "technique", label: "Technique" },
+  { value: "form", label: "Form" },
+  { value: "art", label: "Tech + Form" },
+  { value: "level", label: "Level" },
 ];
+const RITUAL_OPTS = ["exclude", "only"] as const;
 
 const newSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
 
@@ -177,116 +180,87 @@ export function SpellBrowser({
         }
       >
         {/* Techniques carry the colour, Forms the icon — the same language as the rows. */}
-        <div class="artfilter" role="group" aria-label="Filter by Technique">
-          <Button
-            size="small"
-            appearance={technique === "" ? "accent" : "outlined"}
-            onClick={() => setTechnique("")}
-          >
-            All Techniques
-          </Button>
-          {TECHNIQUES.map((t) => (
-            <Button
-              key={t}
-              size="small"
-              appearance={technique === t ? "accent" : "outlined"}
-              color={TECHNIQUE_COLOR[t as Technique]}
-              title={t}
-              onClick={() => setTechnique(technique === t ? "" : t)}
-            >
-              {ART_ABBR[t]} {t}
-            </Button>
-          ))}
+        <div class="fgroups">
+          <FilterGroup label="Technique">
+            <ChipGroup
+              options={TECHNIQUES}
+              value={technique as Technique | ""}
+              onChange={setTechnique}
+              colorOf={(t) => TECHNIQUE_COLOR[t]}
+              titleOf={(t) => t}
+            />
+          </FilterGroup>
+          <FilterGroup label="Form">
+            <Select
+              label="Form"
+              pill
+              active={form !== ""}
+              value={form}
+              onChange={setForm}
+              options={[
+                { value: "", label: "All" },
+                ...FORMS.map((f) => ({ value: f, label: f, icon: <FormIcon form={f} size={14} /> })),
+              ]}
+            />
+          </FilterGroup>
+          <FilterGroup label="Kind">
+            <ChipGroup
+              options={RITUAL_OPTS}
+              value={ritual === "any" ? "" : ritual}
+              onChange={(v) => setRitual(v || "any")}
+              labelOf={(v) => (v === "only" ? "Rituals" : "Formulaic")}
+            />
+          </FilterGroup>
         </div>
-        <div class="artfilter" role="group" aria-label="Filter by Form">
-          <Button
-            size="small"
-            appearance={form === "" ? "accent" : "outlined"}
-            onClick={() => setForm("")}
-          >
-            All Forms
-          </Button>
-          {FORMS.map((f) => (
-            <Button
-              key={f}
-              size="small"
-              appearance={form === f ? "accent" : "outlined"}
-              title={f}
-              onClick={() => setForm(form === f ? "" : f)}
-            >
-              <FormIcon form={f} size={14} /> {f}
-            </Button>
-          ))}
+        <div class="fgroups">
+          <FilterGroup label="Range">
+            <Picker label="Range" value={range} onChange={setRange} options={RANGES} names={RANGE_NAME} />
+          </FilterGroup>
+          <FilterGroup label="Duration">
+            <Picker label="Duration" value={duration} onChange={setDuration} options={DURATIONS} names={DURATION_NAME} />
+          </FilterGroup>
+          <FilterGroup label="Target">
+            <Picker label="Target" value={target} onChange={setTarget} options={TARGETS} names={TARGET_NAME} />
+          </FilterGroup>
+          <FilterGroup label="Level">
+            <Select
+              label="Maximum level"
+              pill
+              active={maxLevel !== ""}
+              value={String(maxLevel)}
+              options={[
+                { value: "", label: "Any" },
+                ...MAX_LEVELS.map((l) => ({ value: String(l), label: `≤ ${l}` })),
+              ]}
+              onChange={(v) => setMaxLevel(v === "" ? "" : Number(v))}
+            />
+          </FilterGroup>
         </div>
-        <div class="chips">
-          <Picker
-            label="Range"
-            value={range}
-            onChange={setRange}
-            options={RANGES}
-            names={RANGE_NAME}
-          />
-          <Picker
-            label="Duration"
-            value={duration}
-            onChange={setDuration}
-            options={DURATIONS}
-            names={DURATION_NAME}
-          />
-          <Picker
-            label="Target"
-            value={target}
-            onChange={setTarget}
-            options={TARGETS}
-            names={TARGET_NAME}
-          />
-          <Select
-            label="Maximum level"
-            pill
-            active={maxLevel !== ""}
-            value={String(maxLevel)}
-            options={[
-              { value: "", label: "Any level" },
-              ...MAX_LEVELS.map((l) => ({
-                value: String(l),
-                label: `Level ≤ ${l}`,
-              })),
-            ]}
-            onChange={(v) => setMaxLevel(v === "" ? "" : Number(v))}
-          />
-          <Select
-            label="Group spells"
-            pill
-            active={groupBy !== "none"}
-            value={groupBy}
-            options={GROUPS}
-            onChange={(v) => setGroupBy(v as SpellGroupBy)}
-          />
-        </div>
-        <div class="chips">
-          <Button
-            size="small"
-            appearance={ritual === "exclude" ? "accent" : "outlined"}
-            onClick={() => setRitual(ritual === "exclude" ? "any" : "exclude")}
-          >
-            Formulaic only
-          </Button>
-          <Button
-            size="small"
-            appearance={ritual === "only" ? "accent" : "outlined"}
-            onClick={() => setRitual(ritual === "only" ? "any" : "only")}
-          >
-            Rituals only
-          </Button>
+        <div class="fgroups">
+          <FilterGroup label="Group by">
+            <Select
+              label="Group spells"
+              pill
+              active={groupBy !== "none"}
+              value={groupBy}
+              options={GROUPS}
+              onChange={(v) => setGroupBy(v as SpellGroupBy)}
+            />
+          </FilterGroup>
           {labTotalOf && (
-            <Button
-              size="small"
-              appearance={onlyReachable ? "accent" : "outlined"}
-              onClick={() => setOnlyReachable(!onlyReachable)}
-              title="Hide spells whose level exceeds your Lab Total"
-            >
-              Within my Lab Total
-            </Button>
+            <FilterGroup label="Lab Total">
+              <Button
+                class="quiet"
+                size="small"
+                variant="brand"
+                appearance={onlyReachable ? "filled-outlined" : "outlined"}
+                pressed={onlyReachable}
+                onClick={() => setOnlyReachable(!onlyReachable)}
+                title="Hide spells whose level exceeds your Lab Total"
+              >
+                Within my Lab Total
+              </Button>
+            </FilterGroup>
           )}
         </div>
       </FilterBar>
@@ -356,7 +330,7 @@ function Picker({
       value={value}
       onChange={onChange}
       options={[
-        { value: "", label: `Any ${label.toLowerCase()}` },
+        { value: "", label: "Any" },
         ...options.map((o) => ({ value: o, label: names[o] ?? o })),
       ]}
     />

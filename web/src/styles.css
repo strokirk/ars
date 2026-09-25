@@ -115,7 +115,7 @@ wa-option { --current-text-color: var(--accent); }
    take the full line), so a row of dropdowns stays a row. */
 .ui-select.pill {
   /* `ch` is the width of "0"; the serif's average glyph runs wider, hence the slack. */
-  display: inline-block; width: calc(var(--label-width, 8ch) * 1.15 + 3.4rem);
+  display: inline-block; width: calc(var(--label-width, 8ch) * 1.15 + 3.4rem); min-width: 6.5rem;
   --wa-form-control-height: 30px;
   --wa-form-control-border-radius: 999px;
   --wa-form-control-background-color: var(--card);
@@ -245,6 +245,7 @@ input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; appe
   background: rgba(255, 253, 249, 0.96); backdrop-filter: blur(6px);
   border-top: 1px solid var(--line); padding: 0.55rem 1rem;
 }
+@media (max-width: 560px) { .budgetbar { margin: 0 -0.7rem; padding: 0.55rem 0.7rem; } }
 .meters { display: flex; flex-wrap: wrap; gap: 0.4rem 0.7rem; }
 .meter { font-size: 0.78rem; color: var(--muted); display: inline-flex; align-items: center; gap: 0.3rem; }
 .meter b { color: var(--ink); font-variant-numeric: tabular-nums; }
@@ -427,7 +428,6 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
   border-left: 1px solid color-mix(in srgb, var(--tech, var(--line)) 30%, var(--line)); padding-left: 0.35rem;
 }
 
-.artfilter { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.35rem; }
 
 .pill-select {
   width: auto; font-size: 0.8rem; min-height: 34px; padding: 0.2rem 0.5rem;

@@ -6,12 +6,14 @@ import {
   type Guideline, type GuidelineSort,
 } from "../lib/guidelines.ts";
 import { TECHNIQUE_COLOR } from "../lib/arts.ts";
-import { TECHNIQUES, FORMS, ART_ABBR, type Technique } from "../../../chargen/src/domain/glossary.ts";
+import { TECHNIQUES, FORMS, type Technique } from "../../../chargen/src/domain/glossary.ts";
 import { FilterBar, type ActiveFilter, type SortOption } from "./ui/FilterBar.tsx";
 import { Select } from "./ui/Select.tsx";
 import { OptionList, OptionRow } from "./ui/OptionList.tsx";
 import { ArtBadge, FormIcon } from "./ui/ArtBadge.tsx";
 import { Button } from "./ui/Button.tsx";
+import { ChipGroup } from "./ui/ChipGroup.tsx";
+import { FilterGroup } from "./ui/FilterGroup.tsx";
 
 const MAX_LEVELS = [5, 10, 15, 20, 25, 30, 35, 40, 50];
 const SORTS: SortOption<GuidelineSort>[] = [
@@ -85,75 +87,73 @@ export function GuidelineBrowser({
           </>
         }
       >
-        <div class="artfilter" role="group" aria-label="Filter by Technique">
-          <Button size="small" appearance={technique === "" ? "accent" : "outlined"} onClick={() => setTechnique("")}>
-            All Techniques
-          </Button>
-          {TECHNIQUES.map((t) => (
-            <Button
-              key={t}
-              size="small"
-              appearance={technique === t ? "accent" : "outlined"}
-              color={TECHNIQUE_COLOR[t as Technique]}
-              title={t}
-              onClick={() => setTechnique(technique === t ? "" : t)}
-            >
-              {ART_ABBR[t]} {t}
-            </Button>
-          ))}
+        <div class="fgroups">
+          <FilterGroup label="Technique">
+            <ChipGroup
+              options={TECHNIQUES}
+              value={technique as Technique | ""}
+              onChange={setTechnique}
+              colorOf={(t) => TECHNIQUE_COLOR[t]}
+              titleOf={(t) => t}
+            />
+          </FilterGroup>
+          <FilterGroup label="Form">
+            <Select
+              label="Form"
+              pill
+              active={form !== ""}
+              value={form}
+              onChange={setForm}
+              options={[
+                { value: "", label: "All" },
+                ...FORMS.map((f) => ({ value: f, label: f, icon: <FormIcon form={f} size={14} /> })),
+              ]}
+            />
+          </FilterGroup>
         </div>
-        <div class="artfilter" role="group" aria-label="Filter by Form">
-          <Button size="small" appearance={form === "" ? "accent" : "outlined"} onClick={() => setForm("")}>
-            All Forms
-          </Button>
-          {FORMS.map((f) => (
-            <Button
-              key={f}
-              size="small"
-              appearance={form === f ? "accent" : "outlined"}
-              title={f}
-              onClick={() => setForm(form === f ? "" : f)}
-            >
-              <FormIcon form={f} size={14} /> {f}
-            </Button>
-          ))}
-        </div>
-        <div class="chips">
-          <Select
-            label="Maximum level"
-            pill
-            active={maxLevel !== ""}
-            value={String(maxLevel)}
-            options={[
-              { value: "", label: "Any level" },
-              ...MAX_LEVELS.map((l) => ({ value: String(l), label: `Level ≤ ${l}` })),
-            ]}
-            onChange={(v) => setMaxLevel(v === "" ? "" : Number(v))}
-          />
+        <div class="fgroups">
+          <FilterGroup label="Level">
+            <Select
+              label="Maximum level"
+              pill
+              active={maxLevel !== ""}
+              value={String(maxLevel)}
+              options={[
+                { value: "", label: "Any" },
+                ...MAX_LEVELS.map((l) => ({ value: String(l), label: `≤ ${l}` })),
+              ]}
+              onChange={(v) => setMaxLevel(v === "" ? "" : Number(v))}
+            />
+          </FilterGroup>
           {/* Only worth showing once a supplement is actually installed. */}
           {BOOKS.length > 1 && (
-            <Select
-              label="Book"
-              pill
-              active={Boolean(book)}
-              value={book}
-              options={[
-                { value: "", label: "Every book" },
-                ...BOOKS.map((b) => ({ value: b.key, label: b.name })),
-              ]}
-              onChange={setBook}
-            />
+            <FilterGroup label="Book">
+              <Select
+                label="Book"
+                pill
+                active={Boolean(book)}
+                value={book}
+                options={[
+                  { value: "", label: "All" },
+                  ...BOOKS.map((b) => ({ value: b.key, label: b.name })),
+                ]}
+                onChange={setBook}
+              />
+            </FilterGroup>
           )}
-        </div>
-        <div class="chips">
-          <Button
-            size="small"
-            appearance={!includeGeneral ? "accent" : "outlined"}
-            title="General guidelines scale with the level of the spell"
-            onClick={() => setIncludeGeneral(!includeGeneral)}
-          >
-            Hide General
-          </Button>
+          <FilterGroup label="General guidelines">
+            <Button
+              class="quiet"
+              size="small"
+              variant="brand"
+              appearance={!includeGeneral ? "filled-outlined" : "outlined"}
+              pressed={!includeGeneral}
+              title="General guidelines scale with the level of the spell"
+              onClick={() => setIncludeGeneral(!includeGeneral)}
+            >
+              Hide General
+            </Button>
+          </FilterGroup>
         </div>
       </FilterBar>
 

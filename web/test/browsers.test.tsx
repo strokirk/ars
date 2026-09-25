@@ -89,11 +89,10 @@ describe("SpellBrowser", () => {
     expect(count(el)).toBeGreaterThan(0);
   });
 
-  test("a Form chip narrows the list independently of Technique", async () => {
+  test("the Form dropdown narrows the list independently of Technique", async () => {
     const el = mount(<SpellBrowser />);
     await openFilters(el);
-    artChip(el, "Ignem").click();
-    await flush();
+    await choose(select(el, "Form"), "Ignem");
     const ignem = count(el);
     artChip(el, "Creo").click();
     await flush();
@@ -101,15 +100,15 @@ describe("SpellBrowser", () => {
     expect(count(el)).toBeGreaterThan(0);
   });
 
-  test("Rituals only and Formulaic only are mutually exclusive views", async () => {
+  test("Rituals and Formulaic are mutually exclusive views", async () => {
     const el = mount(<SpellBrowser />);
     await openFilters(el);
-    chip(el, "Rituals only").click();
+    chip(el, "Rituals").click();
     await flush();
     const rituals = count(el);
-    chip(el, "Rituals only").click();  // toggle off
+    chip(el, "Rituals").click();  // toggle off
     await flush();
-    chip(el, "Formulaic only").click();
+    chip(el, "Formulaic").click();
     await flush();
     const formulaic = count(el);
     expect(rituals).toBeGreaterThan(0);

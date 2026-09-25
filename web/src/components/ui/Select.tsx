@@ -5,6 +5,8 @@ import type WaSelect from "@awesome.me/webawesome/dist/components/select/select.
 export interface SelectOption {
   value: string;
   label: string;
+  /** Shown before the label in the menu (e.g. a Form's glyph). */
+  icon?: ComponentChildren;
 }
 
 /**
@@ -74,7 +76,12 @@ export function Select({
       placeholder={placeholder}
     >
       {icon && <span slot="start" class="select-icon">{icon}</span>}
-      {options.map((o) => <wa-option value={o.value} key={o.value}>{o.label}</wa-option>)}
+      {options.map((o) => (
+        <wa-option value={o.value} key={o.value} label={o.label}>
+          {o.icon && <span slot="start" class="select-icon">{o.icon}</span>}
+          {o.label}
+        </wa-option>
+      ))}
     </wa-select>
   );
 }

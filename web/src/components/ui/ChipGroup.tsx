@@ -11,12 +11,17 @@ export function ChipGroup<T extends string>({
   onChange,
   allLabel = "All",
   labelOf,
+  colorOf,
+  titleOf,
 }: {
   options: readonly T[];
   value: T | "";
   onChange: (next: T | "") => void;
   allLabel?: string | null;
   labelOf?: (o: T) => string;
+  /** Per-option colour (a Technique's hue), shown as coloured text / a tint when selected. */
+  colorOf?: (o: T) => string | undefined;
+  titleOf?: (o: T) => string;
 }) {
   return (
     <wa-button-group class="seg" label={allLabel ?? "Filter"}>
@@ -38,6 +43,8 @@ export function ChipGroup<T extends string>({
           appearance={value === o ? "filled-outlined" : "outlined"}
           pressed={value === o}
           key={o}
+          tint={colorOf?.(o)}
+          title={titleOf?.(o)}
           onClick={() => onChange(value === o ? "" : o)}
         >
           {labelOf ? labelOf(o) : o}
