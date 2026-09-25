@@ -2,7 +2,7 @@
 // rendering and `validate`. Affinity discounts and Skilled-Parens/Warrior bonuses
 // come from the derived Modifiers.
 import { charKind } from "./character.ts";
-import type { AbilityPick, Character } from "./character.ts";
+import type { AbilityPick, Character, XpPool } from "./character.ts";
 import { abilityXp, affinityXp, artXp, charCost } from "./costs.ts";
 import { type Modifiers, deriveModifiers } from "./modifiers.ts";
 import { ARTS, type Art } from "./glossary.ts";
@@ -61,7 +61,13 @@ export interface Budgets {
   childhood: BudgetLine & { nativeLanguageSet: boolean };
   laterLife: BudgetLine & { years: number };
   apprenticeship: BudgetLine & { spells: BudgetLine; minimums: ApprenticeshipMinimums };
+  /** Spell Mastery xp. Its cap is what Virtues/bonuses grant; anything past it is paid from apprenticeship xp. */
+  mastery: BudgetLine;
 }
+
+/** Total bonus xp granted to one pool (Virtues + manual bonuses). */
+export const grantedXp = (mods: Modifiers, pool: XpPool): number =>
+  mods.grants.filter((g) => g.pool === pool).reduce((s, g) => s + g.xp, 0);
 
 export function abilityCost(a: AbilityPick, mods: Modifiers): number {
   const raw = abilityXp(a.score);
@@ -102,16 +108,21 @@ export function computeBudgets(ch: Character, mods: Modifiers = deriveModifiers(
   const stageXp = (stage: AbilityPick["stage"]) =>
     ch.abilities.filter((a) => a.stage === stage).reduce((s, a) => s + abilityCost(a, mods), 0);
   const childhoodSpent = stageXp("childhood");
+  const childhoodCap = CHILDHOOD_XP + grantedXp(mods, "childhood");
   const laterLifeSpent = stageXp("later-life");
-  const laterLifeCap = ch.laterLifeYears * mods.laterLifeXpPerYear;
+  const laterLifeCap = ch.laterLifeYears * mods.laterLifeXpPerYear + grantedXp(mods, "later-life");
+
+  const masterySpent = ch.spells.reduce((s, sp) => s + abilityXp(sp.mastery ?? 0), 0);
+  const masteryCap = Math.max(0, grantedXp(mods, "mastery"));
+  const masteryOverflow = Math.max(0, masterySpent - masteryCap);
 
   const artXpSpent = ARTS.reduce<number>((s, art) => s + (ch.arts[art] ? artCost(art, ch.arts[art]!, mods) : 0), 0);
   const apprenticeAbilityXp = stageXp("apprenticeship");
-  const apprenticeSpent = artXpSpent + apprenticeAbilityXp;
-  const apprenticeCap = APPRENTICESHIP_XP + mods.bonusApprenticeshipXp + mods.warriorXp;
+  const apprenticeSpent = artXpSpent + apprenticeAbilityXp + masteryOverflow;
+  const apprenticeCap = APPRENTICESHIP_XP + grantedXp(mods, "apprenticeship");
 
   const spellsSpent = ch.spells.reduce((s, sp) => s + sp.level, 0);
-  const spellCap = SPELL_LEVELS + mods.bonusSpellLevels;
+  const spellCap = SPELL_LEVELS + grantedXp(mods, "spells");
 
   const line = (key: string, label: string, spent: number, cap: number): BudgetLine => ({
     key, label, spent, cap, over: spent > cap, full: spent === cap,
@@ -130,7 +141,7 @@ export function computeBudgets(ch: Character, mods: Modifiers = deriveModifiers(
       hermeticVirtues, hermeticFlaws, storyFlaws,
       personalityFlaws, majorPersonalityFlaws, socialStatuses,
     },
-    childhood: { ...line("childhood", "Childhood xp", childhoodSpent, CHILDHOOD_XP), nativeLanguageSet: !!ch.nativeLanguage },
+    childhood: { ...line("childhood", "Childhood xp", childhoodSpent, childhoodCap), nativeLanguageSet: !!ch.nativeLanguage },
     laterLife: { ...line("later-life", "Later life xp", laterLifeSpent, laterLifeCap), years: ch.laterLifeYears },
     apprenticeship: {
       ...line("apprenticeship", "Apprenticeship xp", apprenticeSpent, apprenticeCap),
@@ -141,5 +152,6 @@ export function computeBudgets(ch: Character, mods: Modifiers = deriveModifiers(
         latin: ch.abilities.some((a) => /latin/i.test(a.name) || /latin/i.test(a.specialty ?? "")),
       },
     },
+    mastery: line("mastery", "Mastery xp", masterySpent - masteryOverflow, masteryCap),
   };
 }

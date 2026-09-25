@@ -4,7 +4,7 @@
 // never block a mutation — they're expected mid-build. The CLI is a thin wrapper
 // over these; a web app can call them identically.
 import { charKind } from "./character.ts";
-import type { AbilityPick, Character, PersonalityTrait, SpellPick, TraitPick } from "./character.ts";
+import type { AbilityPick, Character, PersonalityTrait, SpellPick, TraitPick, XpBonus } from "./character.ts";
 import { type Art, type Characteristic, type Form, type Stage, type Technique, isArt, isCharacteristic } from "./glossary.ts";
 import type { ResolvedAbility, ResolvedTrait } from "../data/rules.ts";
 import type { SpellRow } from "../data/types.ts";
@@ -55,20 +55,18 @@ const sameTrait = (a: { name: string; param?: string }, b: { name: string; param
   a.name.toLowerCase() === b.name.toLowerCase() &&
   (a.param ?? "").toLowerCase() === (b.param ?? "").toLowerCase();
 
-function isRepeatable(description: string): boolean {
-  return /(more than once|multiple times|may be taken (again|several|two|twice)|take this (virtue|flaw) (more than once|multiple))/i.test(description);
-}
-
 export function addTrait(ch: Character, kind: "Virtue" | "Flaw", resolved: ResolvedTrait, force = false): MutationResult {
   const list = kind === "Virtue" ? ch.virtues : ch.flaws;
   const dupe = list.find((t) => sameTrait(t, { name: resolved.canonical, param: resolved.param }));
-  if (dupe && !isRepeatable(resolved.row.description) && !force) {
+  // Parameterized repeatables (Puissant Art, Affinity) repeat only with a different parameter.
+  if (dupe && !(resolved.row.repeatable && !resolved.param) && !force) {
     const why = dupe.free ? "it duplicates a free benefit you already have" : "it's already taken and isn't repeatable";
     return { ok: false, character: ch, rejected: `Cannot add ${resolved.display}: ${why}.`, issues: validate(ch) };
   }
   const pick: TraitPick = {
     name: resolved.canonical, display: resolved.display, param: resolved.param,
     size: resolved.size, category: resolved.row.category, points: resolved.points,
+    repeatable: resolved.row.repeatable || undefined,
   };
   const candidate = clone(ch);
   (kind === "Virtue" ? candidate.virtues : candidate.flaws).push(pick);
@@ -81,6 +79,7 @@ export function addFreeTrait(ch: Character, kind: "Virtue" | "Flaw", resolved: R
   const pick: TraitPick = {
     name: resolved.canonical, display: resolved.display, param: resolved.param,
     size: resolved.size, category: resolved.row.category, points: 0, free: true,
+    repeatable: resolved.row.repeatable || undefined,
   };
   (kind === "Virtue" ? candidate.virtues : candidate.flaws).push(pick);
   return finalize(ch, candidate, `+ Free ${kind}: ${resolved.display}`, true);
@@ -155,6 +154,17 @@ export function addSpell(ch: Character, spell: SpellRow, opts: LabTotalOpts = {}
   candidate.spells.push(pick);
   const head = `Lab Total (${spell.technique} ${spell.form}): ${lt.breakdown}\n+ ${spell.name} (${spell.tech_abbr}${spell.form_abbr} ${spell.level})${spell.level <= lt.total ? ` ✓ ${spell.level} ≤ ${lt.total}` : ""}`;
   return finalize(ch, candidate, head, force);
+}
+
+/** Set a known spell's Mastery score (0 clears it). Paid from the mastery pool, then apprenticeship xp. */
+export function setMastery(ch: Character, name: string, score: number): MutationResult {
+  if (!Number.isInteger(score) || score < 0) return reject(ch, `Mastery score must be a non-negative integer.`);
+  const candidate = clone(ch);
+  const spell = candidate.spells.find((s) => s.name.toLowerCase() === name.toLowerCase());
+  if (!spell) return reject(ch, `"${name}" isn't a known spell.`);
+  if (score === 0) delete spell.mastery;
+  else spell.mastery = score;
+  return finalize(ch, candidate, `Mastery: ${spell.name} ${score}`, true);
 }
 
 export function removeSpell(ch: Character, query: string): MutationResult {
@@ -252,6 +262,10 @@ export interface MetaFields {
   confidence?: number;
   laterLifeYears?: number;
   reputation?: string | null;
+  /** Replaces the whole list. */
+  xpBonuses?: XpBonus[];
+  /** Replaces the whole list of accepted issue codes. */
+  dismissed?: string[];
 }
 
 /** Set any subset of the scalar header fields in one mutation. */
@@ -261,6 +275,8 @@ export function setMeta(ch: Character, m: MetaFields, force = false): MutationRe
   if (m.name !== undefined) { candidate.name = m.name; applied.push("name"); }
   if (m.concept !== undefined) { candidate.concept = m.concept; applied.push("concept"); }
   if (m.reputation !== undefined) { candidate.reputation = m.reputation; applied.push("reputation"); }
+  if (m.xpBonuses !== undefined) { candidate.xpBonuses = m.xpBonuses; applied.push(`${m.xpBonuses.length} xp bonus(es)`); }
+  if (m.dismissed !== undefined) { candidate.dismissed = m.dismissed; applied.push(`${m.dismissed.length} dismissed`); }
   if (m.age !== undefined) {
     // Magi finish a 15-year apprenticeship, so they're ≥25; grogs/companions can be younger.
     const floor = charKind(ch) === "magus" ? 25 : 5;

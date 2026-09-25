@@ -25,7 +25,7 @@ export function hasEnablingVirtue(ch: Character, type: AbilityType): boolean {
     case "Supernatural": return hasCategory(ch, "Supernatural");
     case "Academic": return hasVirtueNamed(ch, "Educated", "Clerk", "Priest", "Mythic Companion");
     case "Martial": return hasVirtueNamed(ch, "Warrior", "Knight", "Soldier", "Custos");
-    case "Arcane": return false; // Arcane comes from apprenticeship for magi
+    case "Arcane": return hasVirtueNamed(ch, "Arcane Lore"); // otherwise Arcane comes from apprenticeship
     default: return true;
   }
 }

@@ -201,7 +201,7 @@ describe("querySpells range/duration/target filters", () => {
 function trait(p: Partial<VirtueFlawRow> & { name: string }): VirtueFlawRow {
   return {
     kind: "Virtue", size: "Minor", category: "General", categories: ["General"],
-    tainted: false, cost_raw: "", description: "", source_file: "x.md", source_line: 1, ...p,
+    tainted: false, repeatable: false, cost_raw: "", description: "", source_file: "x.md", source_line: 1, ...p,
   };
 }
 

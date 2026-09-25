@@ -1,8 +1,43 @@
 // Derives mechanical effects from a character's chosen Virtues/Flaws (free ones
-// included). These feed xp budgeting (Affinity, Skilled Parens, Warrior) and the
-// Lab/Casting Totals (Puissant, Magical Focus, Deficient — used from M4/M5).
-import type { Character } from "./character.ts";
+// included). These feed xp budgeting (Affinity, VIRTUE_XP grants, the player's own
+// xpBonuses) and the Lab/Casting Totals (Puissant, Magical Focus, Deficient).
+import type { AbilityPick, Character, XpPool } from "./character.ts";
 import { type Art, isArt } from "./glossary.ts";
+import type { AbilityType } from "../data/types.ts";
+
+/** Extra xp (or spell levels) added to one creation pool's cap. */
+export interface XpGrant {
+  pool: XpPool;
+  xp: number;
+  /** Virtue display name, or the player's note for a manual bonus. */
+  source: string;
+  /** Only Abilities matching this may spend it — checked by validate(), not enforced. */
+  only?: { label: string; types?: AbilityType[]; names?: string[] };
+}
+
+/**
+ * Creation xp each Virtue grants, per copy taken. Pure data: add a row here and
+ * budgets, validation and the wizard's pool headings pick it up. Mundane bonuses
+ * land in the later-life pool (where non-General Abilities open up with the
+ * enabling Virtue); a Virtue whose restriction can't be expressed as types/names
+ * (Well-Traveled) carries only its label.
+ */
+export const VIRTUE_XP: Record<string, Omit<XpGrant, "source">[]> = {
+  "Skilled Parens": [{ pool: "apprenticeship", xp: 60 }, { pool: "spells", xp: 30 }],
+  Warrior: [{ pool: "later-life", xp: 50, only: { label: "Martial Abilities", types: ["Martial"] } }],
+  "Arcane Lore": [{ pool: "later-life", xp: 50, only: { label: "Arcane Abilities", types: ["Arcane"] } }],
+  Educated: [{ pool: "later-life", xp: 50, only: { label: "Latin and Artes Liberales", names: ["Latin", "Artes Liberales"] } }],
+  "Privileged Upbringing": [{ pool: "later-life", xp: 50, only: { label: "General, Academic or Martial Abilities", types: ["General", "Academic", "Martial"] } }],
+  "Well-Traveled": [{ pool: "later-life", xp: 50, only: { label: "living languages, Area Lores, Bargain, Carouse, Charm, Etiquette, Folk Ken or Guile" } }],
+  "Mastered Spells": [{ pool: "mastery", xp: 50 }],
+};
+
+/** Does an Ability satisfy a grant's restriction? Unrestricted/uncheckable grants accept anything. */
+export function grantAccepts(g: XpGrant, a: Pick<AbilityPick, "name" | "type">): boolean {
+  if (!g.only || (!g.only.types && !g.only.names)) return true;
+  if (g.only.types?.includes(a.type as AbilityType)) return true;
+  return g.only.names?.some((n) => n.toLowerCase() === a.name.toLowerCase()) ?? false;
+}
 
 export interface Modifiers {
   puissantArt: Map<Art, number>;        // Art -> +3 (×n if stacked)
@@ -11,9 +46,7 @@ export interface Modifiers {
   affinityAbility: Set<string>;         // ability names whose xp counts ×1.5
   foci: { size: "Minor" | "Major"; text: string }[];
   deficientArts: Set<Art>;              // Arts whose totals are halved
-  bonusApprenticeshipXp: number;        // Skilled Parens: +60
-  bonusSpellLevels: number;             // Skilled Parens: +30
-  warriorXp: number;                    // Warrior: +50, Martial Abilities only
+  grants: XpGrant[];                    // VIRTUE_XP rows + the player's xpBonuses
   laterLifeXpPerYear: number;           // 15 normally; Wealthy 20, Poor 10 (companions)
 }
 
@@ -25,9 +58,7 @@ export function deriveModifiers(ch: Character): Modifiers {
     affinityAbility: new Set(),
     foci: [],
     deficientArts: new Set(),
-    bonusApprenticeshipXp: 0,
-    bonusSpellLevels: 0,
-    warriorXp: 0,
+    grants: [],
     laterLifeXpPerYear: 15,
   };
   const asArt = (p?: string): Art | undefined => (p && isArt(p) ? p : undefined);
@@ -37,6 +68,7 @@ export function deriveModifiers(ch: Character): Modifiers {
   if (ch.flaws.some((f) => f.name.toLowerCase() === "poor")) m.laterLifeXpPerYear = 10;
 
   for (const v of ch.virtues) {
+    for (const g of VIRTUE_XP[v.name] ?? []) m.grants.push({ ...g, source: v.display });
     switch (v.name) {
       case "Puissant Art": {
         const a = asArt(v.param);
@@ -60,15 +92,9 @@ export function deriveModifiers(ch: Character): Modifiers {
       case "Major Magical Focus":
         m.foci.push({ size: "Major", text: v.param ?? "" });
         break;
-      case "Skilled Parens":
-        m.bonusApprenticeshipXp += 60;
-        m.bonusSpellLevels += 30;
-        break;
-      case "Warrior":
-        m.warriorXp += 50;
-        break;
     }
   }
+  for (const b of ch.xpBonuses ?? []) m.grants.push({ pool: b.pool, xp: b.xp, source: b.note || "Bonus" });
   for (const f of ch.flaws) {
     if (f.name === "Deficient Form" || f.name === "Deficient Technique") {
       const a = asArt(f.param);

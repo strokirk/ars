@@ -10,6 +10,7 @@
 import { type Character, type SpellPick, type TraitPick, type AbilityPick, charKind } from "../domain/character.ts";
 import { type Budgets, computeBudgets } from "../domain/budgets.ts";
 import { confidenceScore } from "../domain/modifiers.ts";
+import { houseWarping } from "../domain/houses.ts";
 import {
   type Art, type Form, CHARACTERISTICS, CHARACTERISTIC_NAMES, FORMS, TECHNIQUES, ART_ABBR, isForm,
 } from "../domain/glossary.ts";
@@ -95,7 +96,7 @@ function traitItem(t: TraitPick, data: SheetData): string {
 
 function spellItem(s: SpellPick, data: SheetData): string {
   const tf = `${ART_ABBR[s.technique]}${ART_ABBR[s.form]}`;
-  const head = `<span class="lvl">${tf} ${s.level}</span> ${esc(s.name)}${s.inFocus ? ' <span class="tag">· in focus</span>' : ""}`;
+  const head = `<span class="lvl">${tf} ${s.level}</span> ${esc(s.name)}${s.mastery ? ` <span class="tag">· Mastery ${s.mastery}</span>` : ""}${s.inFocus ? ' <span class="tag">· in focus</span>' : ""}`;
   const attrs = `data-name="${esc(s.name.toLowerCase())}" data-level="${s.level}" data-tf="${tf}"`;
   const desc = data.spellDesc?.(s.name);
   return desc
@@ -122,10 +123,10 @@ h2 { font-size:1.1rem; text-transform:uppercase; letter-spacing:.06em; border-bo
   display:flex; align-items:baseline; gap:.6rem; flex-wrap:wrap; }
 h3.sub { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:1rem 0 .4rem; }
 .sub { color:var(--muted); margin:.1rem 0 1.4rem; }
-.grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem; }
-.stat { background:#fff; border:1px solid var(--line); border-radius:6px; padding:.5rem .6rem; }
-.stat b { display:block; font-size:.7rem; text-transform:uppercase; color:var(--muted); letter-spacing:.04em; }
-.stat span { font-size:1.25rem; font-weight:600; }
+.grid { display:flex; flex-wrap:wrap; gap:.3rem; }
+.stat { background:#fff; border:1px solid var(--line); border-radius:6px; padding:.1rem .5rem; display:flex; gap:.35rem; align-items:baseline; }
+.stat b { font-size:.72rem; text-transform:uppercase; color:var(--muted); letter-spacing:.04em; }
+.stat span { font-weight:600; }
 .arts { display:grid; grid-template-columns:repeat(5,1fr); gap:.4rem; }
 .art { display:flex; align-items:center; gap:.35rem; background:#fff; border:1px solid var(--line);
   border-left:4px solid var(--c); border-radius:6px; padding:.35rem .5rem; }
@@ -190,9 +191,18 @@ export function renderSheetHtml(ch: Character, data: SheetData = {}, b: Budgets 
   const stats = CHARACTERISTICS.map((c) =>
     `<div class="stat" title="${CHARACTERISTIC_NAMES[c]}"><b>${c}</b><span>${sign(ch.characteristics[c] ?? 0)}</span></div>`).join("");
 
+  const warping = houseWarping(ch);
+  const pickedArts = (list: readonly Art[]) => list.filter((a) => (ch.arts[a] ?? 0) > 0);
+  const techs = pickedArts(TECHNIQUES);
+  const forms = pickedArts(FORMS);
+
   const body = `
   <h1>${esc(magusTitle(ch))}</h1>
-  <p class="sub">${esc(ch.concept || "—")} · Age ${ch.age}</p>
+  <p class="sub">${esc(ch.concept || "—")} · Age ${ch.age}${warping ? ` · Warping ${warping.points} point${warping.points === 1 ? "" : "s"}` : ""}</p>
+
+  <h2>Personality · Reputation${hasConfidence ? " · Confidence" : ""}</h2>
+  <p>${ch.personality.map((p) => `${esc(p.trait)} ${sign(p.value)}`).join(", ") || "—"}<br>
+  Reputation: ${ch.reputation ? esc(ch.reputation) : "—"}${hasConfidence ? ` · Confidence ${conf.score} (${conf.points} points)` : ""}</p>
 
   <h2>Characteristics</h2>
   <div class="grid">${stats}</div>
@@ -202,7 +212,7 @@ export function renderSheetHtml(ch: Character, data: SheetData = {}, b: Budgets 
   <p class="free">Free: ${free.map((v) => esc(v.display)).join("; ") || "—"}</p>
   <h3 class="sub">Virtues · ${b.virtuesFlaws.virtuePoints} pts</h3>
   ${vir.map((v) => traitItem(v, data)).join("") || '<div class="row flat">—</div>'}
-  <h3 class="sub">Flaws · ${b.virtuesFlaws.flawPoints} pts ${b.virtuesFlaws.balanced ? "(balanced)" : "(unbalanced)"}</h3>
+  <h3 class="sub">Flaws · ${b.virtuesFlaws.flawPoints} pts</h3>
   ${flw.map((f) => traitItem(f, data)).join("") || '<div class="row flat">—</div>'}
 
   <h2>Abilities <span class="ctl">sort: <button data-sort="name" data-tgt="abilities" class="on">A–Z</button><button data-sort="score" data-tgt="abilities">score</button></span></h2>
@@ -212,17 +222,14 @@ export function renderSheetHtml(ch: Character, data: SheetData = {}, b: Budgets 
   <p class="ledger">xp — childhood ${b.childhood.spent}/${b.childhood.cap} · later life ${b.laterLife.spent}/${b.laterLife.cap}${magus ? ` · apprenticeship ${b.apprenticeship.spent}/${b.apprenticeship.cap}` : ""}</p>
 
   ${magus ? `<h2>Arts</h2>
-  <h3 class="sub">Techniques</h3>
-  <div class="arts">${TECHNIQUES.map((t) => artChip(t, ch.arts[t] ?? 0)).join("")}</div>
-  <h3 class="sub">Forms</h3>
-  <div class="arts">${FORMS.map((f) => artChip(f, ch.arts[f] ?? 0)).join("")}</div>
+  ${techs.length ? `<h3 class="sub">Techniques</h3>
+  <div class="arts">${techs.map((t) => artChip(t, ch.arts[t]!)).join("")}</div>` : ""}
+  ${forms.length ? `<h3 class="sub">Forms</h3>
+  <div class="arts">${forms.map((f) => artChip(f, ch.arts[f]!)).join("")}</div>` : ""}
+  ${techs.length + forms.length === 0 ? "<p>—</p>" : ""}
 
   <h2>Spells Known <span class="tag">(${b.apprenticeship.spells.spent} levels)</span>${spells.length ? ` <span class="ctl">sort: <button data-sort="level" data-tgt="spells" class="on">level</button><button data-sort="name" data-tgt="spells">A–Z</button><button data-sort="tf" data-tgt="spells">Form</button></span>` : ""}</h2>
   <div id="spells">${spells.map((s) => spellItem(s, data)).join("") || '<div class="row flat">—</div>'}</div>` : ""}
-
-  <h2>Personality · Reputation${hasConfidence ? " · Confidence" : ""}</h2>
-  <p>${ch.personality.map((p) => `${esc(p.trait)} ${sign(p.value)}`).join(", ") || "—"}<br>
-  Reputation: ${ch.reputation ? esc(ch.reputation) : "—"}${hasConfidence ? ` · Confidence ${conf.score} (${conf.points} points)` : ""}</p>
 
   <h2>Notes &amp; Description</h2>
   <div class="notes">${ch.notes?.trim() ? markdown(ch.notes) : "<p>—</p>"}</div>`;

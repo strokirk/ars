@@ -3,7 +3,9 @@
 // skills/magus-creation/SKILL.md. Pure — shared by the CLI and any web UI.
 import { type Character, charKind } from "./character.ts";
 import { type Budgets, ageAbilityMax, computeBudgets } from "./budgets.ts";
-import { type Modifiers, deriveModifiers } from "./modifiers.ts";
+import { type Modifiers, deriveModifiers, grantAccepts } from "./modifiers.ts";
+import { abilityCost } from "./budgets.ts";
+import { houseWarping } from "./houses.ts";
 import { abilityAllowed, hasEnablingVirtue } from "./ability-policy.ts";
 import { spellLabTotal } from "./labtotal.ts";
 
@@ -13,6 +15,8 @@ export interface Issue {
   code: string;
   budget: string;
   message: string;
+  /** The player reviewed and accepted it (Character.dismissed) — shown, but no longer counted. */
+  dismissed?: boolean;
 }
 
 // Numeric/prohibition ceilings (a cap exceeded, a kind forbidden a pick) — these are
@@ -81,6 +85,32 @@ export function validate(ch: Character, mods: Modifiers = deriveModifiers(ch), b
     warn("hermetic-forbidden", "virtues-flaws", `Only Gifted characters may take Hermetic Virtues or Flaws.`);
   }
 
+  // Non-repeatable Virtues/Flaws taken twice (with the same parameter). Allowed — a
+  // troupe may rule otherwise — but worth a second look.
+  for (const [kindName, list] of [["Virtue", ch.virtues], ["Flaw", ch.flaws]] as const) {
+    const seen = new Map<string, number>();
+    for (const t of list) {
+      const k = `${t.name.toLowerCase()}|${(t.param ?? "").toLowerCase()}`;
+      seen.set(k, (seen.get(k) ?? 0) + 1);
+    }
+    for (const [k, n] of seen) {
+      const t = list.find((x) => `${x.name.toLowerCase()}|${(x.param ?? "").toLowerCase()}` === k)!;
+      if (n < 2 || (t.repeatable && !t.param)) continue;
+      warn("dupe-trait", "virtues-flaws", `${t.display} is taken ${n}× — the rules don't say this ${kindName} can be taken more than once.`);
+    }
+  }
+
+  // Restricted bonus xp (Warrior → Martial, Educated → Latin/Artes Liberales, …): the
+  // pool's cap already includes it, so check the pool actually spent that much on
+  // eligible Abilities. ponytail: each grant is checked alone, so two grants sharing
+  // eligible Abilities can double-count them.
+  for (const g of mods.grants) {
+    if (!g.only?.types && !g.only?.names) continue;
+    if (g.pool !== "childhood" && g.pool !== "later-life" && g.pool !== "apprenticeship") continue;
+    const eligible = ch.abilities.filter((a) => a.stage === g.pool && grantAccepts(g, a)).reduce((s, a) => s + abilityCost(a, mods), 0);
+    if (eligible < g.xp) warn("grant-restricted", g.pool, `${g.source}: its ${g.xp} xp must be spent on ${g.only.label} in ${g.pool} — only ${eligible} xp is.`);
+  }
+
   // 3. Childhood.
   if (!budgets.childhood.nativeLanguageSet) err("native-language", "childhood", `Native Language not set (mandatory, score ${5} for 75 xp). Use \`set native-language <lang>\`.`);
   if (budgets.childhood.over) warn("childhood-over", "childhood", `Childhood xp overspent: ${budgets.childhood.spent}/${budgets.childhood.cap}.`);
@@ -99,6 +129,7 @@ export function validate(ch: Character, mods: Modifiers = deriveModifiers(ch), b
     if (!ap.minimums.magicTheory) err("min-magic-theory", "apprenticeship", `Magic Theory ≥ 1 is required.`);
     if (!ap.minimums.latin) err("min-latin", "apprenticeship", `Latin ≥ 1 is required.`);
     if (ap.spells.over) warn("spell-over", "apprenticeship", `Spell levels overspent: ${ap.spells.spent}/${ap.spells.cap}.`);
+    if (budgets.mastery.spent < budgets.mastery.cap) warn("mastery-under", "apprenticeship", `Mastery xp unused: ${budgets.mastery.spent}/${budgets.mastery.cap} — raise a known spell's Mastery.`);
     for (const s of ch.spells) {
       const lt = spellLabTotal(ch, mods, s, { aura: s.aura, inFocus: s.inFocus });
       if (s.level > lt.total) warn("spell-labtotal", "apprenticeship", `${s.name} (level ${s.level}) exceeds its Lab Total of ${lt.total} (${lt.breakdown}).`);
@@ -117,10 +148,15 @@ export function validate(ch: Character, mods: Modifiers = deriveModifiers(ch), b
     else if (a.restricted && a.stage !== "apprenticeship" && !hasEnablingVirtue(ch, a.type)) warn("ability-restricted", stageBudget[a.stage] ?? "apprenticeship", `${a.name} is marked * (needs an enabling Virtue) — verify you have one.`);
   }
 
+  const w = houseWarping(ch);
+  if (w) warn("house-warping", "virtues-flaws", `Warping Score starts at ${w.points} point${w.points === 1 ? "" : "s"}: ${w.reason}.`);
+
+  const dismissed = new Set(ch.dismissed ?? []);
+  for (const i of issues) if (dismissed.has(i.code)) i.dismissed = true;
   return issues;
 }
 
 /** Convenience: true when no error-level issues remain. */
 export function isLegal(issues: Issue[]): boolean {
-  return !issues.some((i) => i.level === "error");
+  return !issues.some((i) => i.level === "error" && !i.dismissed);
 }

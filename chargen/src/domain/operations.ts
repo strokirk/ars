@@ -16,7 +16,7 @@ import { type Issue, VIOLATION_CODES, validate } from "./validate.ts";
 import {
   addAbility, addFreeTrait, addPersonality, addSpell, addTrait,
   removeAbility, removeSpell, removeTrait, setArt, setArts, setCharacteristic, setCharacteristics,
-  setMeta, setNativeLanguage, setNotes, type MetaFields, type MutationResult,
+  setMastery, setMeta, setNativeLanguage, setNotes, type MetaFields, type MutationResult,
 } from "./mutations.ts";
 import { XP_STAGES, isArt, isCharacteristic } from "./glossary.ts";
 
@@ -31,6 +31,7 @@ export type Op =
   | { op: "arts"; values: Record<string, number> }
   | { op: "art"; name: string; score: number }
   | { op: "spell"; name: string; aura?: number; focus?: boolean }
+  | { op: "mastery"; name: string; score: number }
   | { op: "personality"; trait: string; value: number }
   | { op: "native-language"; value: string }
   | { op: "notes"; value: string; mode?: "set" | "append" }
@@ -39,7 +40,7 @@ export type Op =
 
 export const OP_KINDS = [
   "chars", "char", "virtue", "flaw", "ability", "arts", "art",
-  "spell", "personality", "native-language", "notes", "meta", "remove",
+  "spell", "mastery", "personality", "native-language", "notes", "meta", "remove",
 ] as const;
 
 export interface OpResult {
@@ -96,6 +97,8 @@ export function applyOp(ch: Character, op: Op, rules: RulesData, force = false):
       if (!s) return { ok: false, character: ch, rejected: `No spell named "${op.name}". Try \`chargen options spells --search ${op.name.split(/\s+/)[0]}\`.`, issues: validate(ch) };
       return addSpell(ch, s, { aura: op.aura, inFocus: op.focus }, force);
     }
+    case "mastery":
+      return setMastery(ch, op.name, op.score);
     case "personality":
       return addPersonality(ch, op.trait, op.value);
     case "native-language":
@@ -150,6 +153,7 @@ export function opSummary(op: Op): string {
     case "arts": return `arts ${Object.entries(op.values).map(([k, v]) => `${k} ${v}`).join(", ")}`;
     case "art": return `art ${op.name} ${op.score}`;
     case "spell": return `spell ${op.name}`;
+    case "mastery": return `mastery ${op.name} ${op.score}`;
     case "personality": return `personality ${op.trait} ${op.value}`;
     case "native-language": return `native-language ${op.value}`;
     case "notes": return `notes (${op.mode ?? "set"})`;

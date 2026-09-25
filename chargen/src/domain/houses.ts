@@ -2,7 +2,7 @@
 // creation (per skills/magus-creation/SKILL.md). applyHouse() turns a House (plus
 // any required choice) into concrete free Virtue/Ability/Flaw picks + notes for
 // choices the player still owes.
-import type { AbilityPick, TraitPick } from "./character.ts";
+import type { AbilityPick, Character, TraitPick } from "./character.ts";
 import type { House } from "./glossary.ts";
 import type { RulesData } from "../data/rules.ts";
 
@@ -47,6 +47,8 @@ interface HouseBenefit {
   virtues?: { name: string; param?: string }[];
   abilities?: { name: string; score: number }[];
   puissant?: { kind: "art" | "ability"; options: string[]; fallback: string };
+  /** Warping Points inflicted at creation unless a paid Virtue/Flaw's name matches `unless`. */
+  warping?: { points: number; unless: RegExp; reason: string };
   notes?: string[];
 }
 
@@ -68,12 +70,22 @@ const HOUSE_BENEFITS: Record<House, HouseBenefit> = {
   Mercere: { puissant: { kind: "art", options: ["Creo", "Muto"], fallback: "Creo" } },
   Merinita: {
     virtues: [{ name: "Faerie Magic" }],
-    notes: ["Merinita: +1 Warping Point if you take no faerie-related Virtue/Flaw."],
+    abilities: [{ name: "Faerie Magic", score: 1 }],
+    // ponytail: "faerie-related" matched by name only; a Virtue that's faerie in substance but not in name needs a dismiss.
+    warping: { points: 1, unless: /faerie/i, reason: "Merinita initiation — no faerie-related Virtue or Flaw" },
   },
   Tremere: { virtues: [{ name: "Minor Magical Focus", param: "certamen" }] },
   Tytalus: { virtues: [{ name: "Self-Confident" }] },
   Verditius: { virtues: [{ name: "Verditius Magic" }] },
 };
+
+/** Warping Points a House's initiation inflicts on this character (0 if exempt). */
+export function houseWarping(ch: Character): { points: number; reason: string } | null {
+  const w = ch.house ? HOUSE_BENEFITS[ch.house].warping : undefined;
+  if (!w) return null;
+  const exempt = [...ch.virtues, ...ch.flaws].some((t) => !t.free && w.unless.test(t.name));
+  return exempt ? null : { points: w.points, reason: w.reason };
+}
 
 export function applyHouse(
   house: House,

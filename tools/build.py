@@ -64,6 +64,7 @@ CREATE TABLE virtues_flaws (
   category     TEXT,           -- primary category (Hermetic, General, ...)
   categories   TEXT,           -- JSON array (some entries list several)
   tainted      INTEGER,        -- 0/1
+  repeatable   INTEGER,        -- 0/1: may be taken more than once
   cost_raw     TEXT,
   description  TEXT,
   source_file  TEXT,
@@ -130,10 +131,10 @@ def main():
     for i, v in enumerate(vf, start=1):
         con.execute(
             """INSERT INTO virtues_flaws (id,name,kind,size,category,categories,
-               tainted,cost_raw,description,source_file,source_line)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+               tainted,repeatable,cost_raw,description,source_file,source_line)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
             (i, v["name"], v["kind"], v["size"], v["category"],
-             json.dumps(v["categories"]), int(v["tainted"]), v["cost_raw"],
+             json.dumps(v["categories"]), int(v["tainted"]), int(v["repeatable"]), v["cost_raw"],
              v["description"], v["source_file"], v["source_line"]),
         )
         con.execute("INSERT INTO virtues_flaws_fts (rowid,name,description) VALUES (?,?,?)",

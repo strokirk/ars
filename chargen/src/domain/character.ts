@@ -14,6 +14,7 @@ export interface TraitPick {
   category: string;
   points: number;      // 0 (Free) | 1 (Minor) | 3 (Major)
   free?: boolean;      // The Gift / Hermetic Magus / House benefit — off-budget
+  repeatable?: boolean; // the rules allow taking it more than once (VirtueFlawRow.repeatable)
 }
 
 export interface AbilityPick {
@@ -34,6 +35,18 @@ export interface SpellPick {
   labTotal: number;     // the cap computed when added, recorded for audit
   inFocus?: boolean;    // counted as in your Magical Focus
   aura?: number;        // aura assumed when learning (default 3)
+  mastery?: number;     // Spell Mastery score (costs xp like an Ability)
+}
+
+/** The xp/level pools a bonus can top up. */
+export type XpPool = "childhood" | "later-life" | "apprenticeship" | "spells" | "mastery";
+export const XP_POOLS: readonly XpPool[] = ["childhood", "later-life", "apprenticeship", "spells", "mastery"];
+
+/** A player/GM-entered adjustment to a pool's cap (negative to take xp away). */
+export interface XpBonus {
+  pool: XpPool;
+  xp: number;
+  note: string;
 }
 
 export interface PersonalityTrait {
@@ -63,6 +76,10 @@ export interface Character {
   confidence: number;
   reputation?: string | null;
   laterLifeYears: number;
+  /** Free-form adjustments on top of what Virtues grant (house rules, a story reward). */
+  xpBonuses?: XpBonus[];
+  /** Issue codes the player has reviewed and accepted — they stop counting against legality. */
+  dismissed?: string[];
 }
 
 export interface NewCharacterOpts {

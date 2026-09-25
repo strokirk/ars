@@ -148,16 +148,16 @@ export function parseSheetMarkdown(md: string, rules: RulesData): ImportResult {
 
     for (const line of section(lines, /^## Spells Known/)) {
       if (line === "—") continue;
-      const m = line.match(/^-\s+(.+?)\s+\(([A-Za-z]{2})([A-Za-z]{2})\s+(\d+)\)$/);
+      const m = line.match(/^-\s+(.+?)\s+\(([A-Za-z]{2})([A-Za-z]{2})\s+(\d+)\)(?:\s+·\s+Mastery\s+(\d+))?$/);
       if (!m) { warnings.push(`Could not parse spell line "${line}"`); continue; }
-      const [, spName, techAbbr, formAbbr, levelStr] = m;
+      const [, spName, techAbbr, formAbbr, levelStr, masteryStr] = m;
       const row = rules.spell(spName!.trim());
       const technique = (row?.technique as Technique | undefined) ?? ABBR_TO_ART[techAbbr!] as Technique | undefined;
       const form = (row?.form as Form | undefined) ?? ABBR_TO_ART[formAbbr!] as Form | undefined;
       if (!technique || !form) { warnings.push(`Unknown Technique/Form for spell "${spName}"`); continue; }
       if (!row) warnings.push(`"${spName}" isn't in the rules data — imported with no known requisites.`);
       const level = Number(levelStr);
-      ch.spells.push({ name: spName!.trim(), technique, form, level, requisites: row?.requisites ?? [], labTotal: level });
+      ch.spells.push({ name: spName!.trim(), technique, form, level, requisites: row?.requisites ?? [], labTotal: level, ...(masteryStr ? { mastery: Number(masteryStr) } : {}) });
     }
     const mods = deriveModifiers(ch);
     for (const s of ch.spells) s.labTotal = spellLabTotal(ch, mods, s, { aura: s.aura, inFocus: s.inFocus }).total;

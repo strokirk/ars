@@ -59,7 +59,7 @@ export function renderSheet(ch: Character, b: Budgets = computeBudgets(ch)): str
 
     L.push(`## Spells Known  (total levels: ${b.apprenticeship.spells.spent})`);
     if (ch.spells.length === 0) L.push("—");
-    else for (const s of ch.spells) L.push(`- ${s.name} (${ART_ABBR[s.technique]}${ART_ABBR[s.form]} ${s.level})`);
+    else for (const s of ch.spells) L.push(`- ${s.name} (${ART_ABBR[s.technique]}${ART_ABBR[s.form]} ${s.level})${s.mastery ? ` · Mastery ${s.mastery}` : ""}`);
     L.push("");
   }
 

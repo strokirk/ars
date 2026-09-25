@@ -72,6 +72,8 @@ export function reseedMagus(prev: Character, opts: NewOpts): Character {
   base.personality = prev.personality;
   base.reputation = prev.reputation;
   base.confidence = prev.confidence;
+  base.xpBonuses = prev.xpBonuses;
+  base.dismissed = prev.dismissed;
   // Keep player picks; replace only the free (Gift/Status/House) grants.
   base.virtues = [...base.virtues.filter((v) => v.free), ...prev.virtues.filter((v) => !v.free)];
   base.flaws = [...base.flaws.filter((f) => f.free), ...prev.flaws.filter((f) => !f.free)];

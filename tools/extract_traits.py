@@ -51,6 +51,14 @@ def parse_cost(line):
     return size, cats, tainted
 
 
+# "May be taken more than once" is spelled a dozen ways in the source; the regex
+# catches the phrasings, REPEATABLE_EXTRA names any the prose leaves implicit.
+REPEATABLE_RE = re.compile(
+    r"more than once|multiple times|several times|take this (?:virtue|flaw) twice"
+    r"|may be taken (?:again|several|two|twice)", re.I)
+REPEATABLE_EXTRA = {"Mastered Spells"}
+
+
 def parse_virtues_flaws():
     lines = VF_FILE.read_text(encoding="utf-8").splitlines()
     out = []
@@ -86,6 +94,8 @@ def parse_virtues_flaws():
                 "category": cats[0] if cats else None,
                 "categories": cats,
                 "tainted": tainted,
+                "repeatable": name in REPEATABLE_EXTRA
+                or bool(REPEATABLE_RE.search(" ".join(desc))),
                 "cost_raw": cost_raw,
                 "description": clean(" ".join(desc)),
                 "source_file": VF_FILE.name,

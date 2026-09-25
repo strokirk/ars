@@ -299,3 +299,40 @@ test("data: Creo Terram and Creo Mentem spells are extracted (were silently drop
   const wall = rules.spell("Conjuring the Mystic Tower");
   assert.ok(wall && wall.technique === "Creo" && wall.form === "Terram");
 });
+
+test("Virtue xp grants, manual bonuses, mastery, Merinita warping, soft dupes, dismissals", async () => {
+  const { createMagus } = await import("../src/domain/create.ts");
+  const { applyOps } = await import("../src/domain/operations.ts");
+  let ch = createMagus({ name: "Fenn", house: "Merinita" }, rules).character;
+  assert.ok(ch.abilities.some((a) => a.name === "Faerie Magic" && a.score === 1), "Merinita grants Faerie Magic 1");
+  assert.ok(validate(ch).some((i) => i.code === "house-warping"));
+
+  ch = applyOps(ch, [
+    { op: "virtue", name: "Warrior" },
+    { op: "virtue", name: "Mastered Spells" },
+    { op: "virtue", name: "Mastered Spells" },
+    { op: "virtue", name: "Educated" },
+    { op: "virtue", name: "Educated" },
+    { op: "flaw", name: "Faerie Upbringing" },
+    { op: "spell", name: "Pilum of Fire" },
+    { op: "mastery", name: "Pilum of Fire", score: 3 },
+    { op: "meta", fields: { xpBonuses: [{ pool: "childhood", xp: 10, note: "house rule" }] } },
+  ], rules, { force: true }).character;
+  const b = computeBudgets(ch);
+  assert.equal(b.childhood.cap, 55);
+  assert.equal(b.laterLife.cap, 5 * 15 + 50 + 100, "Warrior + 2× Educated land in later life");
+  assert.equal(b.mastery.cap, 100, "Mastered Spells stacks");
+  assert.equal(b.mastery.spent, 30, "Mastery 3 costs 30 xp");
+  let issues = validate(ch);
+  assert.ok(!issues.some((i) => i.code === "house-warping"), "a faerie Flaw exempts Merinita");
+  assert.ok(issues.some((i) => i.code === "grant-restricted" && /Warrior/.test(i.message)));
+  assert.ok(issues.some((i) => i.code === "dupe-trait" && /Educated/.test(i.message)));
+  assert.ok(!issues.some((i) => i.code === "dupe-trait" && /Mastered/.test(i.message)), "Mastered Spells is repeatable");
+
+  ch = applyOps(ch, [{ op: "mastery", name: "Pilum of Fire", score: 7 }], rules, { force: true }).character;
+  assert.equal(computeBudgets(ch).apprenticeship.spent - computeBudgets({ ...ch, spells: ch.spells.map((s) => ({ ...s, mastery: 0 })) }).apprenticeship.spent, 40, "mastery past its pool spills into apprenticeship xp");
+
+  ch = applyOps(ch, [{ op: "meta", fields: { dismissed: ["char-under"] } }], rules, { force: true }).character;
+  issues = validate(ch);
+  assert.ok(issues.find((i) => i.code === "char-under")?.dismissed);
+});

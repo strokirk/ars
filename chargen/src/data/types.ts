@@ -11,6 +11,8 @@ export interface VirtueFlawRow {
   category: string;
   categories: string[];
   tainted: boolean;
+  /** The rules allow taking it more than once (see tools/extract_traits.py). */
+  repeatable: boolean;
   cost_raw: string;
   description: string;
   source_file: string;
