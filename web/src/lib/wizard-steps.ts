@@ -75,12 +75,12 @@ export function metersFor(step: StepDef, b: Budgets): Meter[] {
       text: `V ${vf.virtuePoints} ${vf.balanced ? "=" : "≠"} F ${vf.flawPoints} (≤${vf.cap})`,
     });
   }
-  if (step.budgets.includes("childhood")) out.push({ ...b.childhood, label: "Childhood" });
-  if (step.budgets.includes("later-life")) out.push({ ...b.laterLife, label: "Later life" });
+  if (step.budgets.includes("childhood")) out.push({ ...b.childhood, label: "Childhood", pool: "childhood" });
+  if (step.budgets.includes("later-life")) out.push({ ...b.laterLife, label: "Later life", pool: "later-life" });
   if (step.budgets.includes("apprenticeship")) {
-    out.push({ ...b.apprenticeship, label: "Apprenticeship" });
-    out.push({ ...b.apprenticeship.spells, label: "Spells" });
-    if (b.mastery.cap > 0 || b.mastery.spent > 0) out.push({ ...b.mastery, label: "Mastery" });
+    out.push({ ...b.apprenticeship, label: "Apprenticeship", pool: "apprenticeship" });
+    out.push({ ...b.apprenticeship.spells, label: "Spells", pool: "spells" });
+    if (b.mastery.cap > 0 || b.mastery.spent > 0) out.push({ ...b.mastery, label: "Mastery", pool: "mastery" });
   }
   return out;
 }

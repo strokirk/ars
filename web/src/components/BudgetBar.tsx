@@ -1,6 +1,7 @@
 import type { ComponentChildren } from "preact";
 import { useRef } from "preact/hooks";
 import { usePublishHeight } from "../lib/use-publish-height.ts";
+import type { XpPool } from "../../../chargen/src/domain/character.ts";
 
 export interface Meter {
   label: string;
@@ -12,6 +13,8 @@ export interface Meter {
   text?: string;
   /** Muted trailing gloss (e.g. "33 left"). */
   note?: string;
+  /** The xp pool behind this meter, for bonus adjustments. */
+  pool?: XpPool;
 }
 
 /** One meter: the label, the value, and an optional gloss. Used in the per-stage
@@ -33,7 +36,12 @@ export const leftText = (m: Meter): string => {
 
 /** Sticky strip under the step pips: one bar per budget pool, and the step
  *  navigation (`children`) on the right. */
-export function BudgetBar({ meters, children }: { meters: Meter[]; children?: ComponentChildren }) {
+export function BudgetBar({ meters, bonus, children }: {
+  meters: Meter[];
+  /** Extra control after a meter's label (the Wizard's bonus-xp "±"). */
+  bonus?: (m: Meter) => ComponentChildren;
+  children?: ComponentChildren;
+}) {
   const el = useRef<HTMLDivElement>(null);
   // The creator's sticky filter bars hang below this strip.
   usePublishHeight(el, "--budgetbar-h");
@@ -43,7 +51,7 @@ export function BudgetBar({ meters, children }: { meters: Meter[]; children?: Co
         {meters.map((m) => (
           <div key={m.label} class={`pool ${m.over ? "over" : m.full ? "full" : ""}`}>
             <div class="pool-label">
-              <span>{m.label}</span>
+              <span>{m.label}{bonus?.(m)}</span>
               <b>{m.text ?? leftText(m)}</b>
             </div>
             <div class="pool-bar" title={`${m.spent}/${m.cap}`}>

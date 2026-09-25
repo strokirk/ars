@@ -21,7 +21,6 @@ import { deriveModifiers } from "../../chargen/src/domain/modifiers.ts";
 import { spellLabTotal } from "../../chargen/src/domain/labtotal.ts";
 import { artXp, affinityXp } from "../../chargen/src/domain/costs.ts";
 import { rules } from "./engine.ts";
-import { BonusXp } from "./components/BonusXp.tsx";
 import { abilityXp } from "../../chargen/src/domain/costs.ts";
 import type { SpellRow } from "../../chargen/src/data/types.ts";
 
@@ -200,8 +199,6 @@ export function AbilitiesStep({ ch, update }: StepProps) {
       </section>
 
       <AbilityPicker ch={ch} update={update} stages={stages} />
-      <hr class="soft" />
-      <BonusXp ch={ch} update={update} pools={magus ? ["childhood", "later-life", "apprenticeship"] : ["childhood", "later-life"]} />
     </div>
   );
 }
@@ -350,7 +347,6 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
           ))}
         </ul>
       )}
-      <BonusXp ch={ch} update={update} pools={["apprenticeship", "spells", "mastery"]} />
       <SpellBrowser
         labTotalOf={labTotalOf}
         action={(s) => {
