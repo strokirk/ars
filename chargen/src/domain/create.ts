@@ -2,7 +2,7 @@
 // blank magus and applies the off-budget grants every magus gets: The Gift,
 // Hermetic Magus, and the House's free benefit. Previously this loop was copy-
 // pasted across cmdNew and both test files.
-import { newCharacter, type Character, type NewCharacterOpts } from "./character.ts";
+import { newCharacter, traitPick, type Character, type NewCharacterOpts } from "./character.ts";
 import { applyHouse } from "./houses.ts";
 import type { House } from "./glossary.ts";
 import type { RulesData } from "../data/rules.ts";
@@ -26,7 +26,7 @@ export function createMagus(opts: CreateOpts, rules: RulesData): CreateResult {
   const ch = newCharacter({ ...opts, kind: "magus" });
   for (const n of ["The Gift", "Hermetic Magus"]) {
     const r = rules.resolveTrait(n);
-    if (r.ok) ch.virtues.push({ name: r.trait.canonical, display: r.trait.display, size: r.trait.size, category: r.trait.row.category, points: 0, free: true });
+    if (r.ok) ch.virtues.push(traitPick(r.trait, true));
   }
   const app = applyHouse(opts.house, { puissant: opts.puissant }, rules);
   ch.virtues.push(...app.virtues);

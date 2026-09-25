@@ -57,6 +57,7 @@ All Virtues and Flaws (from `md/04-virtues-and-flaws/12-general.md`).
 | `category` | primary: `Hermetic`, `General`, `Supernatural`, `Social Status`, `Personality`, `Story`, `Mythic Companion`, `Special` |
 | `categories` | JSON array (a few entries list more than one) |
 | `tainted` | 1 if a Tainted variant |
+| `enables` | JSON array of Ability types (`Academic`/`Arcane`/`Martial`) the Virtue opens at creation, read from its text |
 | `repeatable` | 1 if the rules let you take it more than once (regex over the text + `REPEATABLE_EXTRA` in `tools/extract_traits.py`) |
 | `cost_raw` | the verbatim cost line, e.g. `Minor, Hermetic` |
 | `description`, `source_file`, `source_line` | |

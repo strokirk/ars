@@ -2,6 +2,7 @@
 // character round-trips through a base64 hash so a build can be shared on a static site.
 import { signal } from "@preact/signals";
 import type { Character } from "../../chargen/src/domain/character.ts";
+import { rules } from "./rules.ts";
 
 export interface Draft {
   id: string;
@@ -14,7 +15,9 @@ const KEY = "ars-drafts-v1";
 function read(): Draft[] {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as Draft[]) : [];
+    const list = raw ? (JSON.parse(raw) as Draft[]) : [];
+    for (const d of list) rules.refreshTraitFlags(d.character);
+    return list;
   } catch {
     return [];
   }
@@ -62,7 +65,7 @@ export function decodeCharacter(data: string): Character | null {
     const b64 = data.replace(/-/g, "+").replace(/_/g, "/");
     const bin = atob(b64);
     const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
-    return JSON.parse(new TextDecoder().decode(bytes)) as Character;
+    return rules.refreshTraitFlags(JSON.parse(new TextDecoder().decode(bytes)) as Character);
   } catch {
     return null;
   }

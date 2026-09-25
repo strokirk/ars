@@ -20,7 +20,7 @@ function parseImport(text: string): Parsed {
     if (!parsed || typeof parsed !== "object" || !parsed.kind || !parsed.name) {
       throw new Error("That JSON doesn't look like an exported character.");
     }
-    return { character: parsed as Character, warnings: [] };
+    return { character: rules.refreshTraitFlags(parsed as Character), warnings: [] };
   }
   return parseSheetMarkdown(trimmed, rules);
 }

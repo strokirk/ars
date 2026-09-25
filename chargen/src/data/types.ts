@@ -13,6 +13,8 @@ export interface VirtueFlawRow {
   tainted: boolean;
   /** The rules allow taking it more than once (see tools/extract_traits.py). */
   repeatable: boolean;
+  /** Ability types a Virtue opens at creation ("You may purchase Academic Abilities…"). */
+  enables: ("Academic" | "Arcane" | "Martial")[];
   cost_raw: string;
   description: string;
   source_file: string;

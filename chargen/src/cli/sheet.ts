@@ -21,6 +21,7 @@ export function renderSheet(ch: Character, b: Budgets = computeBudgets(ch)): str
   const L: string[] = [];
   const magus = charKind(ch) === "magus";
   L.push(`# ${magusTitle(ch)}`, "");
+  L.push(`**Type:** ${charKind(ch)[0]!.toUpperCase()}${charKind(ch).slice(1)}`);
   L.push(`**Concept:** ${ch.concept || "—"} · **Age:** ${ch.age} · **Later-life years:** ${ch.laterLifeYears}${magus ? " (fresh Gauntlet unless noted)" : ""}`, "");
 
   L.push("## Characteristics");

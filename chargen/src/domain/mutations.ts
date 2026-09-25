@@ -3,7 +3,7 @@
 // problems (unbalanced V&F, unused xp, missing minimums) are returned as issues but
 // never block a mutation — they're expected mid-build. The CLI is a thin wrapper
 // over these; a web app can call them identically.
-import { charKind } from "./character.ts";
+import { charKind, traitPick } from "./character.ts";
 import type { AbilityPick, Character, PersonalityTrait, SpellPick, TraitPick, XpBonus } from "./character.ts";
 import { type Art, type Characteristic, type Form, type Stage, type Technique, isArt, isCharacteristic } from "./glossary.ts";
 import type { ResolvedAbility, ResolvedTrait } from "../data/rules.ts";
@@ -63,11 +63,7 @@ export function addTrait(ch: Character, kind: "Virtue" | "Flaw", resolved: Resol
     const why = dupe.free ? "it duplicates a free benefit you already have" : "it's already taken and isn't repeatable";
     return { ok: false, character: ch, rejected: `Cannot add ${resolved.display}: ${why}.`, issues: validate(ch) };
   }
-  const pick: TraitPick = {
-    name: resolved.canonical, display: resolved.display, param: resolved.param,
-    size: resolved.size, category: resolved.row.category, points: resolved.points,
-    repeatable: resolved.row.repeatable || undefined,
-  };
+  const pick = traitPick(resolved);
   const candidate = clone(ch);
   (kind === "Virtue" ? candidate.virtues : candidate.flaws).push(pick);
   return finalize(ch, candidate, `+ ${kind}: ${resolved.display} (${resolved.size}, ${resolved.row.category}) = ${resolved.points} pt${resolved.points === 1 ? "" : "s"}`, force);
@@ -76,11 +72,7 @@ export function addTrait(ch: Character, kind: "Virtue" | "Flaw", resolved: Resol
 /** Add a free, off-budget Virtue/Flaw (e.g. an Ex Miscellanea / Jerbiton grant). */
 export function addFreeTrait(ch: Character, kind: "Virtue" | "Flaw", resolved: ResolvedTrait): MutationResult {
   const candidate = clone(ch);
-  const pick: TraitPick = {
-    name: resolved.canonical, display: resolved.display, param: resolved.param,
-    size: resolved.size, category: resolved.row.category, points: 0, free: true,
-    repeatable: resolved.row.repeatable || undefined,
-  };
+  const pick = traitPick(resolved, true);
   (kind === "Virtue" ? candidate.virtues : candidate.flaws).push(pick);
   return finalize(ch, candidate, `+ Free ${kind}: ${resolved.display}`, true);
 }

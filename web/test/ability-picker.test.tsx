@@ -111,7 +111,7 @@ describe("AbilityPicker", () => {
     const martial = optionFor(el, "Single Weapon");
     expect(label(martial.action)).toBe("Add ⚠");
     expect(martial.action.getAttribute("disabled")).toBeNull();
-    expect(martial.meta).toMatch(/can't be learned in childhood/);
+    expect(martial.meta).toMatch(/aren't usually learned in childhood/);
     // ...and it sorts below everything actually takeable.
     expect(rowTitles(el).indexOf("Single Weapon")).toBeGreaterThan(rowTitles(el).indexOf("Swim"));
   });

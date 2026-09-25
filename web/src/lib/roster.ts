@@ -2,6 +2,7 @@
 // by a URL-safe slug so each member has a stable, linkable sheet at #/roster/:slug.
 import type { Character } from "../../../chargen/src/domain/character.ts";
 import { kebab } from "../../../chargen/src/cli/sheet.ts";
+import { rules } from "../rules.ts";
 
 export interface RosterEntry {
   slug: string;
@@ -31,7 +32,7 @@ export function buildRoster(characters: Character[]): RosterEntry[] {
     });
 }
 
-export const roster: RosterEntry[] = buildRoster(Object.values(modules).map((m) => m.default));
+export const roster: RosterEntry[] = buildRoster(Object.values(modules).map((m) => rules.refreshTraitFlags(m.default)));
 
 export function rosterEntry(slug: string): RosterEntry | undefined {
   return roster.find((e) => e.slug === slug);

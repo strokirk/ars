@@ -44,7 +44,7 @@ const fail = (ctx: Ctx, message: string): number => {
 };
 
 function tryLoad(ctx: Ctx): ReturnType<typeof loadCharacter> | undefined {
-  return characterExists(ctx.charPath) ? loadCharacter(ctx.charPath) : undefined;
+  return characterExists(ctx.charPath) ? loadCharacter(ctx.charPath, ctx.rules) : undefined;
 }
 
 /** Apply an op batch to the loaded character, persist when saved, render. The one
@@ -135,7 +135,7 @@ export function cmdBuild(ctx: Ctx): number {
 
 // ── apply (a batch of ops to an existing character) ─────────────────────────────
 export function cmdApply(ctx: Ctx): number {
-  const ch = loadCharacter(ctx.charPath);
+  const ch = loadCharacter(ctx.charPath, ctx.rules);
   let ops: Op[];
   try {
     const parsed = JSON.parse(readJsonInput(ctx));
@@ -147,7 +147,7 @@ export function cmdApply(ctx: Ctx): number {
 
 // ── status ──────────────────────────────────────────────────────────────────────
 export function cmdStatus(ctx: Ctx): number {
-  const ch = loadCharacter(ctx.charPath);
+  const ch = loadCharacter(ctx.charPath, ctx.rules);
   const b = computeBudgets(ch);
   const issues = validate(ch);
   const guidance = nextGuidance(ch, b);
@@ -260,7 +260,7 @@ export function cmdOptions(ctx: Ctx): number {
 // ── set (single-op sugar) ───────────────────────────────────────────────────────
 export function cmdSet(ctx: Ctx): number {
   const what = (ctx.positionals[0] ?? "").toLowerCase();
-  const ch = loadCharacter(ctx.charPath);
+  const ch = loadCharacter(ctx.charPath, ctx.rules);
   const rest = ctx.positionals.slice(1);
   const meta = (fields: MetaFields): number => runBatch(ctx, ch, [{ op: "meta", fields }]);
 
@@ -295,7 +295,7 @@ export function cmdSet(ctx: Ctx): number {
 // ── add (single-op sugar) ───────────────────────────────────────────────────────
 export function cmdAdd(ctx: Ctx): number {
   const what = (ctx.positionals[0] ?? "").toLowerCase();
-  const ch = loadCharacter(ctx.charPath);
+  const ch = loadCharacter(ctx.charPath, ctx.rules);
 
   if (what === "virtue" || what === "flaw") {
     const name = ctx.positionals[1];
@@ -331,7 +331,7 @@ export function cmdAdd(ctx: Ctx): number {
 export function cmdRemove(ctx: Ctx): number {
   const what = (ctx.positionals[0] ?? "").toLowerCase();
   const name = ctx.positionals.slice(1).join(" ");
-  const ch = loadCharacter(ctx.charPath);
+  const ch = loadCharacter(ctx.charPath, ctx.rules);
   if (!["virtue", "flaw", "ability", "spell"].includes(what)) {
     return fail(ctx, `Unknown remove target "${what}". Try: virtue | flaw | ability | spell`);
   }
@@ -341,7 +341,7 @@ export function cmdRemove(ctx: Ctx): number {
 
 // ── notes ───────────────────────────────────────────────────────────────────────
 export function cmdNotes(ctx: Ctx): number {
-  const ch = loadCharacter(ctx.charPath);
+  const ch = loadCharacter(ctx.charPath, ctx.rules);
   const file = flagStr(ctx.flags, "file");
   const append = flagStr(ctx.flags, "append");
   const set = flagStr(ctx.flags, "set") ?? (file ? undefined : ctx.positionals.join(" "));
@@ -353,7 +353,7 @@ export function cmdNotes(ctx: Ctx): number {
 
 // ── check ─────────────────────────────────────────────────────────────────────
 export function cmdCheck(ctx: Ctx): number {
-  const ch = loadCharacter(ctx.charPath);
+  const ch = loadCharacter(ctx.charPath, ctx.rules);
   const issues = validate(ch);
   out(ctx, renderIssues(issues), { legal: isLegal(issues), issues });
   return isLegal(issues) ? 0 : 1;
@@ -389,7 +389,7 @@ function writeSheets(ctx: Ctx, ch: ReturnType<typeof loadCharacter>, outPath: st
 }
 
 export function cmdExport(ctx: Ctx): number {
-  const ch = loadCharacter(ctx.charPath);
+  const ch = loadCharacter(ctx.charPath, ctx.rules);
   if (ctx.json) { console.log(JSON.stringify(ch, null, 2)); return 0; }
   const format = exportFormat(ctx);
   const outPath = flagStr(ctx.flags, "out");

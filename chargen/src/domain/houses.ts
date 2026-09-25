@@ -2,7 +2,7 @@
 // creation (per skills/magus-creation/SKILL.md). applyHouse() turns a House (plus
 // any required choice) into concrete free Virtue/Ability/Flaw picks + notes for
 // choices the player still owes.
-import type { AbilityPick, Character, TraitPick } from "./character.ts";
+import { type AbilityPick, type Character, type TraitPick, traitPick } from "./character.ts";
 import type { House } from "./glossary.ts";
 import type { RulesData } from "../data/rules.ts";
 
@@ -22,7 +22,7 @@ function freeTrait(rules: RulesData, input: string, param?: string): TraitPick |
   const r = rules.resolveTrait(input, param);
   if (!r.ok) return { error: r.error };
   const t = r.trait;
-  return { name: t.canonical, display: t.display, param: t.param, size: t.size, category: t.row.category, points: 0, free: true };
+  return traitPick(t, true);
 }
 
 function freeAbility(rules: RulesData, name: string, score: number): AbilityPick | { error: string } {

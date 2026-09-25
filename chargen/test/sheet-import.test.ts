@@ -128,3 +128,13 @@ test("a grog (no Confidence) round-trips, and is inferred as a grog", () => {
   assert.equal(reimported.kind, "grog");
   assert.equal(renderSheet(reimported), before);
 });
+
+test("the explicit **Type:** line wins over shape-based inference, and older exports still infer", () => {
+  const ch = newCharacter({ name: "Otto", kind: "companion" });
+  const md = renderSheet(ch);
+  assert.match(md, /^\*\*Type:\*\* Companion$/m);
+  // A hand-edited sheet that dropped Confidence would otherwise read as a grog.
+  const edited = md.replace(" / Confidence", "");
+  assert.equal(parseSheetMarkdown(edited, rules).character.kind, "companion");
+  assert.equal(parseSheetMarkdown(md.replace(/^\*\*Type:\*\*.*\n/m, ""), rules).character.kind, "companion");
+});

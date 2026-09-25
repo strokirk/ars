@@ -2,7 +2,7 @@
 // Round-trips the standard export exactly; anything it can't resolve (a Virtue/Flaw
 // or Ability name the rules data doesn't recognize) is skipped and reported in
 // `warnings` rather than failing the whole import.
-import { newCharacter, type Character, type CharacterKind, type TraitPick } from "../domain/character.ts";
+import { newCharacter, traitPick, type Character, type CharacterKind, type TraitPick } from "../domain/character.ts";
 import { CHARACTERISTICS, TECHNIQUES, FORMS, ART_ABBR, HOUSES, type Art, type Characteristic, type House, type Technique, type Form, type Stage } from "../domain/glossary.ts";
 import { deriveModifiers } from "../domain/modifiers.ts";
 import { spellLabTotal } from "../domain/labtotal.ts";
@@ -65,10 +65,14 @@ export function parseSheetMarkdown(md: string, rules: RulesData): ImportResult {
   const age = headerMatch ? Number(headerMatch[2]) : 25;
   const laterLifeYears = headerMatch ? Number(headerMatch[3]) : 5;
 
+  // **Type:** is explicit since exports carry it; older exports fall back to the sheet's shape.
+  const typeLine = lines.find((l) => l.startsWith("**Type:**"))?.replace("**Type:**", "").trim().toLowerCase();
   const personalityHeading = lines.find((l) => l.startsWith("## Personality")) ?? "";
-  const kind: CharacterKind = house || lines.some((l) => l.trim() === "## Arts")
-    ? "magus"
-    : personalityHeading.includes("Confidence") ? "companion" : "grog";
+  const kind: CharacterKind = typeLine === "grog" || typeLine === "companion" || typeLine === "magus"
+    ? typeLine
+    : house || lines.some((l) => l.trim() === "## Arts")
+      ? "magus"
+      : personalityHeading.includes("Confidence") ? "companion" : "grog";
 
   const ch: Character = newCharacter({ name, kind, house, concept, age });
   ch.laterLifeYears = laterLifeYears;
@@ -98,8 +102,7 @@ export function parseSheetMarkdown(md: string, rules: RulesData): ImportResult {
       if (m) r = rules.resolveTrait(m[1]!.trim(), m[2]!.trim(), sizeArg);
     }
     if (!r.ok) { warnings.push(`Could not resolve Virtue/Flaw "${display}" (${r.error})`); return null; }
-    const t = r.trait;
-    return { name: t.canonical, display: t.display, param: t.param, size: t.size, category: t.row.category, points: t.points };
+    return traitPick(r.trait);
   };
 
   for (const entry of splitList(afterColon(freeLine))) {

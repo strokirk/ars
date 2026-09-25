@@ -2,6 +2,7 @@
 // PURE (no Node built-ins) so it bundles for the browser unchanged; the file-system
 // loader lives in ./load-node.ts. A web app builds `new RulesData(...)` from JSON it
 // imports directly and reuses all of domain/*.
+import type { Character } from "../domain/character.ts";
 import type { AbilityRow, AbilityType, Size, SpellRow, VirtueFlawRow } from "./types.ts";
 import { isArt, isForm, isTechnique } from "../domain/glossary.ts";
 
@@ -104,6 +105,17 @@ export class RulesData {
     for (const v of virtuesFlaws) this.vfByName.set(norm(v.name), v);
     for (const a of abilities) this.abByName.set(norm(a.name), a);
     for (const s of spells) this.spByName.set(norm(s.name), s);
+  }
+
+  /** Re-stamp each pick's data flags (repeatable, enables) from the current data — for characters saved before a flag existed. */
+  refreshTraitFlags(ch: Character): Character {
+    for (const t of [...ch.virtues, ...ch.flaws]) {
+      const row = this.virtueFlawRow(t.name);
+      if (!row) continue;
+      if (row.repeatable) t.repeatable = true; else delete t.repeatable;
+      if (row.enables?.length) t.enables = row.enables; else delete t.enables;
+    }
+    return ch;
   }
 
   virtueFlawRow(name: string): VirtueFlawRow | undefined {

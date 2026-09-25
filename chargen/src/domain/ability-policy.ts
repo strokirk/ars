@@ -1,7 +1,7 @@
-// Which Ability *types* may be bought at each life stage. Childhood and later-life
-// are mundane (General only); apprenticeship grants Academic/Arcane/Martial, with
-// Supernatural still gated behind a Supernatural Virtue. Enabling-Virtue detection
-// is name-based and deliberately conservative — `--force` is always available.
+// Which Ability *types* are usual at each life stage. Childhood and later-life are
+// mundane (General only, unless a Virtue opens more); apprenticeship adds
+// Academic/Arcane/Martial, with Supernatural gated behind a Supernatural Virtue.
+// `allowed: false` is a soft lock: validate() warns, the picker still lets you add.
 import type { Character } from "./character.ts";
 import type { Stage } from "./glossary.ts";
 import type { AbilityType } from "../data/types.ts";
@@ -11,39 +11,35 @@ export interface AbilityPolicy {
   reason?: string;
 }
 
-function hasCategory(ch: Character, category: string): boolean {
-  return ch.virtues.some((v) => v.category === category);
-}
-function hasVirtueNamed(ch: Character, ...names: string[]): boolean {
-  const set = new Set(names.map((n) => n.toLowerCase()));
-  return ch.virtues.some((v) => set.has(v.name.toLowerCase()) || set.has(v.display.toLowerCase()));
+/**
+ * Does the character have a Virtue that opens a non-General Ability type? Read from
+ * the data (each Virtue's `enables`, lifted from its rules text), plus the blanket
+ * rule that a Supernatural Virtue opens Supernatural Abilities. Advisory only — many
+ * Virtues interact in ways no table captures, so a "no" here is a nudge to check with
+ * the GM, never a hard block.
+ */
+export function hasEnablingVirtue(ch: Character, type: AbilityType): boolean {
+  if (type === "General" || type === null) return true;
+  if (type === "Supernatural") return ch.virtues.some((v) => v.category === "Supernatural");
+  return ch.virtues.some((v) => v.enables?.includes(type));
 }
 
-/** Does the character have a Virtue that enables a given non-General Ability type? */
-export function hasEnablingVirtue(ch: Character, type: AbilityType): boolean {
-  switch (type) {
-    case "Supernatural": return hasCategory(ch, "Supernatural");
-    case "Academic": return hasVirtueNamed(ch, "Educated", "Clerk", "Priest", "Mythic Companion");
-    case "Martial": return hasVirtueNamed(ch, "Warrior", "Knight", "Soldier", "Custos");
-    case "Arcane": return hasVirtueNamed(ch, "Arcane Lore"); // otherwise Arcane comes from apprenticeship
-    default: return true;
-  }
-}
+const GM_CALL = "check with your GM if another Virtue or the story allows it.";
 
 export function abilityAllowed(ch: Character, type: AbilityType, stage: Stage): AbilityPolicy {
   if (stage === "free" || stage === "post-gauntlet") return { allowed: true };
   if (type === "General" || type === null) return { allowed: true };
 
   if (stage === "childhood") {
-    return { allowed: false, reason: `${type} Abilities can't be learned in childhood — they come in apprenticeship (or with an enabling Virtue).` };
+    return { allowed: false, reason: `${type} Abilities aren't usually learned in childhood — ${GM_CALL}` };
   }
   if (stage === "later-life") {
     if (hasEnablingVirtue(ch, type)) return { allowed: true };
-    return { allowed: false, reason: `${type} Abilities need an enabling Virtue before apprenticeship.` };
+    return { allowed: false, reason: `${type} Abilities before apprenticeship usually need a Virtue that allows them — ${GM_CALL}` };
   }
   // apprenticeship
   if (type === "Supernatural" && !hasEnablingVirtue(ch, "Supernatural")) {
-    return { allowed: false, reason: `Supernatural Abilities require a Supernatural Virtue.` };
+    return { allowed: false, reason: `Supernatural Abilities usually need a Supernatural Virtue — ${GM_CALL}` };
   }
   return { allowed: true };
 }

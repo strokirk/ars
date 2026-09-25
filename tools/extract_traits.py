@@ -58,6 +58,18 @@ REPEATABLE_RE = re.compile(
     r"|may be taken (?:again|several|two|twice)", re.I)
 REPEATABLE_EXTRA = {"Mastered Spells"}
 
+# "You may purchase Academic Abilities during character generation" and the like.
+# Supernatural Abilities aren't listed: every Supernatural Virtue enables its own.
+ENABLES_RE = re.compile(
+    r"\b(?:may|can)\s+(?:also\s+)?(?:purchase|acquire|take|learn|buy|have|spend[^.]{0,40}?on)\s+"
+    r"((?:(?:Academic|Arcane|Martial|Supernatural|General)(?:,\s*|\s+(?:and|or)\s+|\s+))+)Abilit", re.I)
+
+
+def enabled_types(text):
+    found = {t.title() for m in ENABLES_RE.findall(text)
+             for t in re.findall(r"Academic|Arcane|Martial", m, re.I)}
+    return sorted(found)
+
 
 def parse_virtues_flaws():
     lines = VF_FILE.read_text(encoding="utf-8").splitlines()
@@ -96,6 +108,7 @@ def parse_virtues_flaws():
                 "tainted": tainted,
                 "repeatable": name in REPEATABLE_EXTRA
                 or bool(REPEATABLE_RE.search(" ".join(desc))),
+                "enables": enabled_types(" ".join(desc)) if kind == "Virtue" else [],
                 "cost_raw": cost_raw,
                 "description": clean(" ".join(desc)),
                 "source_file": VF_FILE.name,

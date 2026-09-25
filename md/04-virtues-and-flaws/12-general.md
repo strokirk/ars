@@ -734,7 +734,7 @@ Minor, Hermetic
 
 Your Advancement Totals for one Hermetic Art are increased by one half, rounded up. At character creation, any experience points you put into that Art are also increased by one half (rounded up), and you may exceed the normal recommended limits. You may take this Virtue twice, for two different Arts.
 
-####’Alim
+#### ’Alim
 
 Minor, Social Status
 
@@ -1843,7 +1843,7 @@ Free, Social Status
 
 The character is a trained worker who practices a trade that is a valuable service to his community, but by which no finished good is produced. Unlike a peasant, who is an agrarian worker who works at a variety of jobs, a laborer concentrates on one specific endeavor to earn his livelihood, be it hauling wood, washing clothes, cleaning latrines, carrying luggage, or serving food.
 
-####(Land) Regio Network
+#### (Land) Regio Network
 
 Minor, Supernatural
 
@@ -4011,7 +4011,7 @@ Minor, Personality
 
 This Flaw is somewhat similar to Covenant Upbringing, but means that the character is a foreigner and comes from a remote or isolated corner of Mythic Europe. He appears and sounds nothing like the locals, has odd customs, habits, and religion (although he need not be pagan), and is quite confused by local society. However, he is not an Outsider, and has been accepted — for the most part. His Native Language is one foreign to the saga, and he needs to learn another language in order to communicate with the rest of the turb. The maximum scores at character creation for locality-dependent Abilities like Language, Area Lore, or Organization Lore, as well as some social Abilities, are half (round up) that which his age normally allows.
 
-####(Form) Monstrosity
+#### (Form) Monstrosity
 
 Minor, Supernatural
 
@@ -4699,7 +4699,7 @@ Minor, General
 
 This character was raised on the margins of society. She is able to use her social abilities normally with those of the lower and middle classes, but doesn’t know how to act among her “betters.” When using Charm or Guile, it is obvious that she’s from the bad part of town, and this makes convincing people to do what she wants harder (–3 on rolls). She can use Etiquette normally if she’s holding her social place (which means staying silent and doing exactly what she’s told) but suffers a –3 penalty if she tries to go beyond this.
 
-####(Realm) Stigmatic
+#### (Realm) Stigmatic
 
 Minor, Supernatural
 

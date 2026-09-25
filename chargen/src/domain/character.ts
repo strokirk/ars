@@ -2,6 +2,8 @@
 // applies a pure mutation (domain/mutations.ts), and writes it back. A web app can
 // hold the same object in memory and drive the same mutations/validators.
 import type { Art, Characteristic, Form, House, Stage, Technique } from "./glossary.ts";
+import type { ResolvedTrait } from "../data/rules.ts";
+import type { VirtueFlawRow } from "../data/types.ts";
 
 /** Player-character category. Drives which budgets and V&F limits apply. */
 export type CharacterKind = "grog" | "companion" | "magus";
@@ -15,6 +17,18 @@ export interface TraitPick {
   points: number;      // 0 (Free) | 1 (Minor) | 3 (Major)
   free?: boolean;      // The Gift / Hermetic Magus / House benefit — off-budget
   repeatable?: boolean; // the rules allow taking it more than once (VirtueFlawRow.repeatable)
+  enables?: VirtueFlawRow["enables"]; // Ability types it opens at creation
+}
+
+/** A resolved trait as stored on the character — the data flags travel with it so validation stays rules-free. */
+export function traitPick(t: ResolvedTrait, free = false): TraitPick {
+  return {
+    name: t.canonical, display: t.display, param: t.param, size: t.size, category: t.row.category,
+    points: free ? 0 : t.points,
+    ...(free ? { free: true } : {}),
+    ...(t.row.repeatable ? { repeatable: true } : {}),
+    ...(t.row.enables?.length ? { enables: t.row.enables } : {}),
+  };
 }
 
 export interface AbilityPick {
