@@ -72,13 +72,14 @@ All Abilities (from `md/05-abilities/05-ability-list.md`).
 | `type` | `General`, `Academic`, `Arcane`, `Martial`, `Supernatural` (NULL for 3 cross-reference stubs) |
 | `restricted` | 1 if it can't be used untrained (marked `*` in source) |
 | `specialties` | comma-separated examples |
-| `description`, `source_file`, `source_line` | |
+| `description` | rules text without the trailing Specialties and (Type), which have their own columns |
+| `source_file`, `source_line` | |
 
 ### Full-text search
 
 FTS5 tables, `rowid` joins back to the base table's `id`:
 `spells_fts(name, description)`, `guidelines_fts(effect)`,
-`virtues_flaws_fts(name, description)`, `abilities_fts(name, description)`.
+`virtues_flaws_fts(name, description)`, `abilities_fts(name, description, specialties)`.
 
 ## Example queries
 

@@ -144,7 +144,7 @@ export class RulesData {
     return this.abilities.filter((a) =>
       (!f.type || (a.type ?? "").toLowerCase() === f.type.toLowerCase()) &&
       (f.restricted === undefined || a.restricted === f.restricted) &&
-      (!s || norm(a.name).includes(s) || norm(a.description).includes(s)),
+      (!s || [a.name, a.description, a.specialties ?? ""].some((t) => norm(t).includes(s))),
     );
   }
 

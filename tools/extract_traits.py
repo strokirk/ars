@@ -128,7 +128,7 @@ def parse_virtues_flaws():
 ABIL_START_RE = re.compile(r"^\*\*(?P<inner>.+?)\*\*\s*:?\s*(?P<rest>.*)$")
 ABIL_TYPES = {"General", "Academic", "Arcane", "Martial", "Supernatural"}
 TYPE_RE = re.compile(r"\(([A-Za-z][A-Za-z ]+?)\)")
-SPEC_RE = re.compile(r"_Specialties?:?_\s*:?\s*(.+?)(?:\((?:General|Academic|Arcane|Martial|Supernatural)\)|$)")
+SPEC_RE = re.compile(r"(?:_Specialties?:?_\s*:?|\bSpecialties?:)\s*(.+?)(?:\((?:General|Academic|Arcane|Martial|Supernatural)\)|$)")
 
 
 def _ability_head(line):
@@ -167,15 +167,19 @@ def parse_abilities():
             if cand.strip() in ABIL_TYPES:
                 atype = cand.strip()
         spec = None
-        sm = SPEC_RE.search(block.replace("\n", " "))
+        desc = block.replace("\n", " ")
+        sm = SPEC_RE.search(desc)
         if sm:
             spec = clean(sm.group(1)).rstrip(". ")
+            # specialties + type have their own columns; keep any sidebar after them
+            desc = desc[:sm.start()] + " " + desc[sm.end():]
+        desc = re.sub(r"\((?:General|Academic|Arcane|Martial|Supernatural)\)\s*$", "", desc.rstrip())
         out.append({
             "name": name,
             "type": atype,
             "restricted": restricted,
             "specialties": spec,
-            "description": clean(block),
+            "description": clean(desc),
             "source_file": ABIL_FILE.name,
             "source_line": i + 1,
         })

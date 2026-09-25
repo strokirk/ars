@@ -151,7 +151,7 @@ export function abilityOptions(
   const opts = all
     .filter((row) =>
       (!q.type || typeLabel(row.type) === q.type) &&
-      (!s || norm(row.name).includes(s) || norm(row.description).includes(s)))
+      (!s || [row.name, row.description, row.specialties ?? ""].some((t) => norm(t).includes(s))))
     .map((row): AbilityOption => {
       const mine = ch.abilities.filter((a) => norm(a.name) === norm(row.name));
       const here = mine.find((a) => a.stage === stage);

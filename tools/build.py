@@ -86,7 +86,7 @@ CREATE TABLE abilities (
 CREATE VIRTUAL TABLE spells_fts        USING fts5(name, description);
 CREATE VIRTUAL TABLE guidelines_fts    USING fts5(effect);
 CREATE VIRTUAL TABLE virtues_flaws_fts USING fts5(name, description);
-CREATE VIRTUAL TABLE abilities_fts     USING fts5(name, description);
+CREATE VIRTUAL TABLE abilities_fts     USING fts5(name, description, specialties);
 
 CREATE INDEX idx_spells_tf    ON spells(technique, form);
 CREATE INDEX idx_spells_level ON spells(level);
@@ -149,8 +149,8 @@ def main():
             (i, a["name"], a["type"], int(a["restricted"]), a["specialties"],
              a["description"], a["source_file"], a["source_line"]),
         )
-        con.execute("INSERT INTO abilities_fts (rowid,name,description) VALUES (?,?,?)",
-                    (i, a["name"], a["description"]))
+        con.execute("INSERT INTO abilities_fts (rowid,name,description,specialties) VALUES (?,?,?,?)",
+                    (i, a["name"], a["description"], a["specialties"]))
 
     con.commit()
     counts = {t: con.execute(f"SELECT count(*) FROM {t}").fetchone()[0]
