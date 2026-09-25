@@ -6,7 +6,7 @@ import { useState } from "preact/hooks";
 import { budgetsOf, charKind, defaultAge, type Character, type Op } from "./engine.ts";
 import { CharacteristicsAllocator } from "./components/CharacteristicsAllocator.tsx";
 import { TraitPicker } from "./components/TraitPicker.tsx";
-import { AbilityPicker } from "./components/AbilityPicker.tsx";
+import { AbilityPicker, type StageSpec } from "./components/AbilityPicker.tsx";
 import { SpellBrowser } from "./components/SpellBrowser.tsx";
 import { Select } from "./components/ui/Select.tsx";
 import { RadioCards } from "./components/ui/RadioCards.tsx";
@@ -139,78 +139,67 @@ export function AbilitiesStep({ ch, update }: StepProps) {
   const min = b.apprenticeship.minimums;
   const setLaterLifeYears = (years: number) =>
     update([{ op: "meta", fields: { laterLifeYears: years, age: defaultAge(kind, years) } }]);
+  const stages: StageSpec[] = [
+    {
+      stage: "childhood", budget: b.childhood, recommended: CHILDHOOD_ABILITIES,
+      title: "Early childhood",
+      hint: "Mundane skills picked up as a child — General Abilities only.",
+    },
+    {
+      stage: "later-life", budget: b.laterLife, recommended: LATER_LIFE_ABILITIES,
+      title: (
+        <>
+          Later life ·{" "}
+          <input
+            type="number" min={0} class="years" value={ch.laterLifeYears} aria-label="Later-life years"
+            onInput={(e) => setLaterLifeYears(Number((e.target as HTMLInputElement).value))}
+          />{" "}
+          yrs × {mods.laterLifeXpPerYear} xp{b.laterLife.cap > ch.laterLifeYears * mods.laterLifeXpPerYear ? " + bonus" : ""} → age {ch.age}
+        </>
+      ),
+      hint: magus
+        ? "The years before apprenticeship — General Abilities only. Age caps every Ability's score."
+        : "Academic, Martial and Supernatural Abilities open up here only if a Virtue enables them. Age caps every Ability's score.",
+    },
+  ];
+  if (magus) stages.push({
+    stage: "apprenticeship", budget: b.apprenticeship, recommended: APPRENTICE_ABILITIES,
+    title: "Apprenticeship",
+    hint: (
+      <>
+        Shares its pool with Arts, so the meter counts both. Mandatory:{" "}
+        <Mandatory ok={min.magicTheory} label="Magic Theory" />{" "}
+        <Mandatory ok={min.latin} label="Latin" />{" "}
+        <Mandatory ok={min.parmaMagica} label="Parma Magica" />
+      </>
+    ),
+  });
   return (
     <div>
-      <p class="note">
-        Age <b>{ch.age}</b> — 5 (childhood) + {ch.laterLifeYears} (later life){magus ? " + 15 (apprenticeship)" : ""}.
-        It isn't set directly: change Later-life years below, and it follows. Age caps the maximum score of any
-        Ability (higher past 30 — see the meter above each row).
-      </p>
-      <div class="field">
-        <label>Native Language (spoken vernacular — free, score 5)</label>
-        <input type="text" value={ch.nativeLanguage ?? ""} placeholder="e.g. German, French, Italian" onInput={(e) => update([{ op: "native-language", value: (e.target as HTMLInputElement).value }])} />
-        <p class="note">Worth 75 xp, but granted outright — it doesn't touch the childhood pool.</p>
-      </div>
-
-      {granted.length > 0 && (
-        <section class="stage">
-          <header class="stage-head"><h3>Granted free</h3></header>
-          <div class="taken-rows">
-            {granted.map((a) => (
-              <div class="char-row" key={a.name}>
-                <span class="nm">{a.name} <small>{a.type ?? "—"} · {ch.house ? `House ${ch.house}` : "a Virtue"}, off-budget</small></span>
-                <span class="val">{a.score}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <AbilityPicker
-        ch={ch} update={update} stage="childhood" budget={b.childhood}
-        title="Early childhood"
-        hint="Mundane skills picked up as a child — General Abilities only."
-        recommended={CHILDHOOD_ABILITIES}
-        collapsible
-      />
-      <hr class="soft" />
-      <AbilityPicker
-        ch={ch} update={update} stage="later-life" budget={b.laterLife}
-        title={`Later life (${ch.laterLifeYears} yrs × ${mods.laterLifeXpPerYear} xp${b.laterLife.cap > ch.laterLifeYears * mods.laterLifeXpPerYear ? " + bonus" : ""})`}
-        hint={magus
-          ? "The years before apprenticeship — General Abilities only."
-          : "Academic, Martial and Supernatural Abilities open up here only if a Virtue enables them."}
-        recommended={LATER_LIFE_ABILITIES}
-        collapsible
-        extra={
-          <div class="field">
-            <label>Later-life years {magus ? "(pre-apprenticeship)" : ""}</label>
+      <section class="stage">
+        <header class="stage-head"><h3>Granted free</h3></header>
+        <div class="taken-rows">
+          <div class="char-row">
+            <span class="nm">
+              <label for="native-language">Native language</label>
+              <small>spoken vernacular, free (75 xp off-budget)</small>
+            </span>
             <input
-              type="number" min={0} value={ch.laterLifeYears}
-              onInput={(e) => setLaterLifeYears(Number((e.target as HTMLInputElement).value))}
+              id="native-language" type="text" class="native-lang" value={ch.nativeLanguage ?? ""} placeholder="e.g. German"
+              onInput={(e) => update([{ op: "native-language", value: (e.target as HTMLInputElement).value }])}
             />
+            <span class="val">5</span>
           </div>
-        }
-      />
-      {magus && (
-        <>
-          <hr class="soft" />
-          <AbilityPicker
-            ch={ch} update={update} stage="apprenticeship" budget={b.apprenticeship}
-            title="Apprenticeship Abilities"
-            hint={
-              <>
-                Shares the 240-xp pool with Arts, so the meter counts both. Mandatory:{" "}
-                <Mandatory ok={min.magicTheory} label="Magic Theory" />{" "}
-                <Mandatory ok={min.latin} label="Latin" />{" "}
-                <Mandatory ok={min.parmaMagica} label="Parma Magica" />
-              </>
-            }
-            recommended={APPRENTICE_ABILITIES}
-            collapsible
-          />
-        </>
-      )}
+          {granted.map((a) => (
+            <div class="char-row" key={a.name}>
+              <span class="nm">{a.name} <small>{a.type ?? "—"} · {ch.house ? `House ${ch.house}` : "a Virtue"}, off-budget</small></span>
+              <span class="val">{a.score}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <AbilityPicker ch={ch} update={update} stages={stages} />
       <hr class="soft" />
       <BonusXp ch={ch} update={update} pools={magus ? ["childhood", "later-life", "apprenticeship"] : ["childhood", "later-life"]} />
     </div>

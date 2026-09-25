@@ -10,7 +10,8 @@ export function Stepper({
   format?: (v: number) => string;
   /** Accessible name for the buttons, e.g. "Intelligence". */
   label?: string;
-  /** Why `+` stops where it does — shown on hover once the ceiling is reached. */
+  /** Hover text for `+` — why it stops, or (for a soft cap) why going on is flagged.
+   *  Pass it only once the ceiling is reached. */
   maxHint?: string;
   /** Render the value as a number input so a score can be typed, not only stepped. */
   editable?: boolean;
@@ -33,7 +34,7 @@ export function Stepper({
       ) : <span class="val">{format ? format(value) : value}</span>}
       <button
         type="button" aria-label={label && `increase ${label}`} disabled={atMax}
-        title={atMax ? maxHint : undefined}
+        title={maxHint}
         onClick={() => onChange(value + 1)}
       >+</button>
     </span>

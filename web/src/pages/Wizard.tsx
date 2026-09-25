@@ -93,6 +93,13 @@ export function Wizard({ kindParam, draftId, stepKey }: { kindParam?: string; dr
         ))}
       </div>
 
+      <BudgetBar meters={metersFor(cur, b)}>
+        <Button disabled={step === 0} onClick={() => { setStep(step - 1); scrollTo(0, 0); }}>← Back</Button>
+        {step < steps.length - 1
+          ? <Button variant="brand" appearance="accent" onClick={() => { setStep(step + 1); scrollTo(0, 0); }}>Next →</Button>
+          : <Button onClick={() => navigate("/")}>Done</Button>}
+      </BudgetBar>
+
       <div class="title-row">
         <h2 style="color:var(--accent); margin:.3rem 0 .2rem;">{KIND_LABEL[kind]} · {cur.label}</h2>
         <Button size="small" onClick={viewSheet} title="View sheet">
@@ -110,15 +117,6 @@ export function Wizard({ kindParam, draftId, stepKey }: { kindParam?: string; dr
         )}
         {Body && <Body ch={ch} update={update} reseed={kind === "magus" ? reseed : undefined} />}
       </div>
-
-      <div class="navrow">
-        <Button disabled={step === 0} onClick={() => setStep(step - 1)}>← Back</Button>
-        {step < steps.length - 1
-          ? <Button variant="brand" appearance="accent" onClick={() => setStep(step + 1)}>Next →</Button>
-          : <Button onClick={() => navigate("/")}>Done</Button>}
-      </div>
-
-      <BudgetBar meters={metersFor(cur, b)} />
     </div>
   );
 }

@@ -40,7 +40,7 @@ export function stepsFor(kind: CharacterKind): StepDef[] {
   const abilities: StepDef = {
     key: "abilities", label: "Abilities",
     budgets: kind === "magus" ? ["childhood", "later-life", "apprenticeship"] : ["childhood", "later-life"],
-    why: "Set your age (it caps the maximum score of any Ability) and a Native Language (free, score 5), then spend 45 xp on childhood skills and your later-life xp.",
+    why: "Name your Native Language (free, score 5), then spend each stage's xp — the meters show what's left. Age follows from your Later-life years and caps the maximum score of any Ability.",
   };
   const arts: StepDef = {
     key: "arts", label: "Arts & Spells", budgets: ["apprenticeship"],

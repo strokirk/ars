@@ -10,6 +10,7 @@ import type { Character } from "../../../chargen/src/domain/character.ts";
 import type { Modifiers } from "../../../chargen/src/domain/modifiers.ts";
 import type { Stage } from "../../../chargen/src/domain/glossary.ts";
 import type { AbilityRow, AbilityType } from "../../../chargen/src/data/types.ts";
+import type { RulesData } from "../../../chargen/src/data/rules.ts";
 
 export const ABILITY_TYPES = ["General", "Academic", "Arcane", "Martial", "Supernatural"] as const;
 export type AbilityTypeFilter = (typeof ABILITY_TYPES)[number];
@@ -99,6 +100,13 @@ export function abilityTemplate(name: string): AbilityTemplate | undefined {
   return TEMPLATES[name.trim().toLowerCase()];
 }
 
+/** The data row behind a taken Ability: its own, or the template it was named
+ *  from ("Provence Lore" → "(Area) Lore"). */
+export function baseAbilityRow(rules: RulesData, name: string): AbilityRow | undefined {
+  const res = rules.resolveAbility(name);
+  return res.ok ? rules.ability(res.ability.baseName ?? res.ability.name) : undefined;
+}
+
 /** The rules' suggested specialties for a row, as a list. */
 export function specialtyHints(row: AbilityRow): string[] {
   return (row.specialties ?? "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -151,7 +159,8 @@ export function abilityOptions(
   const opts = all
     .filter((row) =>
       (!q.type || typeLabel(row.type) === q.type) &&
-      (!s || [row.name, row.description, row.specialties ?? ""].some((t) => norm(t).includes(s))))
+      // "area lore" finds "(Area) Lore".
+      (!s || [row.name, row.name.replace(/[()]/g, ""), row.description, row.specialties ?? ""].some((t) => norm(t).includes(s))))
     .map((row): AbilityOption => {
       const mine = ch.abilities.filter((a) => norm(a.name) === norm(row.name));
       const here = mine.find((a) => a.stage === stage);

@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
-// Render tests for the creator's Abilities step: the stage meter, the always-visible
-// browse list (recommended rows first, locked rows explained and hideable), and the
-// specialty/template flows. Plain preact render over the real rules data, like
-// browsers.test.tsx.
+// Render tests for the creator's Abilities step: the per-stage taken list with its
+// meter, the catalogue (recommended rows first, locked rows explained and hideable),
+// and the naming/renaming/specialty flows. Plain preact render over the real rules
+// data, like browsers.test.tsx. The catalogue sits in a <wa-drawer>, which stays
+// inert under test, so its rows are in the DOM whether or not it is "open".
 import { afterEach, describe, expect, test } from "vitest";
 import { render } from "preact";
 import { useState } from "preact/hooks";
@@ -36,6 +37,16 @@ const optionFor = (el: HTMLElement, title: string) => {
   if (!li) throw new Error(`no row "${title}"`);
   return { li, meta: li.querySelector(".facts")!.textContent!, action: buttons(li)[0]! };
 };
+const type = async (input: HTMLInputElement, value: string) => {
+  input.value = value;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  await flush();
+};
+const key = async (target: Element, k: string) => {
+  target.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true }));
+  await flush();
+};
+const takenNames = (el: HTMLElement) => [...el.querySelectorAll(".taken-rows .char-row .nm")].map((n) => n.textContent!);
 
 /** The picker drives a real character through the engine, exactly as the Wizard does. */
 function Harness({ start, stage = "childhood" as const, recommended }: {
@@ -46,10 +57,12 @@ function Harness({ start, stage = "childhood" as const, recommended }: {
   const b = budgetsOf(ch);
   return (
     <AbilityPicker
-      ch={ch} update={update} stage={stage}
-      budget={stage === "childhood" ? b.childhood : b.laterLife}
-      title="Early childhood" hint="Mundane skills."
-      recommended={stage === "childhood" ? (recommended ?? ["Athletics", "Awareness"]) : recommended}
+      ch={ch} update={update}
+      stages={[{
+        stage, title: "Early childhood", hint: "Mundane skills.",
+        budget: stage === "childhood" ? b.childhood : b.laterLife,
+        recommended: stage === "childhood" ? (recommended ?? ["Athletics", "Awareness"]) : recommended,
+      }]}
     />
   );
 }
@@ -79,20 +92,31 @@ describe("AbilityPicker", () => {
     expect(el.querySelector(".stage-head .meter")!.textContent).toContain("15/45 xp");
   });
 
-  test("raising a score past the age cap is allowed, flagged rather than stopped", async () => {
+  test("raising a score past the age cap is allowed, flagged on the row rather than stopped", async () => {
     const el = mount(<Harness />);
     optionFor(el, "Athletics").action.click();
     await flush();
     const plus = () => el.querySelector<HTMLButtonElement>('.stepper button[aria-label="increase Athletics"]')!;
     for (let i = 1; i < 6; i++) { plus().click(); await flush(); }
-    expect(el.querySelector(".char-row .cost")!.textContent).toMatch(/past the usual age cap/);
+    expect(el.querySelector(".char-row .age-cap")!.textContent).toMatch(/over cap/);
+    expect(plus().title).toMatch(/beyond the usual cap/);
     expect(plus().disabled).toBe(false);
   });
 
-  test("the full list of what childhood can actually take is visible immediately, recommended first", async () => {
+  test("the stage is ticked done only when its pool is spent exactly, not while overspent", async () => {
     const el = mount(<Harness />);
-    // No search, no click needed — every General Ability is already there (locked
-    // rows start hidden, so the list isn't 74 rows of mostly "Locked").
+    const done = () => el.querySelector(".stage-check")!.classList.contains("done");
+    optionFor(el, "Athletics").action.click();
+    await flush();
+    const plus = () => el.querySelector<HTMLButtonElement>('.stepper button[aria-label="increase Athletics"]')!;
+    for (let i = 1; i < 4; i++) { plus().click(); await flush(); } // score 4 = 50 xp of 45
+    expect(el.querySelector(".stage-head .meter")!.classList.contains("over")).toBe(true);
+    expect(done()).toBe(false);
+  });
+
+  test("the catalogue lists what childhood can actually take, recommended first", async () => {
+    const el = mount(<Harness />);
+    // Locked rows start hidden, so the list isn't 74 rows of mostly "Locked".
     expect(rowTitles(el).length).toBeGreaterThan(0);
     expect(rowTitles(el).length).toBeLessThan(rules.abilities.length);
     expect(rowTitles(el)).not.toContain("Single Weapon");
@@ -116,7 +140,7 @@ describe("AbilityPicker", () => {
     expect(rowTitles(el).indexOf("Single Weapon")).toBeGreaterThan(rowTitles(el).indexOf("Swim"));
   });
 
-  test("the type filter narrows the always-visible list (and implies showing locked rows)", async () => {
+  test("the type filter narrows the list (and implies showing locked rows)", async () => {
     const el = mount(<Harness />);
     button(el, "Filters").click();
     await flush();
@@ -127,13 +151,13 @@ describe("AbilityPicker", () => {
     expect(rowTitles(el)).toEqual(["Bows", "Great Weapon", "Single Weapon", "Thrown Weapon"]);
   });
 
-  test("search narrows it too, without any extra step to reveal the list", async () => {
+  test("search narrows it, and Enter adds the top hit", async () => {
     const el = mount(<Harness />);
     const input = el.querySelector<HTMLInputElement>('input[type="search"]')!;
-    input.value = "swim";
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    await flush();
+    await type(input, "swim");
     expect(rowTitles(el)).toEqual(["Swim"]);
+    await key(input, "Enter");
+    expect(takenNames(el).join()).toContain("Swim");
   });
 
   test("an already-taken row says so instead of offering a second copy", async () => {
@@ -146,41 +170,64 @@ describe("AbilityPicker", () => {
     expect(row.meta).toContain("already here at 1");
   });
 
-  test("a placeholder row asks for the specific name before adding it", async () => {
+  test("a placeholder row is named in place, focused, with Enter to add and Escape to cancel", async () => {
     const el = mount(<Harness />);
     const lore = optionFor(el, "(Area) Lore");
-    expect(label(lore.action)).toBe("Name it…");
+    expect(label(lore.action)).toBe("Add");
     lore.action.click();
     await flush();
 
-    const input = el.querySelector<HTMLInputElement>('.name-it input[type="text"]')!;
-    expect(el.querySelector(".name-it label")!.textContent).toBe("Which area?");
-    input.value = "Provence";
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    await flush();
-    button(el, "Add").click();
-    await flush();
+    const input = el.querySelector<HTMLInputElement>(".option.naming input")!;
+    expect(document.activeElement).toBe(input);
+    expect(input.getAttribute("aria-label")).toBe("Which area?");
+    await key(input, "Escape");
+    expect(el.querySelector(".option.naming")).toBeNull();
 
-    expect(el.querySelector(".char-row .nm")!.textContent).toContain("Provence Lore");
+    optionFor(el, "(Area) Lore").action.click();
+    await flush();
+    const again = el.querySelector<HTMLInputElement>(".option.naming input")!;
+    await type(again, "Provense");
+    await key(again, "Enter");
+    expect(takenNames(el).join()).toContain("Provense Lore");
   });
 
-  test("a specialty can be typed onto a taken Ability", async () => {
+  test("a named Ability can be renamed in place, keeping its score and specialty", async () => {
+    const start = apply(createGrog({ name: "Otto" }).character, [
+      { op: "ability", name: "Provense Lore", score: 2, stage: "childhood", specialty: "geography" },
+    ]);
+    const el = mount(<Harness start={start} />);
+    // A data row's own name is fixed; only a typed-in one offers renaming.
+    el.querySelector<HTMLElement>(".ab-name")!.click();
+    await flush();
+    const input = el.querySelector<HTMLInputElement>('.char-row input[aria-label="Rename Provense Lore"]')!;
+    expect(document.activeElement).toBe(input);
+    await type(input, "Provence Lore");
+    await key(input, "Enter");
+    expect(takenNames(el)[0]).toContain("Provence Lore");
+    expect(el.querySelector(".spec-tag")!.textContent).toBe("geography");
+    expect(el.querySelector(".stepper .val")!.textContent).toBe("2");
+  });
+
+  test("a specialty is set from its suggestion chips or typed, without disturbing the score", async () => {
     const el = mount(<Harness />);
     optionFor(el, "Athletics").action.click();
     await flush();
 
-    button(el, "add specialty").click();
+    const tag = () => el.querySelector<HTMLElement>(".spec-tag")!;
+    expect(tag().textContent).toBe("+ specialty");
+    tag().click();
     await flush();
-    const input = el.querySelector<HTMLInputElement>(".spec-edit input")!;
-    expect(input.placeholder).toMatch(/acrobatics/);
-    input.value = "jumping";
-    input.dispatchEvent(new Event("input", { bubbles: true }));
+    button(el.querySelector(".spec-popover")!, "acrobatics").click();
     await flush();
-    button(el, "Save").click();
-    await flush();
+    expect(tag().textContent).toBe("acrobatics");
 
-    expect(el.querySelector(".char-row .nm small")!.textContent).toContain("spec: jumping");
-    // Setting a specialty must not disturb the score it was set on.
+    tag().click();
+    await flush();
+    const input = el.querySelector<HTMLInputElement>(".spec-popover input")!;
+    expect(document.activeElement).toBe(input);
+    await type(input, "jumping");
+    await key(input, "Enter");
+    expect(tag().textContent).toBe("jumping");
     expect(el.querySelector(".stage-head .meter")!.textContent).toContain("5/45 xp");
   });
 

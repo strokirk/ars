@@ -1,5 +1,6 @@
 import type { ComponentChildren } from "preact";
-import { useLayoutEffect, useRef, useState } from "preact/hooks";
+import { useRef, useState } from "preact/hooks";
+import { usePublishHeight } from "../../lib/use-publish-height.ts";
 import { SlidersHorizontal, Shuffle, X, ArrowUpDown } from "lucide-preact";
 import { SearchField } from "./SearchField.tsx";
 import { Select } from "./Select.tsx";
@@ -58,22 +59,8 @@ export function FilterBar<S extends string>({
   const [open, setOpen] = useState(false);
   const row = useRef<HTMLDivElement>(null);
 
-  // Group headings stick below this bar, so publish the bar's own height rather
-  // than guessing it — it wraps to two or three lines on a narrow screen.
-  useLayoutEffect(() => {
-    const el = row.current;
-    if (!el) return;
-    const publish = () =>
-      document.documentElement.style.setProperty(
-        "--filterbar-h",
-        `${el.offsetHeight}px`,
-      );
-    publish();
-    if (typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver(publish);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+  // Group headings stick below this bar.
+  usePublishHeight(row, "--filterbar-h");
 
   return (
     <div class={`filterbar ${open ? "open" : ""}`}>

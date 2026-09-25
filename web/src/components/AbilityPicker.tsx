@@ -1,243 +1,255 @@
 import type { ComponentChildren } from "preact";
-import { useMemo, useState } from "preact/hooks";
-import { CircleCheck } from "lucide-preact";
+import { useMemo, useRef, useState } from "preact/hooks";
+import { CircleCheck, TriangleAlert } from "lucide-preact";
 import { rules, type Character, type Op } from "../engine.ts";
 import type { BudgetLine } from "../../../chargen/src/domain/budgets.ts";
-import { deriveModifiers } from "../../../chargen/src/domain/modifiers.ts";
+import { deriveModifiers, type Modifiers } from "../../../chargen/src/domain/modifiers.ts";
+import type { AbilityPick } from "../../../chargen/src/domain/character.ts";
 import type { Stage } from "../../../chargen/src/domain/glossary.ts";
 import {
-  ABILITY_TYPES, abilityCost, abilityMax, abilityOptions, specialtyHints, typeLabel, xpToNext,
+  ABILITY_TYPES, STAGE_LABEL, abilityCost, abilityMax, abilityOptions, baseAbilityRow, specialtyHints, typeLabel, xpToNext,
   type AbilityOption, type AbilityTypeFilter,
 } from "../lib/abilities.ts";
 import { FilterBar, type ActiveFilter } from "./ui/FilterBar.tsx";
 import { ChipGroup } from "./ui/ChipGroup.tsx";
 import { FilterGroup } from "./ui/FilterGroup.tsx";
 import { OptionList, OptionRow } from "./ui/OptionList.tsx";
-import { MeterPill } from "./BudgetBar.tsx";
-import { Collapsible } from "./ui/Collapsible.tsx";
+import { MeterPill, leftText } from "./BudgetBar.tsx";
 import { Stepper } from "./ui/Stepper.tsx";
 import { Button } from "./ui/Button.tsx";
+import { TextPrompt } from "./ui/TextPrompt.tsx";
+
+/** One xp pool of the Abilities step. */
+export interface StageSpec {
+  stage: Stage;
+  /** Section heading; may carry controls (Later life's years input). */
+  title: ComponentChildren;
+  /** The teaching line under the heading. */
+  hint?: ComponentChildren;
+  budget: BudgetLine;
+  /** Ability names to flag `Recommended` and float to the top of the catalogue. */
+  recommended?: readonly string[];
+}
 
 interface Props {
   ch: Character;
   update: (ops: Op[]) => void;
-  stage: Stage;
-  /** Section heading — the picker owns the whole stage block. */
-  title: string;
-  /** The teaching line under the heading. */
-  hint: ComponentChildren;
-  /** The xp pool this stage spends from, metered in the heading. */
-  budget: BudgetLine;
-  /** Ability names to flag `Recommended` and float to the top of the list. */
-  recommended?: readonly string[];
-  /** Collapse the section behind a summary once its xp pool is fully spent. */
-  collapsible?: boolean;
-  /** Extra controls rendered right under the hint (e.g. Later-life's years input). */
-  extra?: ComponentChildren;
+  stages: StageSpec[];
 }
 
 /** Blocked rows keep their place in the list but lose the row's colour cue. */
 const BLOCKED_ACCENT = "var(--line)";
 
 /**
- * One stage's worth of Abilities: what's taken (with the cost of the next point
- * spelled out) and a searchable, type-filtered list of everything the stage allows
- * — recommended picks first, and what it refuses shown with the reason rather than
- * hidden, unless the player asks to hide it.
+ * The character's Abilities, one section per xp pool, each with its meter and a
+ * "+ Add" button that opens the one shared catalogue in a side drawer.
  */
-export function AbilityPicker({ ch, update, stage, title, hint, budget, recommended, collapsible, extra }: Props) {
-  const [query, setQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState<AbilityTypeFilter | "">("");
-  /** Locked rows (the stage's own refusals) default hidden — a full list is
-   *  useful, but not at the cost of scrolling past 50 "Locked" rows to reach
-   *  the ones worth taking. One tap brings them back, with their reason. */
-  const [showLocked, setShowLocked] = useState(false);
-  /** The placeholder row awaiting its specific name ("(Area) Lore" → "Provence Lore"). */
-  const [pending, setPending] = useState<AbilityOption | null>(null);
-  const [param, setParam] = useState("");
-  /** Name of the taken Ability whose specialty is being edited, plus the draft. */
-  const [editing, setEditing] = useState<string | null>(null);
-  const [specialty, setSpecialty] = useState("");
-
+export function AbilityPicker({ ch, update, stages }: Props) {
+  const [open, setOpen] = useState(false);
+  const [stage, setStage] = useState<Stage>(stages[0]!.stage);
   const mods = deriveModifiers(ch);
-  const taken = ch.abilities.filter((a) => a.stage === stage);
-  const left = budget.cap - budget.spent;
-
-  const setScore = (name: string, score: number, type?: string | null, spec?: string) => {
-    if (score < 1) { update([{ op: "remove", kind: "ability", name }]); return; }
-    update([{ op: "ability", name, score, stage, type: type ?? undefined, specialty: spec }]);
-  };
-
-  /** Placeholder rows need naming first; everything else lands on one tap. */
-  const begin = (o: AbilityOption) => {
-    if (!o.template) { setScore(o.row.name, 1, o.row.type); return; }
-    setPending(o);
-    setParam("");
-  };
-  const confirm = () => {
-    if (!pending?.template || !param.trim()) return;
-    setScore(pending.template.build(param.trim()), 1, pending.row.type);
-    setPending(null);
-  };
-
-  const options = useMemo(
-    () => abilityOptions(rules.abilities, ch, stage, { search: query, type: typeFilter, onlyAvailable: !showLocked, recommended }),
-    [ch, stage, query, typeFilter, showLocked, recommended],
-  );
-
-  const complete = budget.spent >= budget.cap;
-  const header = (
-    <header class="stage-head">
-      {collapsible && <CircleCheck class={`stage-check ${complete ? "done" : ""}`} size={18} aria-hidden="true" />}
-      <h3>{title}</h3>
-      <MeterPill
-        meter={{
-          label: "", spent: budget.spent, cap: budget.cap, over: budget.over, full: budget.full,
-          text: `${budget.spent}/${budget.cap} xp`,
-          note: left > 0 ? `${left} left` : left < 0 ? `${-left} over` : "all spent",
-        }}
-      />
-    </header>
-  );
-
-  const body = (
+  return (
     <>
-      <p class="note stage-hint">{hint}</p>
-      {extra}
-
-      {taken.length > 0 && (
-        <div class="taken-rows">
-          {taken.map((a) => {
-            const max = abilityMax(ch, a.name, mods);
-            const next = xpToNext(a.name, a.score, mods);
-            const row = rules.ability(a.name);
-            return (
-              <div key={a.name}>
-                <div class="char-row">
-                  <span class="nm">
-                    {a.name}
-                    <small>
-                      {typeLabel(a.type)} · {abilityCost(a.name, a.score, mods)} xp
-                      {mods.affinityAbility.has(a.name) && " · Affinity"}
-                      {" · "}
-                      <button
-                        class="linkish"
-                        onClick={() => { setEditing(editing === a.name ? null : a.name); setSpecialty(a.specialty ?? ""); }}
-                      >
-                        {a.specialty ? `spec: ${a.specialty}` : "add specialty"}
-                      </button>
-                    </small>
-                  </span>
-                  <span class="cost">+1 = {next} xp{a.score >= max ? " (past the usual age cap)" : ""}</span>
-                  <Stepper
-                    value={a.score} min={1} label={a.name}
-                    onChange={(v) => setScore(a.name, v, a.type, a.specialty)}
-                  />
-                  <Button size="small" appearance="plain" onClick={() => update([{ op: "remove", kind: "ability", name: a.name }])}>remove</Button>
-                </div>
-                {editing === a.name && (
-                  <div class="spec-edit">
-                    <input
-                      type="text" value={specialty} autofocus
-                      aria-label={`Specialty for ${a.name}`}
-                      placeholder={row && specialtyHints(row).length ? `e.g. ${specialtyHints(row).slice(0, 3).join(", ")}` : "a narrow application"}
-                      onInput={(e) => setSpecialty((e.target as HTMLInputElement).value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") { setScore(a.name, a.score, a.type, specialty.trim()); setEditing(null); } }}
-                    />
-                    <Button size="small" variant="brand" appearance="accent" onClick={() => { setScore(a.name, a.score, a.type, specialty.trim()); setEditing(null); }}>Save</Button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      <FilterBar
-        search={query}
-        onSearch={setQuery}
-        placeholder="Search abilities…"
-        active={[
-          typeFilter && { label: typeFilter, clear: () => setTypeFilter("") },
-          showLocked && { label: "Locked shown", clear: () => setShowLocked(false) },
-        ].filter(Boolean) as ActiveFilter[]}
-        onClear={() => { setTypeFilter(""); setShowLocked(false); }}
-        summary={<>{options.length} abilities</>}
-      >
-        <div class="fgroups">
-          <FilterGroup label="Type">
-            <ChipGroup options={ABILITY_TYPES} value={typeFilter} onChange={setTypeFilter} allLabel="All" />
-          </FilterGroup>
-          <FilterGroup label="Unusual for this stage">
-            <Button
-              class="quiet" size="small" variant="brand"
-              appearance={showLocked ? "filled-outlined" : "outlined"} pressed={showLocked}
-              onClick={() => setShowLocked(!showLocked)}
-            >
-              Show locked
-            </Button>
-          </FilterGroup>
-        </div>
-      </FilterBar>
-
-      {pending?.template && (
-        <div class="panel name-it">
-          <strong>{pending.row.name}</strong>
-          <div class="field" style="margin-top:.6rem;">
-            <label>{pending.template.label}</label>
-            <input
-              type="text" value={param} autofocus
-              aria-label={pending.template.label}
-              placeholder={pending.template.placeholder}
-              onInput={(e) => setParam((e.target as HTMLInputElement).value)}
-              onKeyDown={(e) => { if (e.key === "Enter") confirm(); }}
-            />
-            {pending.template.choices && (
-              <div class="chips" style="margin-top:.4rem;">
-                {pending.template.choices.map((c) => (
-                  <Button size="small" appearance={param === c ? "accent" : "outlined"} variant="brand" key={c} onClick={() => setParam(c)}>{c}</Button>
-                ))}
-              </div>
-            )}
-          </div>
-          <div class="navrow">
-            <Button variant="brand" appearance="accent" disabled={!param.trim()} onClick={confirm}>Add</Button>
-            <Button appearance="plain" onClick={() => setPending(null)}>Cancel</Button>
-          </div>
-        </div>
-      )}
-
-      <OptionList empty="No abilities match.">
-        {options.map((o) => (
-          <OptionRow
-            key={o.row.name}
-            title={o.row.name}
-            badge={o.recommended && !o.blocked ? <span class="badge-tag" style="--row:var(--ok)">Recommended</span> : undefined}
-            meta={metaOf(o)}
-            description={o.row.description}
-            accent={o.blocked ? BLOCKED_ACCENT : undefined}
-            action={
-              <Button
-                size="small" variant="brand" appearance={o.blocked ? "outlined" : "accent"}
-                disabled={o.taken !== undefined}
-                title={o.blocked ?? (o.taken !== undefined ? `Already taken here at ${o.taken}` : undefined)}
-                onClick={() => begin(o)}
-              >
-                {o.taken !== undefined ? "Added" : o.blocked ? "Add ⚠" : o.template ? "Name it…" : "Add"}
+      {stages.map((s) => {
+        const complete = s.budget.spent === s.budget.cap;
+        return (
+          <section class="stage" key={s.stage}>
+            <header class="stage-head">
+              <CircleCheck class={`stage-check ${complete ? "done" : ""}`} size={18} aria-hidden="true" />
+              <h3>{s.title}</h3>
+              <MeterPill meter={{ ...s.budget, label: "", text: `${s.budget.spent}/${s.budget.cap} xp`, note: leftText(s.budget) }} />
+              <Button size="small" variant="brand" appearance="outlined" class="stage-add" onClick={() => { setStage(s.stage); setOpen(true); }}>
+                + Add
               </Button>
-            }
-          />
-        ))}
-      </OptionList>
+            </header>
+            {s.hint && <p class="note stage-hint">{s.hint}</p>}
+            <div class="taken-rows">
+              {ch.abilities.filter((a) => a.stage === s.stage).map((a) => (
+                <TakenAbility key={a.name} ch={ch} a={a} mods={mods} update={update} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
+      <AbilityCatalog ch={ch} update={update} stages={stages} stage={stage} setStage={setStage} open={open} setOpen={setOpen} />
     </>
   );
+}
+
+/** A taken Ability: rename (named ones), specialty tag, score stepper, remove. */
+function TakenAbility({ ch, a, mods, update }: { ch: Character; a: AbilityPick; mods: Modifiers; update: (ops: Op[]) => void }) {
+  const [renaming, setRenaming] = useState(false);
+  const [editingSpec, setEditingSpec] = useState(false);
+  const own = rules.ability(a.name);
+  const base = baseAbilityRow(rules, a.name);
+  const max = abilityMax(ch, a.name, mods);
+  const set = (fields: Partial<AbilityPick>) =>
+    update([{ op: "ability", name: a.name, score: a.score, stage: a.stage, type: a.type ?? undefined, specialty: a.specialty, ...fields } as Op]);
 
   return (
-    <section class="stage">
-      {collapsible
-        ? <Collapsible summary={header} open={!complete}>{body}</Collapsible>
-        : <>{header}{body}</>}
-    </section>
+    <div class="char-row">
+      <span class="nm">
+        {renaming ? (
+          <TextPrompt
+            initial={a.name} label={`Rename ${a.name}`}
+            onSave={(to) => { update([{ op: "rename", name: a.name, to, stage: a.stage }]); setRenaming(false); }}
+            onCancel={() => setRenaming(false)}
+          />
+        ) : own ? (
+          <span title={own.description}>{a.name}</span>
+        ) : (
+          // Only a name the player typed can be retyped; a data row's name is fixed.
+          <button type="button" class="linkish ab-name" title="Rename" onClick={() => setRenaming(true)}>{a.name}</button>
+        )}{" "}
+        <span class="spec-anchor">
+          <button type="button" class={`spec-tag ${a.specialty ? "" : "empty"}`} onClick={() => setEditingSpec(!editingSpec)}>
+            {a.specialty ?? "+ specialty"}
+          </button>
+          {editingSpec && (
+            <div class="spec-popover">
+              <TextPrompt
+                initial={a.specialty ?? ""} label={`Specialty for ${a.name}`}
+                placeholder="a narrow application" choices={base ? specialtyHints(base) : []}
+                onSave={(specialty) => { set({ specialty }); setEditingSpec(false); }}
+                onCancel={() => setEditingSpec(false)}
+              />
+            </div>
+          )}
+        </span>
+        <small>{typeLabel(a.type)} · {abilityCost(a.name, a.score, mods)} xp{mods.affinityAbility.has(a.name) && " · Affinity"}</small>
+      </span>
+      <span class="cost">+1 = {xpToNext(a.name, a.score, mods)} xp</span>
+      <span class="score">
+        {a.score > max && (
+          <span class="badge-tag age-cap" style="--row:var(--warn)" title={`At age ${ch.age} the usual maximum is ${max}`}>
+            <TriangleAlert size={12} aria-hidden="true" /> over cap {max}
+          </span>
+        )}
+        <Stepper
+          value={a.score} min={1} label={a.name}
+          maxHint={a.score >= max ? `Past ${max} is beyond the usual cap at age ${ch.age}` : undefined}
+          onChange={(score) => set({ score })}
+        />
+      </span>
+      <Button size="small" appearance="plain" onClick={() => update([{ op: "remove", kind: "ability", name: a.name, stage: a.stage }])}>remove</Button>
+    </div>
+  );
+}
+
+/** The catalogue of everything a stage can take, in a drawer with a stage switch. */
+function AbilityCatalog({ ch, update, stages, stage, setStage, open, setOpen }: {
+  ch: Character; update: (ops: Op[]) => void; stages: StageSpec[];
+  stage: Stage; setStage: (s: Stage) => void; open: boolean; setOpen: (o: boolean) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const [typeFilter, setTypeFilter] = useState<AbilityTypeFilter | "">("");
+  /** Locked rows (the stage's own refusals) default hidden; one tap brings them back, with their reason. */
+  const [showLocked, setShowLocked] = useState(false);
+  /** The placeholder row being named in place ("(Area) Lore" → "Provence Lore"). */
+  const [naming, setNaming] = useState<string | null>(null);
+  const body = useRef<HTMLDivElement>(null);
+  const spec = stages.find((s) => s.stage === stage) ?? stages[0]!;
+  const focusSearch = () => body.current?.querySelector<HTMLInputElement>('input[type="search"]')?.focus();
+
+  const options = useMemo(
+    () => abilityOptions(rules.abilities, ch, spec.stage, { search: query, type: typeFilter, onlyAvailable: !showLocked, recommended: spec.recommended }),
+    [ch, spec, query, typeFilter, showLocked],
+  );
+
+  const addAs = (name: string, o: AbilityOption) => {
+    update([{ op: "ability", name, score: 1, stage: spec.stage, type: o.row.type ?? undefined }]);
+    setNaming(null);
+    focusSearch();
+  };
+  const add = (o: AbilityOption) => (o.template ? setNaming(o.row.name) : addAs(o.row.name, o));
+
+  return (
+    <wa-drawer
+      label="Add an Ability" open={open} class="catalog"
+      onwa-hide={(e: Event) => { if (e.target === e.currentTarget) setOpen(false); }}
+      onwa-after-show={(e: Event) => { if (e.target === e.currentTarget) focusSearch(); }}
+    >
+      <div
+        ref={body}
+        onKeyDown={(e) => {
+          // Enter in the search box adds the top hit, so you can type, add, and keep typing.
+          if (e.key !== "Enter" || !(e.target as HTMLElement).matches('input[type="search"]')) return;
+          const top = options.find((o) => o.taken === undefined && !o.blocked);
+          if (top) { e.preventDefault(); add(top); }
+        }}
+      >
+        <div class="catalog-stage">
+          <ChipGroup
+            options={stages.map((s) => s.stage)} value={spec.stage} allLabel={null}
+            labelOf={(s) => STAGE_LABEL[s]} onChange={(s) => { if (s) { setStage(s); setNaming(null); } }}
+          />
+          <MeterPill meter={{ ...spec.budget, label: "", text: `${spec.budget.spent}/${spec.budget.cap} xp`, note: leftText(spec.budget) }} />
+        </div>
+        <FilterBar
+          search={query}
+          onSearch={setQuery}
+          placeholder="Search abilities…"
+          active={[
+            typeFilter && { label: typeFilter, clear: () => setTypeFilter("") },
+            showLocked && { label: "Locked shown", clear: () => setShowLocked(false) },
+          ].filter(Boolean) as ActiveFilter[]}
+          onClear={() => { setTypeFilter(""); setShowLocked(false); }}
+          summary={<>{options.length} abilities</>}
+        >
+          <div class="fgroups">
+            <FilterGroup label="Type">
+              <ChipGroup options={ABILITY_TYPES} value={typeFilter} onChange={setTypeFilter} allLabel="All" />
+            </FilterGroup>
+            <FilterGroup label="Unusual for this stage">
+              <Button
+                class="quiet" size="small" variant="brand"
+                appearance={showLocked ? "filled-outlined" : "outlined"} pressed={showLocked}
+                onClick={() => setShowLocked(!showLocked)}
+              >
+                Show locked
+              </Button>
+            </FilterGroup>
+          </div>
+        </FilterBar>
+
+        <OptionList empty="No abilities match.">
+          {options.map((o) =>
+            naming === o.row.name && o.template ? (
+              <li class="option naming" key={o.row.name}>
+                <div class="meta">
+                  <div class="ttl">{o.row.name}</div>
+                  <div class="sz"><span class="facts">{o.template.label}</span></div>
+                  <TextPrompt
+                    label={o.template.label} placeholder={o.template.placeholder} choices={o.template.choices}
+                    saveLabel="Add" onSave={(v) => addAs(o.template!.build(v), o)}
+                    onCancel={() => { setNaming(null); focusSearch(); }}
+                  />
+                </div>
+              </li>
+            ) : (
+              <OptionRow
+                key={o.row.name}
+                title={o.row.name}
+                badge={o.recommended && !o.blocked ? <span class="badge-tag" style="--row:var(--ok)">Recommended</span> : undefined}
+                meta={metaOf(o)}
+                description={o.row.description}
+                accent={o.blocked ? BLOCKED_ACCENT : undefined}
+                action={
+                  <Button
+                    size="small" variant="brand" appearance={o.blocked ? "outlined" : "accent"}
+                    disabled={o.taken !== undefined}
+                    title={o.blocked ?? (o.taken !== undefined ? `Already taken here at ${o.taken}` : undefined)}
+                    onClick={() => add(o)}
+                  >
+                    {o.taken !== undefined ? "Added" : o.blocked ? "Add ⚠" : "Add"}
+                  </Button>
+                }
+              />
+            ),
+          )}
+        </OptionList>
+      </div>
+    </wa-drawer>
   );
 }
 

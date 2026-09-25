@@ -10,6 +10,7 @@ import "@awesome.me/webawesome/dist/components/button/button.js";
 import "@awesome.me/webawesome/dist/components/button-group/button-group.js";
 import "@awesome.me/webawesome/dist/components/select/select.js";
 import "@awesome.me/webawesome/dist/components/option/option.js";
+import "@awesome.me/webawesome/dist/components/drawer/drawer.js";
 import { registerIconLibrary } from "@awesome.me/webawesome/dist/webawesome.js";
 
 // A component's own chrome (the chevron, an option's tick, the clear button) is

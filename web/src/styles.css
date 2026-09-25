@@ -239,13 +239,31 @@ input[type="search"] { -webkit-appearance: none; appearance: none; }
 input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
 
-/* ── budget bar (sticky bottom on mobile) ───────────────── */
+/* ── budget strip (sticky, under the step pips) ─────────── */
 .budgetbar {
-  position: sticky; bottom: 0; z-index: 20; margin: 0 -1rem;
-  background: rgba(255, 253, 249, 0.96); backdrop-filter: blur(6px);
-  border-top: 1px solid var(--line); padding: 0.55rem 1rem;
+  position: sticky; top: var(--topbar-h); z-index: 30; margin: 0 -1rem 0.6rem;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem;
+  background: rgba(251, 248, 243, 0.96); backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line); padding: 0.5rem 1rem;
 }
-@media (max-width: 560px) { .budgetbar { margin: 0 -0.7rem; padding: 0.55rem 0.7rem; } }
+@media (max-width: 560px) {
+  .budgetbar { margin: 0 -0.7rem 0.6rem; padding: 0.4rem 0.7rem; gap: 0.35rem 0.8rem; }
+  .budgetbar .meters { gap: 0.25rem 0.9rem; }
+  .pool { font-size: 0.8rem; flex-basis: 40%; }
+}
+.budgetbar .meters { flex: 1 1 20rem; gap: 0.4rem 1.2rem; }
+.budgetbar-nav { display: flex; gap: 0.5rem; margin-left: auto; }
+.pool { flex: 1 1 8rem; max-width: 14rem; font-size: 0.9rem; }
+.pool-label { display: flex; justify-content: space-between; gap: 0.5rem; color: var(--muted); }
+.pool-label b { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 600; }
+.pool-bar { height: 5px; margin-top: 0.2rem; border-radius: 3px; background: var(--line-soft); overflow: hidden; }
+.pool-bar i { display: block; height: 100%; background: var(--accent-soft); }
+.pool.full .pool-bar i { background: var(--ok); }
+.pool.full b { color: var(--ok); }
+.pool.over .pool-bar i { background: var(--err); }
+.pool.over b { color: var(--err); }
+/* In the creator a list's filter bar stacks under the budget strip. */
+.panel .filterbar { top: calc(var(--topbar-h) + var(--budgetbar-h, 0px)); }
 .meters { display: flex; flex-wrap: wrap; gap: 0.4rem 0.7rem; }
 .meter { font-size: 0.78rem; color: var(--muted); display: inline-flex; align-items: center; gap: 0.3rem; }
 .meter b { color: var(--ink); font-variant-numeric: tabular-nums; }
@@ -335,9 +353,33 @@ input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; appe
   border: none; background: none; padding: 0; min-height: 0; font: inherit; font-size: inherit;
   color: var(--accent); text-decoration: underline dotted; cursor: pointer;
 }
-.spec-edit { display: flex; gap: 0.4rem; align-items: center; padding: 0.15rem 0 0.5rem; }
-.spec-edit input { flex: 1; font-size: 0.85rem; min-height: 36px; padding: 0.3rem 0.5rem; }
-.panel.name-it { margin: 0.2rem 0 0.8rem; }
+.stage-add { margin-left: auto; }
+.stage-head input.years { width: 3.6rem; min-height: 30px; padding: 0.1rem 0.3rem; font-size: 0.95rem; display: inline-block; }
+.char-row input.native-lang { min-height: 34px; padding: 0.2rem 0.5rem; max-width: 14rem; }
+@media (max-width: 560px) { .char-row input.native-lang { max-width: 9rem; } }
+.char-row .nm label { font-size: 0.95rem; color: inherit; }
+.char-row .score { display: inline-flex; align-items: center; gap: 0.4rem; }
+.badge-tag.age-cap { display: inline-flex; align-items: center; gap: 0.2rem; }
+/* The specialty: a small tag beside the name, editing in a popover below it. */
+.spec-anchor { position: relative; display: inline-block; }
+.spec-tag {
+  font: inherit; font-size: 0.75rem; min-height: 0; padding: 0.05rem 0.5rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--accent-tint-line); background: var(--accent-tint); color: var(--accent);
+}
+.spec-tag.empty { background: transparent; border-style: dashed; color: var(--faint); }
+.spec-popover {
+  position: absolute; top: calc(100% + 0.3rem); left: 0; z-index: 35; width: min(24rem, 80vw);
+  background: var(--card); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 0.6rem;
+}
+.text-prompt { display: flex; flex-direction: column; gap: 0.4rem; }
+.text-prompt-row { display: flex; gap: 0.4rem; align-items: center; }
+.text-prompt-row input { flex: 1; font-size: 0.9rem; min-height: 36px; padding: 0.3rem 0.5rem; }
+/* The catalogue drawer: descriptions stay one line until tapped. */
+.catalog { --size: min(36rem, 100vw); }
+.catalog .filterbar { top: 0; margin: 0 0 0.4rem; padding: 0.4rem 0 0.3rem; background: var(--card); }
+.catalog .option .desc.clamp { -webkit-line-clamp: 1; }
+.catalog-stage { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.8rem; margin-bottom: 0.4rem; }
+.option.naming .text-prompt { margin-top: 0.4rem; }
 .count { margin: 0.2rem 0 0.3rem; }
 
 .note { font-size: 0.82rem; color: var(--muted); }
@@ -440,7 +482,7 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
 .pill-select.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 .group-head {
-  position: sticky; top: calc(var(--topbar-h) + var(--filterbar-h)); z-index: 5;
+  position: sticky; top: calc(var(--topbar-h) + var(--budgetbar-h, 0px) + var(--filterbar-h)); z-index: 5;
   display: flex; align-items: center; gap: 0.4rem;
   font-size: 0.82rem; font-weight: 600; letter-spacing: 0.02em;
   color: var(--tech, var(--muted)); background: var(--bg); padding: 0.45rem 0.2rem 0.3rem;
