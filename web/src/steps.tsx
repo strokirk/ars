@@ -3,7 +3,7 @@
 // and companion share all of these; the magus adds House fields here and an Arts &
 // Spells step (see ArtsSpellsStep).
 import { useState } from "preact/hooks";
-import { budgetsOf, charKind, type Character, type Op } from "./engine.ts";
+import { budgetsOf, charKind, defaultAge, type Character, type Op } from "./engine.ts";
 import { CharacteristicsAllocator } from "./components/CharacteristicsAllocator.tsx";
 import { TraitPicker } from "./components/TraitPicker.tsx";
 import { AbilityPicker } from "./components/AbilityPicker.tsx";
@@ -69,6 +69,7 @@ export function ConceptStep({ ch, update, reseed }: StepProps) {
   const houseChoices = ch.house ? HOUSE_PUISSANT_CHOICES[ch.house] : undefined;
   // The choice isn't stored on the character — it shows up as the granted Virtue.
   const puissant = houseChoices?.find((c) => ch.virtues.some((v) => v.display === `Puissant ${c}`)) ?? "";
+  const [pickingHouse, setPickingHouse] = useState(!ch.house);
   return (
     <div>
       <div class="field">
@@ -79,20 +80,30 @@ export function ConceptStep({ ch, update, reseed }: StepProps) {
         <label>Concept — a sentence on who they are</label>
         <textarea value={ch.concept} placeholder="A grizzled turb sergeant who distrusts magi but would die for the covenant." onInput={(e) => update([{ op: "meta", fields: { concept: (e.target as HTMLTextAreaElement).value } }])} />
       </div>
-      <div class="field">
-        <label>Later-life years {kind === "magus" ? "(pre-apprenticeship)" : ""}</label>
-        <input type="number" min={0} value={ch.laterLifeYears} onInput={(e) => update([{ op: "meta", fields: { laterLifeYears: Number((e.target as HTMLInputElement).value) } }])} />
-      </div>
 
       {kind === "magus" && reseed && (
         <>
           <hr class="soft" />
           <div class="field">
             <label>House</label>
-            <RadioCards
-              name="house" value={ch.house ?? ""} onChange={(house) => reseed({ house })}
-              options={HOUSES.map((h) => ({ value: h, label: h, blurb: HOUSE_BLURB[h] }))}
-            />
+            {pickingHouse ? (
+              <>
+                <RadioCards
+                  name="house" value={ch.house ?? ""}
+                  onChange={(house) => { reseed({ house }); setPickingHouse(false); }}
+                  options={HOUSES.map((h) => ({ value: h, label: h, blurb: HOUSE_BLURB[h] }))}
+                />
+                {ch.house && <Button size="small" appearance="plain" onClick={() => setPickingHouse(false)}>Cancel</Button>}
+              </>
+            ) : (
+              <div class="radio-card on">
+                <span>
+                  <span class="rc-name">{ch.house}</span>
+                  <span class="rc-blurb">{HOUSE_BLURB[ch.house!]}</span>
+                </span>
+                <Button size="small" appearance="plain" onClick={() => setPickingHouse(true)}>Change</Button>
+              </div>
+            )}
           </div>
           {houseChoices && (
             <div class="field">
@@ -118,21 +129,21 @@ export function VirtuesStep({ ch, update }: StepProps) {
 }
 
 export function AbilitiesStep({ ch, update }: StepProps) {
-  const magus = charKind(ch) === "magus";
+  const kind = charKind(ch);
+  const magus = kind === "magus";
   const b = budgetsOf(ch);
   const mods = deriveModifiers(ch);
   const granted = ch.abilities.filter((a) => a.stage === "free");
   const min = b.apprenticeship.minimums;
+  const setLaterLifeYears = (years: number) =>
+    update([{ op: "meta", fields: { laterLifeYears: years, age: defaultAge(kind, years) } }]);
   return (
     <div>
-      <div class="field">
-        <label>Age</label>
-        <input
-          type="number" min={magus ? 25 : 5} value={ch.age}
-          onInput={(e) => update([{ op: "meta", fields: { age: Number((e.target as HTMLInputElement).value) } }])}
-        />
-        <p class="note">Caps the maximum score of any Ability (higher past 30 — see the meter above each row).</p>
-      </div>
+      <p class="note">
+        Age <b>{ch.age}</b> — 5 (childhood) + {ch.laterLifeYears} (later life){magus ? " + 15 (apprenticeship)" : ""}.
+        It isn't set directly: change Later-life years below, and it follows. Age caps the maximum score of any
+        Ability (higher past 30 — see the meter above each row).
+      </p>
       <div class="field">
         <label>Native Language (spoken vernacular — free, score 5)</label>
         <input type="text" value={ch.nativeLanguage ?? ""} placeholder="e.g. German, French, Italian" onInput={(e) => update([{ op: "native-language", value: (e.target as HTMLInputElement).value }])} />
@@ -159,6 +170,15 @@ export function AbilitiesStep({ ch, update }: StepProps) {
           : "Academic, Martial and Supernatural Abilities open up here only if a Virtue enables them."}
         recommended={LATER_LIFE_ABILITIES}
         collapsible
+        extra={
+          <div class="field">
+            <label>Later-life years {magus ? "(pre-apprenticeship)" : ""}</label>
+            <input
+              type="number" min={0} value={ch.laterLifeYears}
+              onInput={(e) => setLaterLifeYears(Number((e.target as HTMLInputElement).value))}
+            />
+          </div>
+        }
       />
       {magus && (
         <>
@@ -254,14 +274,38 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
   const techSummary = TECHNIQUES.filter((t) => (ch.arts[t] ?? 0) > 0)
     .map((t) => `${ART_ABBR[t]} ${ch.arts[t]}`).join(" · ") || "none yet";
 
+  const formSummary = FORMS.filter((f) => (ch.arts[f] ?? 0) > 0)
+    .map((f) => `${ART_ABBR[f]} ${ch.arts[f]}`).join(" · ") || "none yet";
+
   return (
     <div>
       <Collapsible summary={<h3 style="font-size:1rem; margin:.2rem 0;">Techniques <span class="art-shorthand">{techSummary}</span></h3>}>
         {TECHNIQUES.map((t) => artControl(t))}
       </Collapsible>
-      <h3 style="font-size:1rem; margin:1rem 0 .4rem;">Forms</h3>
-      {FORMS.map((f) => artControl(f))}
+      <Collapsible summary={<h3 style="font-size:1rem; margin:.2rem 0;">Forms <span class="art-shorthand">{formSummary}</span></h3>}>
+        {FORMS.map((f) => artControl(f))}
+      </Collapsible>
       <hr class="soft" />
+      <Collapsible class="why" open={false} summary={<strong>What are Lab Total and Casting Total?</strong>}>
+        <p>
+          <b>Lab Total</b> (what caps a spell you can <em>learn</em> here) = Technique + Form + Intelligence +
+          Magic Theory + Aura (3, typically). It's the number the "Learn" button checks against a spell's level.
+        </p>
+        <p>
+          <b>Casting Total</b> (what matters once you're <em>playing</em>, not at creation) = Technique + Form +
+          Stamina − Encumbrance + Aura, plus a die roll, compared against the spell's level to see if it's cast.
+        </p>
+        <p>
+          Both are built from the same Technique/Form/Art scores you're setting on this page — split xp between a
+          Technique and a Form for higher totals in that combination, rather than spreading thin.
+        </p>
+        <p class="note">
+          This app is <b>not exhaustive</b>: it applies Puissant Art/Ability and Affinity to these totals, but many
+          more Virtues and Flaws shift them further — Magical Focus, Deficient Technique/Form, Elemental Magic,
+          Flexible/Restricted Formulaic Magic, a low Arts score's requisite penalty, and dozens more. Treat every
+          computed total here as a floor, not the final word — check your Virtues and Flaws by hand too.
+        </p>
+      </Collapsible>
       <h3 style="font-size:1rem; margin:1rem 0 .4rem;">Spells (≤120 levels)</h3>
       {ch.spells.length > 0 && (
         <ul class="trait-list">
@@ -300,7 +344,6 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
           );
         }}
       />
-      <p class="note">Highest learnable level = Technique + Form + Int + Magic Theory + 3 (aura 3), plus your Virtues. Split xp between a Technique and a Form for higher totals.</p>
     </div>
   );
 }

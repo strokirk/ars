@@ -1,6 +1,6 @@
 import type { ComponentChildren } from "preact";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
-import { SlidersHorizontal, Shuffle, X } from "lucide-preact";
+import { SlidersHorizontal, Shuffle, X, ArrowUpDown } from "lucide-preact";
 import { SearchField } from "./SearchField.tsx";
 import { Select } from "./Select.tsx";
 import { Button } from "./Button.tsx";
@@ -85,17 +85,20 @@ export function FilterBar<S extends string>({
         >
           {lead}
           {sorts && sort !== undefined && onSort && (
-            <Select
-              label="Sort"
-              pill
-              value={sort}
-              options={sorts}
-              onChange={(v) => onSort(v as S)}
-            />
+            <span class="sort-select" title="Sort">
+              <ArrowUpDown size={13} aria-hidden="true" class="sort-ico" />
+              <Select
+                label="Sort"
+                pill
+                value={sort}
+                options={sorts}
+                onChange={(v) => onSort(v as S)}
+              />
+            </span>
           )}
           {onShuffle && (
             <Button title="Shuffle again" onClick={onShuffle}>
-              <Shuffle size={13} aria-hidden="true" /> Shuffle
+              <Shuffle size={13} aria-hidden="true" /> <span class="btn-label">Shuffle</span>
             </Button>
           )}
           {children && (
@@ -107,8 +110,8 @@ export function FilterBar<S extends string>({
               variant="brand"
               onClick={() => setOpen(!open)}
             >
-              <SlidersHorizontal size={13} aria-hidden="true" /> Filters
-              {active.length ? ` (${active.length})` : ""}
+              <SlidersHorizontal size={13} aria-hidden="true" />{" "}
+              <span class="btn-label">Filters{active.length ? ` (${active.length})` : ""}</span>
             </Button>
           )}
         </SearchField>

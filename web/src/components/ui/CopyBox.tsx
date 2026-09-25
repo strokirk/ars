@@ -6,7 +6,7 @@ import { Button } from "./Button.tsx";
  * Markdown/JSON exports instead of triggering a download the user then has to
  * go find on disk.
  */
-export function CopyBox({ text, label, filename }: { text: string; label: string; filename?: string }) {
+export function CopyBox({ text, label }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -23,22 +23,11 @@ export function CopyBox({ text, label, filename }: { text: string; label: string
     setTimeout(() => setCopied(false), 1800);
   };
 
-  const save = () => {
-    if (!filename) return;
-    const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
-    const a = document.createElement("a");
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div class="copybox">
       <div class="copybox-head">
         <span class="note">{label} · {text.length.toLocaleString()} characters</span>
-        <span class="copybox-actions">
-          {filename && <Button size="small" appearance="plain" onClick={save}>Save file</Button>}
-          <Button size="small" variant="brand" appearance="accent" onClick={copy}>{copied ? "✓ Copied" : "Copy"}</Button>
-        </span>
+        <Button size="small" variant="brand" appearance="accent" onClick={copy}>{copied ? "✓ Copied" : "Copy"}</Button>
       </div>
       <textarea id="copybox-text" class="copybox-text" readOnly rows={18} value={text} onFocus={(e) => (e.target as HTMLTextAreaElement).select()} />
     </div>

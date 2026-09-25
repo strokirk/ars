@@ -74,15 +74,28 @@ export interface NewCharacterOpts {
   age?: number;
 }
 
+/**
+ * Age follows directly from Later-life years, not a free choice: 5 fixed years of
+ * childhood, then the later-life years, then (for a freshly Gauntleted magus) the
+ * fixed 15-year apprenticeship. `set age` can still override it (e.g. building a
+ * magus some years past Gauntlet), but the wizard never needs to — it derives Age
+ * from Later-life years automatically.
+ */
+export function defaultAge(kind: CharacterKind, laterLifeYears: number): number {
+  return 5 + laterLifeYears + (kind === "magus" ? 15 : 0);
+}
+
 export function newCharacter(opts: NewCharacterOpts): Character {
+  const kind = opts.kind ?? "magus";
+  const laterLifeYears = 5;
   return {
     schema: 2,
-    kind: opts.kind ?? "magus",
+    kind,
     name: opts.name,
     house: opts.house,
     concept: opts.concept ?? "",
     notes: opts.notes ?? "",
-    age: opts.age ?? 25,
+    age: opts.age ?? defaultAge(kind, laterLifeYears),
     characteristics: {},
     virtues: [],
     flaws: [],
@@ -93,7 +106,7 @@ export function newCharacter(opts: NewCharacterOpts): Character {
     // Grogs are minor characters and have no Confidence (it marks central characters).
     confidence: (opts.kind ?? "magus") === "grog" ? 0 : 1,
     reputation: null,
-    laterLifeYears: 5,
+    laterLifeYears,
   };
 }
 

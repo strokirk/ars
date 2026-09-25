@@ -103,6 +103,8 @@ describe("AbilityPicker", () => {
   test("'Show locked' reveals what this stage refuses, with the engine's own reason — but still lets you take it", async () => {
     const el = mount(<Harness />);
     expect(rowTitles(el)).not.toContain("Single Weapon");
+    button(el, "Filters").click();
+    await flush();
     button(el, "Show locked").click();
     await flush();
     expect(rowTitles(el).length).toBe(rules.abilities.length);
@@ -116,6 +118,8 @@ describe("AbilityPicker", () => {
 
   test("the type filter narrows the always-visible list (and implies showing locked rows)", async () => {
     const el = mount(<Harness />);
+    button(el, "Filters").click();
+    await flush();
     button(el, "Show locked").click();
     await flush();
     button(el, "Martial").click();

@@ -343,17 +343,11 @@ describe("Art icons and badges", () => {
 });
 
 describe("CopyBox", () => {
-  test("shows the text inline for copying instead of downloading it", () => {
+  test("shows the text inline for copying, with no file-download escape hatch", () => {
     const el = mount(<CopyBox text={"# Otto\n\nA grog."} label="Markdown sheet" />);
     expect(el.querySelector("textarea")!.value).toBe("# Otto\n\nA grog.");
     expect(el.textContent).toContain("Copy");
-    // No filename → no save-to-disk escape hatch.
     expect(el.textContent).not.toContain("Save file");
-  });
-
-  test("offers a file save only when given a filename", () => {
-    const el = mount(<CopyBox text="x" label="JSON" filename="otto.json" />);
-    expect(el.textContent).toContain("Save file");
   });
 });
 

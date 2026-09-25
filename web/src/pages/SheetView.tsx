@@ -4,13 +4,12 @@ import { navigate } from "../router.ts";
 import { Button } from "../components/ui/Button.tsx";
 import { Collapsible } from "../components/ui/Collapsible.tsx";
 import { Issues } from "../components/Issues.tsx";
-import { getDraft, saveDraft, newId, encodeCharacter, decodeCharacter } from "../store.ts";
+import { getDraft, saveDraft, newId, decodeCharacter } from "../store.ts";
 import { rules, issuesOf, isCharacterLegal, type Character } from "../engine.ts";
 import { rosterEntry } from "../lib/roster.ts";
 import { renderSheetHtml } from "../../../chargen/src/cli/sheet-html.ts";
 import { renderSheet } from "../../../chargen/src/cli/sheet.ts";
 import { title } from "../charutil.ts";
-import { kebab } from "../../../chargen/src/cli/sheet.ts";
 import { CopyBox } from "../components/ui/CopyBox.tsx";
 
 const sheetData = {
@@ -20,7 +19,6 @@ const sheetData = {
 
 export function SheetView({ match }: { match: Match }) {
   const iframe = useRef<HTMLIFrameElement>(null);
-  const [copied, setCopied] = useState(false);
   // Exports open inline (with a copy button) rather than dropping a file the user
   // then has to go find — on mobile especially, a download is a dead end.
   const [view, setView] = useState<"markdown" | "json" | null>(null);
@@ -47,15 +45,8 @@ export function SheetView({ match }: { match: Match }) {
   }
 
   const html = renderSheetHtml(ch, sheetData);
-  const base = kebab(ch.name || "character");
   const issues = issuesOf(ch);
   const legal = isCharacterLegal(ch);
-
-  const copyShare = async () => {
-    const link = `${location.origin}${location.pathname}#/c/${encodeCharacter(ch)}`;
-    try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 1800); }
-    catch { prompt("Copy this shareable link:", link); }
-  };
 
   const saveCopy = () => {
     const id = newId();
@@ -72,13 +63,11 @@ export function SheetView({ match }: { match: Match }) {
         <Button size="small" appearance={view === "markdown" ? "filled" : "outlined"} onClick={() => setView(view === "markdown" ? null : "markdown")}>Markdown</Button>
         <Button size="small" appearance={view === "json" ? "filled" : "outlined"} onClick={() => setView(view === "json" ? null : "json")}>JSON</Button>
         <Button size="small" onClick={() => iframe.current?.contentWindow?.print()}>Print</Button>
-        <Button size="small" onClick={copyShare}>{copied ? "✓ Link copied" : "Share link"}</Button>
       </div>
 
       {view && (
         <CopyBox
           label={view === "markdown" ? "Markdown sheet" : "Character JSON"}
-          filename={view === "markdown" ? `${base}.md` : `${base}.json`}
           text={view === "markdown" ? renderSheet(ch) : JSON.stringify(ch, null, 2)}
         />
       )}

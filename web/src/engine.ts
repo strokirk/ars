@@ -8,7 +8,7 @@ import { computeBudgets, type Budgets } from "../../chargen/src/domain/budgets.t
 import { validate, isLegal, VIOLATION_CODES, type Issue } from "../../chargen/src/domain/validate.ts";
 import { deriveModifiers } from "../../chargen/src/domain/modifiers.ts";
 import { createGrog, createCompanion, createMagus, type CreateResult } from "../../chargen/src/domain/create.ts";
-import { type Character, type CharacterKind, charKind } from "../../chargen/src/domain/character.ts";
+import { type Character, type CharacterKind, charKind, defaultAge } from "../../chargen/src/domain/character.ts";
 import type { House } from "../../chargen/src/domain/glossary.ts";
 
 export { rules, VIOLATION_CODES };
@@ -28,7 +28,7 @@ export const budgetsOf = (ch: Character): Budgets => computeBudgets(ch);
 export const issuesOf = (ch: Character): Issue[] => validate(ch);
 export const isCharacterLegal = (ch: Character): boolean => isLegal(validate(ch));
 export const modifiersOf = (ch: Character) => deriveModifiers(ch);
-export { charKind };
+export { charKind, defaultAge };
 
 export interface NewOpts {
   name?: string;

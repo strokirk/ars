@@ -9,7 +9,7 @@ import {
   ABILITY_TYPES, abilityCost, abilityMax, abilityOptions, specialtyHints, typeLabel, xpToNext,
   type AbilityOption, type AbilityTypeFilter,
 } from "../lib/abilities.ts";
-import { SearchField } from "./ui/SearchField.tsx";
+import { FilterBar, type ActiveFilter } from "./ui/FilterBar.tsx";
 import { ChipGroup } from "./ui/ChipGroup.tsx";
 import { OptionList, OptionRow } from "./ui/OptionList.tsx";
 import { MeterPill } from "./BudgetBar.tsx";
@@ -31,6 +31,8 @@ interface Props {
   recommended?: readonly string[];
   /** Collapse the section behind a summary once its xp pool is fully spent. */
   collapsible?: boolean;
+  /** Extra controls rendered right under the hint (e.g. Later-life's years input). */
+  extra?: ComponentChildren;
 }
 
 /** Blocked rows keep their place in the list but lose the row's colour cue. */
@@ -42,7 +44,7 @@ const BLOCKED_ACCENT = "var(--line)";
  * — recommended picks first, and what it refuses shown with the reason rather than
  * hidden, unless the player asks to hide it.
  */
-export function AbilityPicker({ ch, update, stage, title, hint, budget, recommended, collapsible }: Props) {
+export function AbilityPicker({ ch, update, stage, title, hint, budget, recommended, collapsible, extra }: Props) {
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<AbilityTypeFilter | "">("");
   /** Locked rows (the stage's own refusals) default hidden — a full list is
@@ -100,6 +102,7 @@ export function AbilityPicker({ ch, update, stage, title, hint, budget, recommen
   const body = (
     <>
       <p class="note stage-hint">{hint}</p>
+      {extra}
 
       {taken.length > 0 && (
         <div class="taken-rows">
@@ -149,15 +152,24 @@ export function AbilityPicker({ ch, update, stage, title, hint, budget, recommen
         </div>
       )}
 
-      <SearchField value={query} onInput={setQuery} placeholder="Search abilities…" />
-      <div class="filters">
+      <FilterBar
+        search={query}
+        onSearch={setQuery}
+        placeholder="Search abilities…"
+        active={[
+          typeFilter && { label: typeFilter, clear: () => setTypeFilter("") },
+          showLocked && { label: "Locked shown", clear: () => setShowLocked(false) },
+        ].filter(Boolean) as ActiveFilter[]}
+        onClear={() => { setTypeFilter(""); setShowLocked(false); }}
+        summary={<>{options.length} abilities</>}
+      >
         <div class="chips-row">
           <ChipGroup options={ABILITY_TYPES} value={typeFilter} onChange={setTypeFilter} allLabel="All types" />
           <Button size="small" appearance={showLocked ? "accent" : "outlined"} variant="brand" onClick={() => setShowLocked(!showLocked)}>
             {showLocked ? "Showing locked" : "Show locked"}
           </Button>
         </div>
-      </div>
+      </FilterBar>
 
       {pending?.template && (
         <div class="panel name-it">
@@ -186,7 +198,6 @@ export function AbilityPicker({ ch, update, stage, title, hint, budget, recommen
         </div>
       )}
 
-      <p class="note count">{options.length} abilities</p>
       <OptionList empty="No abilities match.">
         {options.map((o) => (
           <OptionRow

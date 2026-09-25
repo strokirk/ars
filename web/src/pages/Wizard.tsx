@@ -1,5 +1,6 @@
 import type { JSX } from "preact";
 import { useEffect, useMemo, useState } from "preact/hooks";
+import { ScrollText } from "lucide-preact";
 import { navigate } from "../router.ts";
 import { Button } from "../components/ui/Button.tsx";
 import { getDraft, saveDraft, newId } from "../store.ts";
@@ -77,7 +78,12 @@ export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: s
         ))}
       </div>
 
-      <h2 style="color:var(--accent); margin:.3rem 0 .2rem;">{KIND_LABEL[kind]} · {cur.label}</h2>
+      <div class="title-row">
+        <h2 style="color:var(--accent); margin:.3rem 0 .2rem;">{KIND_LABEL[kind]} · {cur.label}</h2>
+        <Button size="small" onClick={viewSheet} title="View sheet">
+          <ScrollText size={15} aria-hidden="true" /> <span class="btn-label">View sheet</span>
+        </Button>
+      </div>
 
       <div class="panel">
         {cur.why && <div class="why">{cur.why}</div>}
@@ -89,8 +95,6 @@ export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: s
         {step < steps.length - 1
           ? <Button variant="brand" appearance="accent" onClick={() => setStep(step + 1)}>Next →</Button>
           : <Button onClick={() => navigate("/")}>Done</Button>}
-        <span style="flex:1;" />
-        <Button onClick={viewSheet}>View sheet →</Button>
       </div>
 
       <BudgetBar meters={metersFor(cur, b)} />
