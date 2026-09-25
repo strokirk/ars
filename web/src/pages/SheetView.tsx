@@ -2,8 +2,10 @@ import { useMemo, useRef, useState } from "preact/hooks";
 import type { Match } from "../router.ts";
 import { navigate } from "../router.ts";
 import { Button } from "../components/ui/Button.tsx";
+import { Collapsible } from "../components/ui/Collapsible.tsx";
+import { Issues } from "../components/Issues.tsx";
 import { getDraft, saveDraft, newId, encodeCharacter, decodeCharacter } from "../store.ts";
-import { rules, isCharacterLegal, type Character } from "../engine.ts";
+import { rules, issuesOf, isCharacterLegal, type Character } from "../engine.ts";
 import { rosterEntry } from "../lib/roster.ts";
 import { renderSheetHtml } from "../../../chargen/src/cli/sheet-html.ts";
 import { renderSheet } from "../../../chargen/src/cli/sheet.ts";
@@ -46,6 +48,8 @@ export function SheetView({ match }: { match: Match }) {
 
   const html = renderSheetHtml(ch, sheetData);
   const base = kebab(ch.name || "character");
+  const issues = issuesOf(ch);
+  const legal = isCharacterLegal(ch);
 
   const copyShare = async () => {
     const link = `${location.origin}${location.pathname}#/c/${encodeCharacter(ch)}`;
@@ -79,10 +83,18 @@ export function SheetView({ match }: { match: Match }) {
         />
       )}
 
-      {!isCharacterLegal(ch) && (
-        <div class="why" style="border-color:var(--warn); background:#f7f1e0;">
-          <strong style="color:var(--warn);">Work in progress.</strong> This sheet isn't rules-legal yet — open it in the editor to finish.
-        </div>
+      {issues.length > 0 && (
+        <Collapsible
+          class="why"
+          open={!legal}
+          summary={
+            legal
+              ? <span style="color:var(--warn);">⚠ Rules-legal, with {issues.length} note{issues.length === 1 ? "" : "s"} worth a look</span>
+              : <span style="color:var(--err);">✗ Not yet legal — {issues.length} issue{issues.length === 1 ? "" : "s"} (open it in the editor to finish)</span>
+          }
+        >
+          <Issues issues={issues} />
+        </Collapsible>
       )}
 
       <iframe

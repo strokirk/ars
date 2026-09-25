@@ -1,5 +1,6 @@
 import type { ComponentChildren } from "preact";
 import { useMemo, useState } from "preact/hooks";
+import { CircleCheck } from "lucide-preact";
 import { rules, type Character, type Op } from "../engine.ts";
 import type { BudgetLine } from "../../../chargen/src/domain/budgets.ts";
 import { deriveModifiers } from "../../../chargen/src/domain/modifiers.ts";
@@ -12,6 +13,7 @@ import { SearchField } from "./ui/SearchField.tsx";
 import { ChipGroup } from "./ui/ChipGroup.tsx";
 import { OptionList, OptionRow } from "./ui/OptionList.tsx";
 import { MeterPill } from "./BudgetBar.tsx";
+import { Collapsible } from "./ui/Collapsible.tsx";
 import { Stepper } from "./ui/Stepper.tsx";
 import { Button } from "./ui/Button.tsx";
 
@@ -27,6 +29,8 @@ interface Props {
   budget: BudgetLine;
   /** Ability names to flag `Recommended` and float to the top of the list. */
   recommended?: readonly string[];
+  /** Collapse the section behind a summary once its xp pool is fully spent. */
+  collapsible?: boolean;
 }
 
 /** Blocked rows keep their place in the list but lose the row's colour cue. */
@@ -38,7 +42,7 @@ const BLOCKED_ACCENT = "var(--line)";
  * — recommended picks first, and what it refuses shown with the reason rather than
  * hidden, unless the player asks to hide it.
  */
-export function AbilityPicker({ ch, update, stage, title, hint, budget, recommended }: Props) {
+export function AbilityPicker({ ch, update, stage, title, hint, budget, recommended, collapsible }: Props) {
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<AbilityTypeFilter | "">("");
   /** Locked rows (the stage's own refusals) default hidden — a full list is
@@ -78,18 +82,23 @@ export function AbilityPicker({ ch, update, stage, title, hint, budget, recommen
     [ch, stage, query, typeFilter, showLocked, recommended],
   );
 
-  return (
-    <section class="stage">
-      <header class="stage-head">
-        <h3>{title}</h3>
-        <MeterPill
-          meter={{
-            label: "", spent: budget.spent, cap: budget.cap, over: budget.over, full: budget.full,
-            text: `${budget.spent}/${budget.cap} xp`,
-            note: left > 0 ? `${left} left` : left < 0 ? `${-left} over` : "all spent",
-          }}
-        />
-      </header>
+  const complete = budget.spent >= budget.cap;
+  const header = (
+    <header class="stage-head">
+      {collapsible && <CircleCheck class={`stage-check ${complete ? "done" : ""}`} size={18} aria-hidden="true" />}
+      <h3>{title}</h3>
+      <MeterPill
+        meter={{
+          label: "", spent: budget.spent, cap: budget.cap, over: budget.over, full: budget.full,
+          text: `${budget.spent}/${budget.cap} xp`,
+          note: left > 0 ? `${left} left` : left < 0 ? `${-left} over` : "all spent",
+        }}
+      />
+    </header>
+  );
+
+  const body = (
+    <>
       <p class="note stage-hint">{hint}</p>
 
       {taken.length > 0 && (
@@ -115,10 +124,9 @@ export function AbilityPicker({ ch, update, stage, title, hint, budget, recommen
                       </button>
                     </small>
                   </span>
-                  <span class="cost">{a.score >= max ? "max" : `+1 = ${next} xp`}</span>
+                  <span class="cost">+1 = {next} xp{a.score >= max ? " (past the usual age cap)" : ""}</span>
                   <Stepper
-                    value={a.score} min={1} max={max} label={a.name}
-                    maxHint={`Age ${ch.age} caps Abilities at ${max} during creation.`}
+                    value={a.score} min={1} label={a.name}
                     onChange={(v) => setScore(a.name, v, a.type, a.specialty)}
                   />
                   <Button size="small" appearance="plain" onClick={() => update([{ op: "remove", kind: "ability", name: a.name }])}>remove</Button>
@@ -190,17 +198,25 @@ export function AbilityPicker({ ch, update, stage, title, hint, budget, recommen
             accent={o.blocked ? BLOCKED_ACCENT : undefined}
             action={
               <Button
-                size="small" variant="brand" appearance="accent"
-                disabled={Boolean(o.blocked) || o.taken !== undefined}
+                size="small" variant="brand" appearance={o.blocked ? "outlined" : "accent"}
+                disabled={o.taken !== undefined}
                 title={o.blocked ?? (o.taken !== undefined ? `Already taken here at ${o.taken}` : undefined)}
                 onClick={() => begin(o)}
               >
-                {o.taken !== undefined ? "Added" : o.blocked ? "Locked" : o.template ? "Name it…" : "Add"}
+                {o.taken !== undefined ? "Added" : o.blocked ? "Add ⚠" : o.template ? "Name it…" : "Add"}
               </Button>
             }
           />
         ))}
       </OptionList>
+    </>
+  );
+
+  return (
+    <section class="stage">
+      {collapsible
+        ? <Collapsible summary={header} open={!complete}>{body}</Collapsible>
+        : <>{header}{body}</>}
     </section>
   );
 }

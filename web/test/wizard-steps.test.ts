@@ -11,11 +11,12 @@ describe("stepsFor", () => {
     expect(stepsFor("companion").map((s) => s.key)).not.toContain("arts");
   });
 
-  test("every kind starts at Concept and ends at Review", () => {
+  test("every kind starts at Concept, then Virtues & Flaws, and ends at Personality", () => {
     for (const kind of ["grog", "companion", "magus"] as const) {
       const keys = stepsFor(kind).map((s) => s.key);
       expect(keys[0]).toBe("concept");
-      expect(keys.at(-1)).toBe("review");
+      expect(keys[1]).toBe("virtues");
+      expect(keys.at(-1)).toBe("personality");
     }
   });
 
@@ -36,8 +37,8 @@ describe("metersFor", () => {
   const grogBudgets = computeBudgets(createGrog({ name: "Otto" }).character);
   const magusBudgets = computeBudgets(createMagus({ name: "Marcus", house: "Bonisagus" }, rules).character);
 
-  test("Review and Concept show no meters", () => {
-    for (const key of ["concept", "review"] as const) {
+  test("Concept and Personality show no meters", () => {
+    for (const key of ["concept", "personality"] as const) {
       const step = stepsFor("grog").find((s) => s.key === key)!;
       expect(metersFor(step, grogBudgets)).toEqual([]);
     }

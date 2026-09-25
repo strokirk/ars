@@ -6,7 +6,7 @@ import type { Budgets } from "../../../chargen/src/domain/budgets.ts";
 import { KIND_LABEL } from "../engine.ts";
 import type { Meter } from "../components/BudgetBar.tsx";
 
-export type StepKey = "concept" | "characteristics" | "virtues" | "abilities" | "arts" | "personality" | "review";
+export type StepKey = "concept" | "characteristics" | "virtues" | "abilities" | "arts" | "personality";
 export type BudgetKey = "characteristics" | "virtues-flaws" | "childhood" | "later-life" | "apprenticeship";
 
 export interface StepDef {
@@ -40,7 +40,7 @@ export function stepsFor(kind: CharacterKind): StepDef[] {
   const abilities: StepDef = {
     key: "abilities", label: "Abilities",
     budgets: kind === "magus" ? ["childhood", "later-life", "apprenticeship"] : ["childhood", "later-life"],
-    why: "Set a Native Language (free, score 5), spend 45 xp on childhood skills, then your later-life xp. Your age caps the maximum score of any Ability.",
+    why: "Set your age (it caps the maximum score of any Ability) and a Native Language (free, score 5), then spend 45 xp on childhood skills and your later-life xp.",
   };
   const arts: StepDef = {
     key: "arts", label: "Arts & Spells", budgets: ["apprenticeship"],
@@ -52,10 +52,9 @@ export function stepsFor(kind: CharacterKind): StepDef[] {
       ? "Give the grog a few Personality Traits. Grogs should have a score in Loyal (warriors also in Brave) — these guide play when the character is shared."
       : "A few Personality Traits to guide roleplaying. A Personality Flaw is mirrored by a ±3 trait (±6 for a Major).",
   };
-  const review: StepDef = { key: "review", label: "Review", budgets: [], why: "" };
 
-  const mid = kind === "magus" ? [characteristics, virtues, abilities, arts] : [characteristics, virtues, abilities];
-  return [concept, ...mid, personality, review];
+  const mid = kind === "magus" ? [virtues, characteristics, abilities, arts] : [virtues, characteristics, abilities];
+  return [concept, ...mid, personality];
 }
 
 export function metersFor(step: StepDef, b: Budgets): Meter[] {

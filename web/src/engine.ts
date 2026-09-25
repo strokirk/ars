@@ -5,14 +5,14 @@
 import { rules } from "./rules.ts";
 import { type Op, applyOps, type BatchResult } from "../../chargen/src/domain/operations.ts";
 import { computeBudgets, type Budgets } from "../../chargen/src/domain/budgets.ts";
-import { validate, isLegal, type Issue } from "../../chargen/src/domain/validate.ts";
+import { validate, isLegal, VIOLATION_CODES, type Issue } from "../../chargen/src/domain/validate.ts";
 import { deriveModifiers } from "../../chargen/src/domain/modifiers.ts";
 import { createGrog, createCompanion, createMagus, type CreateResult } from "../../chargen/src/domain/create.ts";
 import { type Character, type CharacterKind, charKind } from "../../chargen/src/domain/character.ts";
-import type { House, Technique, Form } from "../../chargen/src/domain/glossary.ts";
+import type { House } from "../../chargen/src/domain/glossary.ts";
 
-export { rules };
-export type { Op, Issue, Budgets, Character, CharacterKind, House, Technique, Form };
+export { rules, VIOLATION_CODES };
+export type { Op, Issue, Budgets, Character, CharacterKind, House };
 
 /** Apply a batch, forcing through cap violations (they surface as Issues, not rejections). */
 export function apply(ch: Character, ops: Op[]): Character {
@@ -34,8 +34,6 @@ export interface NewOpts {
   name?: string;
   house?: House;
   puissant?: string;
-  favoredTechnique?: Technique;
-  favoredForm?: Form;
 }
 
 /** Fresh blank character of a kind. Magus requires a House (defaults applied later). */
@@ -44,19 +42,13 @@ export function freshCharacter(kind: CharacterKind, opts: NewOpts = {}): CreateR
   if (kind === "grog") return createGrog({ name });
   if (kind === "companion") return createCompanion({ name });
   return createMagus(
-    {
-      name,
-      house: opts.house ?? "Bonisagus",
-      puissant: opts.puissant,
-      favoredTechnique: opts.favoredTechnique,
-      favoredForm: opts.favoredForm,
-    },
+    { name, house: opts.house ?? "Bonisagus", puissant: opts.puissant },
     rules,
   );
 }
 
 /**
- * Rebuild a magus with new House / favored / Puissant choices (which change the free,
+ * Rebuild a magus with new House / Puissant choices (which change the free,
  * off-budget grants) while carrying over every player-made pick. Used when the House
  * dropdown changes mid-build so we don't strand stale House benefits.
  */
@@ -68,9 +60,6 @@ export function reseedMagus(prev: Character, opts: NewOpts): Character {
       age: prev.age,
       house: opts.house ?? prev.house ?? "Bonisagus",
       puissant: opts.puissant,
-      favoredTechnique: opts.favoredTechnique ?? prev.favoredTechnique,
-      favoredForm: opts.favoredForm ?? prev.favoredForm,
-      focus: prev.focus,
     },
     rules,
   ).character;

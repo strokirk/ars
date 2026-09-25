@@ -4,18 +4,17 @@ import { navigate } from "../router.ts";
 import { Button } from "../components/ui/Button.tsx";
 import { getDraft, saveDraft, newId } from "../store.ts";
 import {
-  apply, reseedMagus, budgetsOf, issuesOf, isCharacterLegal, freshCharacter, charKind,
+  apply, reseedMagus, budgetsOf, issuesOf, freshCharacter, charKind, VIOLATION_CODES,
   KIND_LABEL, type Character, type CharacterKind, type Op,
 } from "../engine.ts";
 import { BudgetBar } from "../components/BudgetBar.tsx";
-import { Issues } from "../components/Issues.tsx";
 import {
   ConceptStep, CharacteristicsStep, VirtuesStep, AbilitiesStep, PersonalityStep, ArtsSpellsStep, type StepProps,
 } from "../steps.tsx";
 import { stepsFor, metersFor, type StepDef, type StepKey } from "../lib/wizard-steps.ts";
 
-/** Step bodies, keyed by the step definitions in lib/wizard-steps.ts. Review has none. */
-const BODIES: Partial<Record<StepKey, (p: StepProps) => JSX.Element>> = {
+/** Step bodies, keyed by the step definitions in lib/wizard-steps.ts. */
+const BODIES: Record<StepKey, (p: StepProps) => JSX.Element> = {
   concept: ConceptStep,
   characteristics: CharacteristicsStep,
   virtues: VirtuesStep,
@@ -43,29 +42,30 @@ export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: s
   const reseed: StepProps["reseed"] = (opts) => {
     const next = reseedMagus(ch, {
       house: opts.house as Parameters<typeof reseedMagus>[1]["house"],
-      favoredTechnique: opts.favoredTechnique as Parameters<typeof reseedMagus>[1]["favoredTechnique"],
-      favoredForm: opts.favoredForm as Parameters<typeof reseedMagus>[1]["favoredForm"],
       puissant: opts.puissant,
     });
     setCh(next); saveDraft(id, next);
   };
+  const viewSheet = () => { saveDraft(id, ch); navigate(`/sheet/${id}`); };
 
   const kind = charKind(ch);
   const steps = useMemo(() => stepsFor(kind), [kind]);
   const b = budgetsOf(ch);
   const issues = issuesOf(ch);
-  const legal = isCharacterLegal(ch);
   const cur = steps[Math.min(step, steps.length - 1)]!;
 
+  // "flagged" tracks active rule violations (a cap exceeded, a kind forbidden a pick)
+  // — advisory, never blocking — the same set the sheet's callout and the CLI's
+  // status icons use. A step with only completeness gaps (still spending xp) never
+  // flags; it just isn't "done" yet.
   const stepStatus = (s: StepDef): string => {
-    const errs = issues.filter((i) => i.level === "error" && (s.budgets as string[]).includes(i.budget));
-    if (errs.length) return "flagged";
+    const flagged = issues.some((i) => VIOLATION_CODES.has(i.code) && (s.budgets as string[]).includes(i.budget));
+    if (flagged) return "flagged";
     if (s.budgets.length && s.budgets.every((bk) => !issues.some((i) => i.budget === bk))) return "done";
     return "";
   };
 
   const Body = BODIES[cur.key];
-  const isReview = cur.key === "review";
 
   return (
     <div>
@@ -80,22 +80,8 @@ export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: s
       <h2 style="color:var(--accent); margin:.3rem 0 .2rem;">{KIND_LABEL[kind]} · {cur.label}</h2>
 
       <div class="panel">
-        {!isReview && cur.why && <div class="why">{cur.why}</div>}
-        {!isReview && Body && <Body ch={ch} update={update} reseed={kind === "magus" ? reseed : undefined} />}
-
-        {isReview && (
-          <div>
-            {legal ? (
-              <div class="why" style="border-color:var(--ok); background:#eaf3ea;"><strong style="color:var(--ok);">✓ Rules-legal.</strong> This {KIND_LABEL[kind].toLowerCase()} is ready. View the sheet to export or share it.</div>
-            ) : (
-              <div class="why" style="border-color:var(--err); background:#f7eae6;"><strong style="color:var(--err);">Not yet legal.</strong> Resolve the errors below — the budget meters and step tabs show where.</div>
-            )}
-            <Issues issues={issues} />
-            <div class="navrow" style="margin-top:1rem;">
-              <Button variant="brand" appearance="accent" onClick={() => { saveDraft(id, ch); navigate(`/sheet/${id}`); }}>View sheet →</Button>
-            </div>
-          </div>
-        )}
+        {cur.why && <div class="why">{cur.why}</div>}
+        {Body && <Body ch={ch} update={update} reseed={kind === "magus" ? reseed : undefined} />}
       </div>
 
       <div class="navrow">
@@ -103,9 +89,11 @@ export function Wizard({ kindParam, draftId }: { kindParam?: string; draftId?: s
         {step < steps.length - 1
           ? <Button variant="brand" appearance="accent" onClick={() => setStep(step + 1)}>Next →</Button>
           : <Button onClick={() => navigate("/")}>Done</Button>}
+        <span style="flex:1;" />
+        <Button onClick={viewSheet}>View sheet →</Button>
       </div>
 
-      {!isReview && <BudgetBar meters={metersFor(cur, b)} />}
+      <BudgetBar meters={metersFor(cur, b)} />
     </div>
   );
 }

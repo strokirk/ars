@@ -11,10 +11,7 @@ const HINT: Partial<Record<(typeof CHARACTERISTICS)[number], string>> = {
 };
 
 export function CharacteristicsAllocator({ ch, update }: { ch: Character; update: (ops: Op[]) => void }) {
-  const set = (name: string, value: number) => {
-    const v = Math.max(-3, Math.min(3, value));
-    update([{ op: "char", name, value: v }]);
-  };
+  const set = (name: string, value: number) => update([{ op: "char", name, value }]);
   return (
     <div>
       {CHARACTERISTICS.map((c) => {
@@ -26,7 +23,7 @@ export function CharacteristicsAllocator({ ch, update }: { ch: Character; update
               {CHARACTERISTIC_NAMES[c]} <small>{c}{HINT[c] ? ` · ${HINT[c]}` : ""}</small>
             </span>
             <Stepper
-              value={v} min={-3} max={3} label={CHARACTERISTIC_NAMES[c]}
+              value={v} min={-9} max={9} label={CHARACTERISTIC_NAMES[c]}
               format={(n) => (n > 0 ? `+${n}` : String(n))}
               onChange={(next) => set(c, next)}
             />

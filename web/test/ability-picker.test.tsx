@@ -79,15 +79,14 @@ describe("AbilityPicker", () => {
     expect(el.querySelector(".stage-head .meter")!.textContent).toContain("15/45 xp");
   });
 
-  test("the age cap stops the stepper and says why", async () => {
+  test("raising a score past the age cap is allowed, flagged rather than stopped", async () => {
     const el = mount(<Harness />);
     optionFor(el, "Athletics").action.click();
     await flush();
     const plus = () => el.querySelector<HTMLButtonElement>('.stepper button[aria-label="increase Athletics"]')!;
-    for (let i = 1; i < 5; i++) { plus().click(); await flush(); }
-    expect(el.querySelector(".char-row .cost")!.textContent).toBe("max");
-    expect(plus().disabled).toBe(true);
-    expect(plus().title).toMatch(/caps Abilities at 5/);
+    for (let i = 1; i < 6; i++) { plus().click(); await flush(); }
+    expect(el.querySelector(".char-row .cost")!.textContent).toMatch(/past the usual age cap/);
+    expect(plus().disabled).toBe(false);
   });
 
   test("the full list of what childhood can actually take is visible immediately, recommended first", async () => {
@@ -101,15 +100,15 @@ describe("AbilityPicker", () => {
     expect(optionFor(el, "Athletics").li.querySelector(".badge-tag")!.textContent).toBe("Recommended");
   });
 
-  test("'Show locked' reveals what this stage refuses, with the engine's own reason", async () => {
+  test("'Show locked' reveals what this stage refuses, with the engine's own reason — but still lets you take it", async () => {
     const el = mount(<Harness />);
     expect(rowTitles(el)).not.toContain("Single Weapon");
     button(el, "Show locked").click();
     await flush();
     expect(rowTitles(el).length).toBe(rules.abilities.length);
     const martial = optionFor(el, "Single Weapon");
-    expect(label(martial.action)).toBe("Locked");
-    expect(martial.action.getAttribute("disabled")).not.toBeNull();
+    expect(label(martial.action)).toBe("Add ⚠");
+    expect(martial.action.getAttribute("disabled")).toBeNull();
     expect(martial.meta).toMatch(/can't be learned in childhood/);
     // ...and it sorts below everything actually takeable.
     expect(rowTitles(el).indexOf("Single Weapon")).toBeGreaterThan(rowTitles(el).indexOf("Swim"));

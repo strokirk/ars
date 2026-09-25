@@ -39,7 +39,12 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
     [pool, cat, query],
   );
 
-  const taken = mode === "Virtue" ? ch.virtues : ch.flaws;
+  // Both kinds together, whichever tab is open for browsing — reviewing what you
+  // already have shouldn't depend on which pool you're currently adding from.
+  const takenAll = [
+    ...ch.virtues.filter((v) => !v.free).map((v) => ({ ...v, kind: "Virtue" as const })),
+    ...ch.flaws.filter((f) => !f.free).map((f) => ({ ...f, kind: "Flaw" as const })),
+  ];
 
   function begin(row: VirtueFlawRow) {
     const needsParam = rules.paramKind(row.name);
@@ -72,15 +77,24 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
         <Button size="small" appearance={mode === "Flaw" ? "accent" : "outlined"} color="var(--err)" onClick={() => { setMode("Flaw"); setCat(""); setActive(null); }}>Flaws</Button>
       </div>
 
-      {taken.filter((t) => !t.free).length > 0 && (
-        <div class="taken">
-          {taken.filter((t) => !t.free).map((t) => (
-            <span class={`taken-chip ${mode === "Virtue" ? "virtue" : "flaw"}`} key={t.display}>
-              {t.display}{t.size !== "Free" ? ` (${t.size === "Major" ? "Maj" : "Min"})` : ""}
-              <button class="x" title="remove" onClick={() => update([{ op: "remove", kind: mode === "Virtue" ? "virtue" : "flaw", name: t.display }])}>×</button>
-            </span>
+      {takenAll.length > 0 && (
+        <ul class="trait-list">
+          {takenAll.map((t) => (
+            <li key={`${t.kind}-${t.display}`}>
+              <details class={`trait-row ${t.kind.toLowerCase()}`}>
+                <summary>
+                  <span class="tr-name">{t.display}</span>
+                  {t.size !== "Free" && <span class="tr-meta">{t.size}</span>}
+                  <button
+                    class="x" title="remove"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); update([{ op: "remove", kind: t.kind === "Virtue" ? "virtue" : "flaw", name: t.display }]); }}
+                  >×</button>
+                </summary>
+                <p class="tr-desc">{rules.virtueFlawRow(t.name)?.description ?? "No description available."}</p>
+              </details>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
 
       <SearchField value={query} onInput={setQuery} placeholder={`Search ${mode.toLowerCase()}s…`} />

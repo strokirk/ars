@@ -9,6 +9,8 @@ import { TraitPicker } from "./components/TraitPicker.tsx";
 import { AbilityPicker } from "./components/AbilityPicker.tsx";
 import { SpellBrowser } from "./components/SpellBrowser.tsx";
 import { Select } from "./components/ui/Select.tsx";
+import { RadioCards } from "./components/ui/RadioCards.tsx";
+import { Collapsible } from "./components/ui/Collapsible.tsx";
 import { Button } from "./components/ui/Button.tsx";
 import { Stepper } from "./components/ui/Stepper.tsx";
 import { ArtBadge, FormIcon } from "./components/ui/ArtBadge.tsx";
@@ -18,14 +20,33 @@ import { HOUSE_PUISSANT_CHOICES } from "../../chargen/src/domain/houses.ts";
 import { deriveModifiers } from "../../chargen/src/domain/modifiers.ts";
 import { spellLabTotal } from "../../chargen/src/domain/labtotal.ts";
 import { artXp, affinityXp } from "../../chargen/src/domain/costs.ts";
+import { rules } from "./engine.ts";
 import type { SpellRow } from "../../chargen/src/data/types.ts";
 
 export interface StepProps {
   ch: Character;
   update: (ops: Op[]) => void;
-  /** Magus only: rebuild from scratch with new House/favored picks (re-applies grants). */
-  reseed?: (opts: { house?: string; favoredTechnique?: string; favoredForm?: string; puissant?: string }) => void;
+  /** Magus only: rebuild from scratch with new House/Puissant picks (re-applies grants). */
+  reseed?: (opts: { house?: string; puissant?: string }) => void;
 }
+
+// A one-line gloss per House, for the picker cards — paraphrased from
+// md/02-the-order-of-hermes/02-the-houses-of-hermes.md, not the free benefit
+// (that's whatever `chargen/src/domain/houses.ts` grants — see the Virtue it adds).
+const HOUSE_BLURB: Record<string, string> = {
+  Bjornaer: "Shapeshifters bonded to an animal heartbeast; avoid familiars, wary of other shapeshifters.",
+  Bonisagus: "The Founder's own lineage — masters of Magic Theory and Order politics.",
+  Criamon: "Secretive mystics pursuing the Enigma; inscrutable even to other magi.",
+  "Ex Miscellanea": "A disorganized grab-bag of hedge traditions — easy to join, hard to pin down.",
+  Flambeau: "Fire and destruction specialists, the Order's aggressive, chivalrous shock troops.",
+  Guernicus: "The Order's judges and investigators, enforcing the Code of Hermes.",
+  Jerbiton: "Artists and diplomats who keep the Order tied to mundane society.",
+  Mercere: "Messengers of the Order — even the unGifted are recognized as magi.",
+  Merinita: "Faerie-obsessed and often isolated, drawn to the mysteries of Arcadia.",
+  Tremere: "A disciplined, hierarchical lineage built on strategy and Certamen dueling.",
+  Tytalus: "Thrive on conflict and challenge, endlessly testing themselves and their elders.",
+  Verditius: "Unmatched item enchanters, though most can't cast spells without tools.",
+};
 
 // The early-childhood Abilities from the rulebook (all General).
 const CHILDHOOD_ABILITIES = [
@@ -58,15 +79,9 @@ export function ConceptStep({ ch, update, reseed }: StepProps) {
         <label>Concept — a sentence on who they are</label>
         <textarea value={ch.concept} placeholder="A grizzled turb sergeant who distrusts magi but would die for the covenant." onInput={(e) => update([{ op: "meta", fields: { concept: (e.target as HTMLTextAreaElement).value } }])} />
       </div>
-      <div class="field" style="display:flex; gap:.8rem;">
-        <div style="flex:1;">
-          <label>Age</label>
-          <input type="number" min={kind === "magus" ? 25 : 5} value={ch.age} onInput={(e) => update([{ op: "meta", fields: { age: Number((e.target as HTMLInputElement).value) } }])} />
-        </div>
-        <div style="flex:1;">
-          <label>Later-life years {kind === "magus" ? "(pre-apprenticeship)" : ""}</label>
-          <input type="number" min={0} value={ch.laterLifeYears} onInput={(e) => update([{ op: "meta", fields: { laterLifeYears: Number((e.target as HTMLInputElement).value) } }])} />
-        </div>
+      <div class="field">
+        <label>Later-life years {kind === "magus" ? "(pre-apprenticeship)" : ""}</label>
+        <input type="number" min={0} value={ch.laterLifeYears} onInput={(e) => update([{ op: "meta", fields: { laterLifeYears: Number((e.target as HTMLInputElement).value) } }])} />
       </div>
 
       {kind === "magus" && reseed && (
@@ -74,9 +89,9 @@ export function ConceptStep({ ch, update, reseed }: StepProps) {
           <hr class="soft" />
           <div class="field">
             <label>House</label>
-            <Select
-              label="House" value={ch.house ?? ""} onChange={(house) => reseed({ house })}
-              options={HOUSES.map((h) => ({ value: h, label: h }))}
+            <RadioCards
+              name="house" value={ch.house ?? ""} onChange={(house) => reseed({ house })}
+              options={HOUSES.map((h) => ({ value: h, label: h, blurb: HOUSE_BLURB[h] }))}
             />
           </div>
           {houseChoices && (
@@ -88,28 +103,6 @@ export function ConceptStep({ ch, update, reseed }: StepProps) {
               />
             </div>
           )}
-          <div class="field" style="display:flex; gap:.8rem;">
-            <div style="flex:1;">
-              <label>Favored Technique</label>
-              <Select
-                label="Favored Technique" value={ch.favoredTechnique ?? ""}
-                onChange={(favoredTechnique) => update([{ op: "meta", fields: { favoredTechnique } }])}
-                options={[{ value: "", label: "—" }, ...TECHNIQUES.map((t) => ({ value: t, label: t }))]}
-              />
-            </div>
-            <div style="flex:1;">
-              <label>Favored Form</label>
-              <Select
-                label="Favored Form" value={ch.favoredForm ?? ""}
-                onChange={(favoredForm) => update([{ op: "meta", fields: { favoredForm } }])}
-                options={[{ value: "", label: "—" }, ...FORMS.map((f) => ({ value: f, label: f }))]}
-              />
-            </div>
-          </div>
-          <div class="field">
-            <label>Magical Focus (optional, free text)</label>
-            <input type="text" value={ch.focus ?? ""} placeholder="e.g. fire, the dead, self-transformation" onInput={(e) => update([{ op: "meta", fields: { focus: (e.target as HTMLInputElement).value } }])} />
-          </div>
         </>
       )}
     </div>
@@ -133,6 +126,14 @@ export function AbilitiesStep({ ch, update }: StepProps) {
   return (
     <div>
       <div class="field">
+        <label>Age</label>
+        <input
+          type="number" min={magus ? 25 : 5} value={ch.age}
+          onInput={(e) => update([{ op: "meta", fields: { age: Number((e.target as HTMLInputElement).value) } }])}
+        />
+        <p class="note">Caps the maximum score of any Ability (higher past 30 — see the meter above each row).</p>
+      </div>
+      <div class="field">
         <label>Native Language (spoken vernacular — free, score 5)</label>
         <input type="text" value={ch.nativeLanguage ?? ""} placeholder="e.g. German, French, Italian" onInput={(e) => update([{ op: "native-language", value: (e.target as HTMLInputElement).value }])} />
         <p class="note">Worth 75 xp, but granted outright — it doesn't touch the childhood pool.</p>
@@ -147,6 +148,7 @@ export function AbilitiesStep({ ch, update }: StepProps) {
         title="Early childhood"
         hint="Mundane skills picked up as a child — General Abilities only."
         recommended={CHILDHOOD_ABILITIES}
+        collapsible
       />
       <hr class="soft" />
       <AbilityPicker
@@ -156,6 +158,7 @@ export function AbilitiesStep({ ch, update }: StepProps) {
           ? "The years before apprenticeship — General Abilities only."
           : "Academic, Martial and Supernatural Abilities open up here only if a Virtue enables them."}
         recommended={LATER_LIFE_ABILITIES}
+        collapsible
       />
       {magus && (
         <>
@@ -248,24 +251,36 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
     );
   };
 
+  const techSummary = TECHNIQUES.filter((t) => (ch.arts[t] ?? 0) > 0)
+    .map((t) => `${ART_ABBR[t]} ${ch.arts[t]}`).join(" · ") || "none yet";
+
   return (
     <div>
-      <h3 style="font-size:1rem; margin:.2rem 0 .4rem;">Techniques</h3>
-      {TECHNIQUES.map((t) => artControl(t))}
+      <Collapsible summary={<h3 style="font-size:1rem; margin:.2rem 0;">Techniques <span class="art-shorthand">{techSummary}</span></h3>}>
+        {TECHNIQUES.map((t) => artControl(t))}
+      </Collapsible>
       <h3 style="font-size:1rem; margin:1rem 0 .4rem;">Forms</h3>
       {FORMS.map((f) => artControl(f))}
       <hr class="soft" />
       <h3 style="font-size:1rem; margin:1rem 0 .4rem;">Spells (≤120 levels)</h3>
       {ch.spells.length > 0 && (
-        <div class="taken">
+        <ul class="trait-list">
           {ch.spells.map((s) => (
-            <span class="taken-chip" key={s.name}>
-              <ArtBadge technique={s.technique} form={s.form} level={s.level} />
-              {s.name}
-              <button class="x" title="remove" onClick={() => update([{ op: "remove", kind: "spell", name: s.name }])}>×</button>
-            </span>
+            <li key={s.name}>
+              <details class="trait-row">
+                <summary>
+                  <ArtBadge technique={s.technique} form={s.form} level={s.level} />
+                  <span class="tr-name">{s.name}</span>
+                  <button
+                    class="x" title="remove"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); update([{ op: "remove", kind: "spell", name: s.name }]); }}
+                  >×</button>
+                </summary>
+                <p class="tr-desc">{rules.spell(s.name)?.description ?? "No description available."}</p>
+              </details>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
       <SpellBrowser
         labTotalOf={labTotalOf}
