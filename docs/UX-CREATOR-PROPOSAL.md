@@ -1,5 +1,9 @@
 # Creator UX proposal — Abilities, Arts & Spells, Sheet
 
+> **Status (2026-09-25): implemented** — P1–P10 and both bugs landed on `main`
+> (9f96f7f … 44cfec1). Left open: a covenant-wide `<datalist>` of names for P2, and a
+> manual Mastery bonus before any Virtue opens that pool.
+
 Walkthrough on 2026-09-25: a new magus of House Merinita, 1280×900 viewport, headless
 Chromium against `pnpm dev`. The goals are **clarity** and **compactness**. A magus touches
 roughly 30 Abilities, 15 Arts and a dozen spells across four xp pools, so every pixel spent
