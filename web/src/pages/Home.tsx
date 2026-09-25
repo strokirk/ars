@@ -37,9 +37,7 @@ export function Home() {
         ))}
       </div>
 
-      <div class="grid">
-        <ImportCharacter />
-      </div>
+      <p class="import-row"><ImportCharacter /></p>
 
       <h2 class="section-title">Plan a season</h2>
       <div class="grid">

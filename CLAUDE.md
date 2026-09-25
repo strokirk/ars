@@ -47,45 +47,27 @@ the database.
 ## The character creators (`chargen/` engine + `web/` app)
 
 `chargen/src/domain/*` is a **pure, I/O-free** rules engine (budgets, validation,
-mutations) keyed off a character's `kind` (`grog | companion | magus`); the same
-engine backs both the CLI and the browser. `web/` is a Vite + Preact static site that
-imports the engine, `data/*.json` and `data/guidelines/*.yaml` directly (no backend)
-and drives a multi-step, validated, mobile-first creator for each kind, plus the
-covenant roster (each member's sheet at `#/roster/:slug`), the reference Library at
-`#/library` (spells, guideline effects, the R/D/T ladders, Virtues & Flaws) and the
-spell designer at `#/library/design`, draft save/resume (localStorage), inline
-copyable Markdown/JSON export, print, and shareable links.
+mutations) shared by the CLI and the browser. `web/` is a static Vite + Preact site
+that imports the engine and `data/` directly — no backend. It holds the creators, the
+covenant roster, the reference Library, the spell designer and a dice roller.
 
-`web/src/lib/*` holds the app's own pure logic (queries, roster slugs, trait
-eligibility, per-stage Ability options + xp costs, wizard steps, the guideline
-model + spell-level arithmetic) and `web/src/components/ui/*` the shared primitives —
-**put new logic in `lib/` and new markup patterns in `ui/` rather than inlining
-either in a page or picker.** The three browsers (`SpellBrowser`, `TraitBrowser`,
-`GuidelineBrowser`) are deliberately shared between the creator, the Library and the
-designer; give them an `action`/`onPick` prop to make rows actionable rather than
-forking a second copy. Their chrome is shared
-too: `ui/FilterBar` is the sticky search + sort + active-filter header (the bulky
-controls go in its dismissible panel, as `children`), and `ui/OptionList` holds the
-row and the `useVisibleCount`/`MoreRows` paging — results scroll with the page, so
-never wrap a list in its own scroll box.
+Rule effects belong in data, not in scattered `if (name === …)` checks: Virtue xp
+grants live in `VIRTUE_XP`, House benefits in `HOUSE_BENEFITS`, and "repeatable" /
+"enables Ability type" are columns the extractor reads from the rules text. The engine
+advises rather than forbids — rule violations are warnings the player can dismiss,
+because troupes house-rule and no table captures every Virtue interaction.
 
-**Dropdowns are `ui/Select` (Web Awesome `<wa-select>`), not `<select>`** — a native
-select hands its popup to the OS, which draws it in the platform's style and takes no
-CSS. `src/webawesome.ts` registers the cherry-picked components once for the whole app
-(and serves their internal chrome icons inline, so nothing calls Font Awesome's CDN);
-`index.html` carries the required `wa-theme-default wa-palette-default wa-light`
-classes, and the `--wa-*` token block at the top of `styles.css` is the entire theme —
-point tokens at the parchment palette rather than writing per-component CSS. The
-wrapper never imports the custom elements, so under test the tags stay inert DOM that
-still carries `value` and emits `change`; drive them in vitest with
-`wa-select[aria-label="…"]`, not `<select>`. Buttons go through `ui/Button`
-(`<wa-button>`, `appearance` for hierarchy) the same way — **including the filter
-chips**: `Button`'s `color` prop overrides the WA brand tokens (`--wa-color-brand-*`)
-on that one instance, so a Technique- or Virtue/Flaw-coloured chip still gets real
-`wa-button` focus/disabled/sizing behaviour instead of a hand-rolled `.chip-toggle`.
-One non-filter toggle (the spell designer's Yes/No) is still a plain
-`<button class="chip-toggle">` — fine for a one-off, not a pattern to spread.
-Test helpers must query `"button, wa-button"`.
+Conventions for `web/`:
+
+- Put new logic in `src/lib/` and reusable markup in `src/components/ui/`, not inline
+  in a page.
+- The browsers (`SpellBrowser`, `TraitBrowser`, `GuidelineBrowser`) are shared by the
+  creator and the Library — add an `action`/`onPick` prop rather than forking one.
+  Their filters live in `ui/FilterBar`'s panel; lists scroll with the page.
+- Use the Web Awesome wrappers — `ui/Select`, `ui/Button`, `ui/ChipGroup` (a
+  segmented control) — not raw `<select>`/`<button>`. Theme through the `--wa-*`
+  tokens at the top of `styles.css`. Under test the custom elements stay inert, so
+  query `"button, wa-button"` and `wa-select[aria-label="…"]`.
 
 ```sh
 cd web && pnpm install && pnpm dev       # local dev server

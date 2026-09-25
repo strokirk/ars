@@ -15,8 +15,8 @@ import {
 } from "./ui/FilterBar.tsx";
 import { ChipGroup } from "./ui/ChipGroup.tsx";
 import { OptionList, OptionRow } from "./ui/OptionList.tsx";
-import { TraitBadge, CategoryIcon } from "./ui/TraitBadge.tsx";
-import { Button } from "./ui/Button.tsx";
+import { TraitBadge } from "./ui/TraitBadge.tsx";
+import { Select } from "./ui/Select.tsx";
 
 const SIZES = ["Minor", "Major"] as const;
 const KINDS = ["Virtue", "Flaw"] as const;
@@ -109,6 +109,7 @@ export function TraitBrowser({
         onClear={clearAll}
         summary={<>{matches.length} {matches.length === 1 && kind ? kind.toLowerCase() : noun}</>}
       >
+        <div class="chips-row">
         {!kindProp && (
           <ChipGroup
             options={KINDS}
@@ -118,33 +119,21 @@ export function TraitBrowser({
             labelOf={(k) => `${k}s`}
           />
         )}
-        <div class="artfilter" role="group" aria-label="Filter by category">
-          <Button
-            onClick={() => setCategory("")}
-            size="small"
-            appearance={category === "" ? "accent" : "outlined"}
-            variant="brand"
-          >
-            All categories
-          </Button>
-          {categories.map((c) => (
-            <Button
-              size="small"
-              appearance={category === c ? "accent" : "outlined"}
-              variant="brand"
-              key={c}
-              onClick={() => setCategory(category === c ? "" : c)}
-            >
-              <CategoryIcon category={c} slot="start" /> {c}
-            </Button>
-          ))}
-        </div>
         <ChipGroup
           options={SIZES}
           value={size}
           onChange={(v) => setSize(v)}
           allLabel="Any size"
         />
+          <Select
+            label="Category"
+            pill
+            active={category !== ""}
+            value={category}
+            onChange={setCategory}
+            options={[{ value: "", label: "All categories" }, ...categories.map((c) => ({ value: c, label: c }))]}
+          />
+        </div>
       </FilterBar>
 
       <OptionList empty={`No ${noun} match these filters.`}>

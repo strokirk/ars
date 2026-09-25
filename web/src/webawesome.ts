@@ -7,6 +7,7 @@
 // `utilities.css` a class framework, and this app already has its own of both.
 import "@awesome.me/webawesome/dist/styles/themes/default.css";
 import "@awesome.me/webawesome/dist/components/button/button.js";
+import "@awesome.me/webawesome/dist/components/button-group/button-group.js";
 import "@awesome.me/webawesome/dist/components/select/select.js";
 import "@awesome.me/webawesome/dist/components/option/option.js";
 import { registerIconLibrary } from "@awesome.me/webawesome/dist/webawesome.js";

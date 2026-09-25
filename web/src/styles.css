@@ -79,6 +79,9 @@ h1, h2, h3 { line-height: 1.18; }
 .ui-button { --wa-form-control-height: var(--tap); }
 .ui-button[size="small"], .ui-button.small { --wa-form-control-height: 34px; }
 .ui-button.block { display: block; width: 100%; }
+/* Filter controls are dense: a compact height, and small groups share a row. */
+.filterpanel .ui-button[size="small"], .seg .ui-button[size="small"] { --wa-form-control-height: 28px; font-size: .8rem; }
+.seg { flex: 0 0 auto; }
 
 /* Form-field shape: full width, matching the native inputs beside it. */
 .ui-select { display: block; width: 100%; }
@@ -835,3 +838,10 @@ hr.soft { border: none; border-top: 1px solid var(--line-soft); margin: 1rem 0; 
 .bonus-form wa-select { min-width: 11rem; }
 .trait-row .mastery { display: inline-flex; align-items: center; gap: .3rem; color: var(--muted); }
 .dice-form .chips { flex-wrap: nowrap; }
+
+.import-row { margin: .6rem 0 0; }
+dialog.modal { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); color: var(--ink); padding: 1rem 1.1rem; width: min(40rem, calc(100vw - 32px)); box-shadow: var(--shadow); }
+dialog.modal::backdrop { background: rgb(28 26 23 / .45); }
+dialog.modal h3 { margin: 0 0 .3rem; color: var(--accent); }
+dialog.modal textarea { width: 100%; }
+dialog.modal .navrow { justify-content: flex-end; gap: .5rem; }

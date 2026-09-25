@@ -1,8 +1,9 @@
 import { Button } from "./Button.tsx";
 
 /**
- * A row of filter chips behaving as a single-select. `value` of "" is the
- * catch-all option (labelled by `allLabel`); pass allLabel={null} to omit it.
+ * A segmented control: joined buttons behaving as a single-select. `value` of ""
+ * is the catch-all option (labelled by `allLabel`); pass allLabel={null} to omit it.
+ * Meant for a handful of short options — a long list belongs in wrapping chips.
  */
 export function ChipGroup<T extends string>({
   options,
@@ -18,7 +19,7 @@ export function ChipGroup<T extends string>({
   labelOf?: (o: T) => string;
 }) {
   return (
-    <div class="chips">
+    <wa-button-group class="seg" label={allLabel ?? "Filter"}>
       {allLabel !== null && (
         <Button
           onClick={() => onChange("")}
@@ -40,6 +41,6 @@ export function ChipGroup<T extends string>({
           {labelOf ? labelOf(o) : o}
         </Button>
       ))}
-    </div>
+    </wa-button-group>
   );
 }
