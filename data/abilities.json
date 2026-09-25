@@ -640,12 +640,39 @@
   },
   {
     "name": "Teaching",
-    "type": "Academic",
+    "type": "General",
     "restricted": false,
     "specialties": "a particular Ability, particular kinds of student",
-    "description": "The ability to teach an Ability to someone else. **Theology: Christian *:** Theology is the study of God and his work in the world. The auctores are the Bible and Peter the Lombard's _Sententiae_, the Bible having theoretical primacy, being infallible, and the Sentences being most studied. The speculations of theology are very abstruse, and many theologians are accused of heresy. Sometimes those accused recant, and sometimes they convince the Church that they were right after all. _Specialties:_ biblical knowledge, heresy, history. (Academic) **Theology: Islam *:** This is the Islamic equivalent of Theology: Christian. The major sources for Islamic theology are the Qur'an and the Sunna. _Specialties:_ the Qur'an, debates, history, prophets. (Academic) **Theology: Judaism *:** This is the Jewish equivalent of Theology: Christian. The major sources for Jewish theology are the Torah, the Nevi'im, and the Kutuvim. _Specialties:_ the Torah, creation, history, prophecies",
+    "description": "The ability to teach an Ability to someone else.",
     "source_file": "05-ability-list.md",
     "source_line": 501
+  },
+  {
+    "name": "Theology: Christian",
+    "type": "Academic",
+    "restricted": true,
+    "specialties": "biblical knowledge, heresy, history",
+    "description": "Theology is the study of God and his work in the world. The auctores are the Bible and Peter the Lombard's _Sententiae_, the Bible having theoretical primacy, being infallible, and the Sentences being most studied. The speculations of theology are very abstruse, and many theologians are accused of heresy. Sometimes those accused recant, and sometimes they convince the Church that they were right after all.",
+    "source_file": "05-ability-list.md",
+    "source_line": 504
+  },
+  {
+    "name": "Theology: Islam",
+    "type": "Academic",
+    "restricted": true,
+    "specialties": "the Qur'an, debates, history, prophets",
+    "description": "This is the Islamic equivalent of Theology: Christian. The major sources for Islamic theology are the Qur'an and the Sunna.",
+    "source_file": "05-ability-list.md",
+    "source_line": 507
+  },
+  {
+    "name": "Theology: Judaism",
+    "type": "Academic",
+    "restricted": true,
+    "specialties": "the Torah, creation, history, prophecies",
+    "description": "This is the Jewish equivalent of Theology: Christian. The major sources for Jewish theology are the Torah, the Nevi'im, and the Kutuvim.",
+    "source_file": "05-ability-list.md",
+    "source_line": 510
   },
   {
     "name": "Thrown Weapon",

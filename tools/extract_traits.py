@@ -139,7 +139,9 @@ def _ability_head(line):
     inner = m.group("inner").strip()
     name_part = inner[:-1].rstrip() if inner.endswith(":") else inner
     rest = m.group("rest").strip()
-    if not rest or ":" in name_part or len(name_part) > 60:
+    # A colon usually means inline bold ("COMPLEX ... ROLL: ..."), but "Theology: Christian" is a name.
+    colon_ok = re.match(r"[A-Z][a-z]+: [A-Z][a-z]", name_part) is not None
+    if not rest or (":" in name_part and not colon_ok) or len(name_part) > 60:
         return None
     restricted = name_part.endswith("\\*") or name_part.endswith("*")
     name = clean(name_part.rstrip("*").rstrip("\\")).strip()
