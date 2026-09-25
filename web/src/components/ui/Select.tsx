@@ -65,7 +65,7 @@ export function Select({
       ref={(el: WaSelect | null) => { ref.current = el; }}
       class={`ui-select ${pill ? "pill" : ""} ${active ? "on" : ""}`}
       style={pill ? { "--label-width": `${widest}ch` } : undefined}
-      size={pill ? "small" : "medium"}
+      size={pill ? "s" : "m"}
       pill={pill}
       aria-label={label}
       placeholder={placeholder}

@@ -153,7 +153,17 @@ export function AbilitiesStep({ ch, update }: StepProps) {
       </div>
 
       {granted.length > 0 && (
-        <p class="note">Already granted (free): {granted.map((a) => `${a.name} ${a.score}`).join(", ")}.</p>
+        <section class="stage">
+          <header class="stage-head"><h3>Granted free</h3></header>
+          <div class="taken-rows">
+            {granted.map((a) => (
+              <div class="char-row" key={a.name}>
+                <span class="nm">{a.name} <small>{a.type ?? "—"} · {ch.house ? `House ${ch.house}` : "a Virtue"}, off-budget</small></span>
+                <span class="val">{a.score}</span>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
       <AbilityPicker

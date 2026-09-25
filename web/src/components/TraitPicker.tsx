@@ -23,11 +23,10 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
   const grog = charKind(ch) === "grog";
   const selectable = useCallback((r: VirtueFlawRow) => isTraitSelectable(r, ch), [ch.kind, ch.virtues.length]);
 
-  // Both kinds together — reviewing what you already have shouldn't depend on
-  // which pool you're currently browsing.
+  // Both kinds together, free grants (The Gift, House benefits) included but not removable.
   const takenAll = [
-    ...ch.virtues.filter((v) => !v.free).map((v) => ({ ...v, kind: "Virtue" as const })),
-    ...ch.flaws.filter((f) => !f.free).map((f) => ({ ...f, kind: "Flaw" as const })),
+    ...ch.virtues.map((v) => ({ ...v, kind: "Virtue" as const })),
+    ...ch.flaws.map((f) => ({ ...f, kind: "Flaw" as const })),
   ];
   const timesTaken = (r: VirtueFlawRow) =>
     (r.kind === "Virtue" ? ch.virtues : ch.flaws).filter((t) => t.name === r.name).length;
@@ -68,10 +67,14 @@ export function TraitPicker({ ch, update }: { ch: Character; update: (ops: Op[])
                 <summary>
                   <TraitBadge kind={t.kind} size={t.size} category={t.category} />
                   <span class="tr-name">{t.display}</span>
-                  <button
-                    class="x" title="remove"
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); update([{ op: "remove", kind: t.kind === "Virtue" ? "virtue" : "flaw", name: t.display }]); }}
-                  >×</button>
+                  {t.free
+                    ? t.size !== "Free" && <span class="taken-tag" title="Granted free — off the Virtue/Flaw budget">free</span>
+                    : (
+                      <button
+                        class="x" title="remove"
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); update([{ op: "remove", kind: t.kind === "Virtue" ? "virtue" : "flaw", name: t.display }]); }}
+                      >×</button>
+                    )}
                 </summary>
                 <p class="tr-desc">{rules.virtueFlawRow(t.name)?.description ?? "No description available."}</p>
               </details>

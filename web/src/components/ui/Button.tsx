@@ -55,7 +55,7 @@ export function Button({
       class={`ui-button ${block ? "block" : ""} ${klass}`}
       appearance={appearance}
       variant={color ? "brand" : variant}
-      size={size ?? "medium"}
+      size={size === "small" ? "s" : "m"}
       pill
       disabled={disabled}
       title={title}

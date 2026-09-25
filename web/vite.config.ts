@@ -16,5 +16,10 @@ export default defineConfig({
   // (reading 'context')".
   resolve: { dedupe: ["preact", "preact/hooks", "preact/jsx-runtime", "preact/compat", "@preact/signals"] },
   server: { fs: { allow: [".."] } },
+  // Web Awesome ships ES modules whose components share chunks. Pre-bundling them
+  // means adding one more component import re-optimises mid-session and loads a
+  // second copy — "wa-icon has already been used with this registry". Served as-is,
+  // every component resolves the same chunk URLs.
+  optimizeDeps: { exclude: ["@awesome.me/webawesome"] },
   build: { outDir: "dist", chunkSizeWarningLimit: 1500 },
 });
