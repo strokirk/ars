@@ -285,12 +285,12 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
   const artControl = (art: Art) => {
     const score = ch.arts[art] ?? 0;
     return (
-      <div class="char-row" key={art}>
-        <span class="nm" style={TECHNIQUE_COLOR[art as Technique] ? `--tech:${TECHNIQUE_COLOR[art as Technique]}` : undefined}>
-          <span class="artname"><FormIcon form={art} size={14} /> {art}</span>
-          <small>{ART_ABBR[art]} · {artXpOf(art, score)} xp</small>
+      <div class="art-row" key={art}>
+        <span class="artname" style={TECHNIQUE_COLOR[art as Technique] ? `--tech:${TECHNIQUE_COLOR[art as Technique]}` : undefined}>
+          <FormIcon form={art} size={14} /> {art}
         </span>
-        <Stepper value={score} min={0} label={art} onChange={(v) => setArt(art, v)} />
+        <Stepper editable value={score} min={0} label={art} onChange={(v) => setArt(art, v)} />
+        <small>{artXpOf(art, score)} xp</small>
       </div>
     );
   };
@@ -303,34 +303,41 @@ export function ArtsSpellsStep({ ch, update }: StepProps) {
 
   return (
     <div>
-      <Collapsible summary={<h3 style="font-size:1rem; margin:.2rem 0;">Techniques <span class="art-shorthand">{techSummary}</span></h3>}>
-        {TECHNIQUES.map((t) => artControl(t))}
-      </Collapsible>
-      <Collapsible summary={<h3 style="font-size:1rem; margin:.2rem 0;">Forms <span class="art-shorthand">{formSummary}</span></h3>}>
-        {FORMS.map((f) => artControl(f))}
-      </Collapsible>
+      <div class="arts-grid">
+        <Collapsible summary={<h3 style="font-size:1rem; margin:.2rem 0;">Techniques <span class="art-shorthand">{techSummary}</span></h3>}>
+          {TECHNIQUES.map((t) => artControl(t))}
+        </Collapsible>
+        <Collapsible summary={<h3 style="font-size:1rem; margin:.2rem 0;">Forms <span class="art-shorthand">{formSummary}</span></h3>}>
+          {FORMS.map((f) => artControl(f))}
+        </Collapsible>
+      </div>
       <hr class="soft" />
-      <Collapsible class="why" open={false} summary={<strong>What are Lab Total and Casting Total?</strong>}>
-        <p>
-          <b>Lab Total</b> (what caps a spell you can <em>learn</em> here) = Technique + Form + Intelligence +
-          Magic Theory + Aura (3, typically). It's the number the "Learn" button checks against a spell's level.
-        </p>
-        <p>
-          <b>Casting Total</b> (what matters once you're <em>playing</em>, not at creation) = Technique + Form +
-          Stamina − Encumbrance + Aura, plus a die roll, compared against the spell's level to see if it's cast.
-        </p>
-        <p>
-          Both are built from the same Technique/Form/Art scores you're setting on this page — split xp between a
-          Technique and a Form for higher totals in that combination, rather than spreading thin.
-        </p>
-        <p class="note">
-          This app is <b>not exhaustive</b>: it applies Puissant Art/Ability and Affinity to these totals, but many
-          more Virtues and Flaws shift them further — Magical Focus, Deficient Technique/Form, Elemental Magic,
-          Flexible/Restricted Formulaic Magic, a low Arts score's requisite penalty, and dozens more. Treat every
-          computed total here as a floor, not the final word — check your Virtues and Flaws by hand too.
-        </p>
-      </Collapsible>
-      <h3 style="font-size:1rem; margin:1rem 0 .4rem;">Spells (≤{budgetsOf(ch).apprenticeship.spells.cap} levels)</h3>
+      <div class="spells-head">
+        <h3>Spells (≤{budgetsOf(ch).apprenticeship.spells.cap} levels, each within its Lab Total)</h3>
+        <details class="help-pop">
+          <summary aria-label="What are Lab Total and Casting Total?" title="What are Lab Total and Casting Total?">?</summary>
+          <div class="help-pop-body">
+            <p>
+              <b>Lab Total</b> (what caps a spell you can <em>learn</em> here) = Technique + Form + Intelligence +
+              Magic Theory + Aura (3, typically). It's the number the "Learn" button checks against a spell's level.
+            </p>
+            <p>
+              <b>Casting Total</b> (what matters once you're <em>playing</em>, not at creation) = Technique + Form +
+              Stamina − Encumbrance + Aura, plus a die roll, compared against the spell's level to see if it's cast.
+            </p>
+            <p>
+              Both are built from the same Technique/Form/Art scores you're setting on this page — split xp between a
+              Technique and a Form for higher totals in that combination, rather than spreading thin.
+            </p>
+            <p class="note">
+              This app is <b>not exhaustive</b>: it applies Puissant Art/Ability and Affinity to these totals, but many
+              more Virtues and Flaws shift them further — Magical Focus, Deficient Technique/Form, Elemental Magic,
+              Flexible/Restricted Formulaic Magic, a low Arts score's requisite penalty, and dozens more. Treat every
+              computed total here as a floor, not the final word — check your Virtues and Flaws by hand too.
+            </p>
+          </div>
+        </details>
+      </div>
       {ch.spells.length > 0 && (
         <ul class="trait-list">
           {ch.spells.map((s) => (
