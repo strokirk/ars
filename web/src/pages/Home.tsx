@@ -1,6 +1,7 @@
 import { Hourglass, FlaskConical } from "lucide-preact";
 import { navigate } from "../router.ts";
 import { Button } from "../components/ui/Button.tsx";
+import { ImportCharacter } from "../components/ImportCharacter.tsx";
 import { drafts, deleteDraft, newId, saveDraft } from "../store.ts";
 import { freshCharacter, KIND_BLURB, KIND_LABEL, isCharacterLegal, type CharacterKind } from "../engine.ts";
 import { title, specLine, firstSentence, kindLabel } from "../charutil.ts";
@@ -34,6 +35,10 @@ export function Home() {
             </Button>
           </div>
         ))}
+      </div>
+
+      <div class="grid">
+        <ImportCharacter />
       </div>
 
       <h2 class="section-title">Plan a season</h2>
