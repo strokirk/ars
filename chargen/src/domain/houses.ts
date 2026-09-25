@@ -48,6 +48,48 @@ function pickPuissant(
   return { value: fallback, note: `Unknown Puissant choice "${choice}"; using ${fallback} (options: ${options.join(", ")}).` };
 }
 
+interface HouseBenefit {
+  virtues?: { name: string; param?: string }[];
+  abilities?: { name: string; score: number }[];
+  puissant?: { kind: "art" | "ability"; options: string[]; fallback: (ctx: HouseContext) => string };
+  notes?: string[];
+}
+
+/** The free, off-budget benefit each House grants at creation. */
+const HOUSE_BENEFITS: Record<House, HouseBenefit> = {
+  Bjornaer: { abilities: [{ name: "Heartbeast", score: 1 }] },
+  Bonisagus: { puissant: { kind: "ability", options: ["Magic Theory", "Intrigue"], fallback: () => "Magic Theory" } },
+  Criamon: { abilities: [{ name: "Enigmatic Wisdom", score: 1 }] },
+  "Ex Miscellanea": {
+    notes: [
+      "Ex Miscellanea grants (off-budget): one free Minor Hermetic Virtue, one free Major non-Hermetic Virtue, and a compulsory Major Hermetic Flaw. Add them with `add virtue/flaw --free` once chosen.",
+    ],
+  },
+  Flambeau: {
+    puissant: {
+      kind: "art", options: ["Perdo", "Ignem"],
+      fallback: (ctx) => (ctx.favoredForm === "Ignem" ? "Ignem" : ctx.favoredTechnique === "Perdo" ? "Perdo" : "Ignem"),
+    },
+  },
+  Guernicus: { virtues: [{ name: "Hermetic Prestige" }] },
+  Jerbiton: {
+    notes: ["Jerbiton grants one free Minor Virtue (scholarship, the arts, or mundane interaction). Add it with `add virtue --free` once chosen."],
+  },
+  Mercere: {
+    puissant: {
+      kind: "art", options: ["Creo", "Muto"],
+      fallback: (ctx) => (ctx.favoredTechnique === "Muto" ? "Muto" : "Creo"),
+    },
+  },
+  Merinita: {
+    virtues: [{ name: "Faerie Magic" }],
+    notes: ["Merinita: +1 Warping Point if you take no faerie-related Virtue/Flaw."],
+  },
+  Tremere: { virtues: [{ name: "Minor Magical Focus", param: "certamen" }] },
+  Tytalus: { virtues: [{ name: "Self-Confident" }] },
+  Verditius: { virtues: [{ name: "Verditius Magic" }] },
+};
+
 export function applyHouse(
   house: House,
   choices: HouseChoices,
@@ -65,68 +107,23 @@ export function applyHouse(
     if ("error" in a) app.notes.push(`House benefit not applied: ${a.error}`);
     else app.abilities.push(a);
   };
-  const puissantArt = (opts: string[], fallback: string) => {
-    const p = pickPuissant(choices.puissant, opts, fallback);
-    if (p.note) app.notes.push(p.note);
-    addV("Puissant Art", p.value);
-  };
-  const puissantAbility = (opts: string[], fallback: string) => {
-    const p = pickPuissant(choices.puissant, opts, fallback);
-    if (p.note) app.notes.push(p.note);
-    addV("Puissant Ability", p.value);
-  };
 
-  switch (house) {
-    case "Bjornaer":
-      addA("Heartbeast", 1);
-      break;
-    case "Bonisagus":
-      puissantAbility(["Magic Theory", "Intrigue"], "Magic Theory");
-      break;
-    case "Criamon":
-      addA("Enigmatic Wisdom", 1);
-      break;
-    case "Ex Miscellanea":
-      app.notes.push(
-        "Ex Miscellanea grants (off-budget): one free Minor Hermetic Virtue, one free Major non-Hermetic Virtue, and a compulsory Major Hermetic Flaw. Add them with `add virtue/flaw --free` once chosen.",
-      );
-      break;
-    case "Flambeau": {
-      const fallback = ctx.favoredForm === "Ignem" ? "Ignem" : ctx.favoredTechnique === "Perdo" ? "Perdo" : "Ignem";
-      puissantArt(["Perdo", "Ignem"], fallback);
-      break;
-    }
-    case "Guernicus":
-      addV("Hermetic Prestige");
-      break;
-    case "Jerbiton":
-      app.notes.push("Jerbiton grants one free Minor Virtue (scholarship, the arts, or mundane interaction). Add it with `add virtue --free` once chosen.");
-      break;
-    case "Mercere": {
-      const fallback = ctx.favoredTechnique === "Muto" ? "Muto" : "Creo";
-      puissantArt(["Creo", "Muto"], fallback);
-      break;
-    }
-    case "Merinita":
-      addV("Faerie Magic");
-      app.notes.push("Merinita: +1 Warping Point if you take no faerie-related Virtue/Flaw.");
-      break;
-    case "Tremere":
-      addV("Minor Magical Focus", "certamen");
-      break;
-    case "Tytalus":
-      addV("Self-Confident");
-      break;
-    case "Verditius":
-      addV("Verditius Magic");
-      break;
+  const benefit = HOUSE_BENEFITS[house];
+  for (const v of benefit.virtues ?? []) addV(v.name, v.param);
+  for (const a of benefit.abilities ?? []) addA(a.name, a.score);
+  if (benefit.puissant) {
+    const { kind, options, fallback } = benefit.puissant;
+    const p = pickPuissant(choices.puissant, options, fallback(ctx));
+    if (p.note) app.notes.push(p.note);
+    addV(kind === "art" ? "Puissant Art" : "Puissant Ability", p.value);
   }
+  app.notes.push(...(benefit.notes ?? []));
   return app;
 }
 
 /** Houses that require a --puissant choice, with their options (for `new --help` / errors). */
-export const HOUSE_PUISSANT_CHOICES: Partial<Record<House, string[]>> = {
-  Bonisagus: ["Magic Theory", "Intrigue"],
-  Flambeau: ["Perdo", "Ignem"],
-  Mercere: ["Creo", "Muto"],
-};
+export const HOUSE_PUISSANT_CHOICES: Partial<Record<House, string[]>> = Object.fromEntries(
+  Object.entries(HOUSE_BENEFITS)
+    .filter(([, b]) => b.puissant)
+    .map(([house, b]) => [house, b.puissant!.options]),
+);
