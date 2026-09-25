@@ -79,6 +79,10 @@ const TEMPLATES: Record<string, AbilityTemplate> = {
     choices: ["Latin", "Greek", "Hebrew"],
     build: (p) => p,
   },
+  "(living language)": {
+    label: "Which language?", placeholder: "e.g. French, Occitan, Arabic",
+    build: (p) => p,
+  },
   "craft (type)": {
     label: "Which craft?", placeholder: "e.g. Pottery, Carpentry",
     build: (p) => `Craft ${p}`,
